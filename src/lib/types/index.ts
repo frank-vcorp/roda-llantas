@@ -35,3 +35,13 @@ export interface PricingRule {
   is_active: boolean;
 }
 
+export interface Customer {
+  id: string;
+  profile_id: string;
+  full_name: string;
+  phone: string | null;
+  email: string | null;
+  tax_id: string | null;
+  created_at: string;
+}
+

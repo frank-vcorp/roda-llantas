@@ -4,7 +4,10 @@
  * @author SOFIA - Builder
  * @id IMPL-20260129-QUOTES-03 (Descuento + Edición de Precios)
  * @id IMPL-20260129-QUOTES-02 (Base)
+ * @id IMPL-20260129-CRM-02 (CustomerCombobox integration)
  * @ref context/SPEC-QUOTATIONS.md
+ * @ref context/SPEC-CRM-LITE.md
+ * @modified 2026-01-29: Reemplazado input de cliente con CustomerCombobox
  * @modified 2026-01-29: Agregado descuentos (percentage/amount) y edición de unit_price por item
  */
 
@@ -28,6 +31,8 @@ import {
 import { ArrowLeft, Trash2, ChevronDown, ChevronUp } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
+import { CustomerCombobox } from "@/components/customers/customer-combobox";
+import { Customer } from "@/lib/types";
 
 /**
  * Función auxiliar para calcular el precio público
@@ -56,6 +61,8 @@ export default function QuoteSummaryPage() {
   const { items, removeItem, updateQuantity, getTotalAmount, clearQuote } =
     useQuote();
 
+  // Cliente seleccionado del combobox
+  const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
   const [customerName, setCustomerName] = useState("");
   const [customerPhone, setCustomerPhone] = useState("");
   const [isLoading, setIsLoading] = useState(false);

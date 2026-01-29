@@ -9,6 +9,7 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { InventoryItem } from "@/lib/types";
+import { logLostSale } from "@/lib/services/analytics";
 
 /**
  * Opciones para la búsqueda y paginación de inventario
@@ -86,10 +87,21 @@ export async function getInventoryItems(
         throw new Error(`Count failed: ${countError.message}`);
       }
 
-      return {
+      const count = (countData as number) || 0;
+      const result = {
         data: (data as InventoryItem[]) || [],
-        count: (countData as number) || 0,
+        count,
       };
+
+      // Registrar venta perdida si no hay resultados (fire and forget)
+      // IMPL-20260129-LOST-SALES-01
+      if (count === 0) {
+        logLostSale(searchTerm, count).catch(() => {
+          // Silenciar errores para no afectar la búsqueda principal
+        });
+      }
+
+      return result;
     } catch (error) {
       console.error("[getInventoryItems] Search strategy failed:", error);
       throw error;
@@ -111,10 +123,17 @@ export async function getInventoryItems(
       throw new Error(`Failed to fetch inventory items: ${error.message}`);
     }
 
-    return {
+    const totalCount = count || 0;
+    const result = {
       data: (data as InventoryItem[]) || [],
-      count: count || 0,
+      count: totalCount,
     };
+
+    // Nota: Sin término de búsqueda, no registramos como venta perdida
+    // Las ventas perdidas se registran solo cuando el usuario busca algo específico
+    // IMPL-20260129-LOST-SALES-01
+
+    return result;
   } catch (error) {
     console.error("[getInventoryItems] Browse strategy failed:", error);
     throw error;

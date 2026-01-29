@@ -5,7 +5,9 @@
  * @id IMPL-20260129-QUOTES-05 (Historial)
  * @id IMPL-20260129-QUOTES-03 (Descuento)
  * @id IMPL-20260129-QUOTES-02 (Base)
+ * @id IMPL-20260129-CRM-02 (Customer ID support)
  * @ref context/SPEC-QUOTATIONS.md
+ * @modified 2026-01-29: Agregado soporte para customer_id desde CRM Lite
  * @modified 2026-01-29: Agregado getQuotations() y deleteQuotation() para historial
  * @modified 2026-01-29: Agregado soporte para descuentos (percentage/amount)
  */
@@ -30,6 +32,7 @@ export interface Quotation {
 interface CreateQuotationInput {
   customer_name: string;
   customer_phone?: string;
+  customer_id?: string; // FK -> customers (optional, para CRM Lite)
   items: Array<{
     id: string; // inventory_id
     quantity: number;
@@ -96,6 +99,7 @@ export async function createQuotation(
       .insert([
         {
           profile_id: user.id,
+          customer_id: data.customer_id || null,
           customer_name: data.customer_name,
           customer_phone: data.customer_phone || null,
           discount_type: data.discount_type || null,
