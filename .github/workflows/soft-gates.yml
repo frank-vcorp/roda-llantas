@@ -1,0 +1,73 @@
+name: Soft Gates CI
+
+on:
+  pull_request:
+    branches: [ main, master ]
+  push:
+    branches: [ main, master ]
+
+jobs:
+  gate-1-compilation:
+    if: hashFiles('package.json') != ''
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install pnpm
+        run: npm install -g pnpm@8
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: TypeScript compilation
+        run: pnpm tsc --noEmit
+
+      - name: Lint
+        run: pnpm lint
+
+  gate-2-testing:
+    needs: gate-1-compilation
+    if: hashFiles('package.json') != ''
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install pnpm
+        run: npm install -g pnpm@8
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Run tests with coverage
+        run: pnpm test -- --coverage || pnpm test
+
+  gate-4-docs-soft-gates:
+    needs: gate-2-testing
+    if: hashFiles('PROYECTO.md') != ''
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check Soft Gates documentation for completed tasks
+        run: |
+          if [ ! -f "PROYECTO.md" ]; then
+            echo "No PROYECTO.md found, skipping soft-gates check."
+            exit 0
+          fi
+          node scripts/task-cli.js check-soft-gates || {
+            echo "Soft Gates inconsistentes en tareas [✓]. Revisa PROYECTO.md."
+            exit 1
+          }
