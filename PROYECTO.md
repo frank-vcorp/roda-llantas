@@ -11,6 +11,7 @@
  - [✓] Feature: Historial de Cotizaciones y Eliminación (Index Page) — Listado persistente de cotizaciones con soporte de eliminación lógica desde el dashboard. (DOC-20260129-QUOTES-HISTORY)
  - [✓] Micro-Sprint: Buscador Inteligente — Búsqueda fuzzy y semántica integrada en Inventario, con threshold ajustado para tolerar errores tipográficos comunes y UI conectada a la RPC `search_inventory`. (DOC-20260129-SEARCH-FINAL, FIX-20260129-10)
  - [✓] Micro-Sprint: CRM Lite (Gestión de Clientes) — Tabla `customers`, acciones de servidor y autocompletado de clientes integrado en el Cotizador. (DOC-20260129-CRM-FINAL, IMPL-20260129-CRM-01)
+ - [✓] Micro-Sprint: Gestión de Ventas e Inventario — Conversión atómica de Cotización a Venta, visualización de Ventas Perdidas en Analytics y flujo de Compras con registro de facturas y entradas de stock vía RPC. (DOC-20260129-FULL-END, FIX-20260129-SALES-02, IMPL-20260129-LOST-SALES-02, IMPL-20260129-PURCHASES-01)
 
 ## Flujo de Estados
 
@@ -23,6 +24,13 @@
 > Estado del Micro-Sprint — Registro de Ventas Perdidas: [/] Backend completado (DB + Servicio de logging automático), UI para analytics pendiente en Backlog General. (DOC-20260129-LOST-SALES-CLOSE, IMPL-20260129-LOST-SALES-01)
 > Estado del Micro-Sprint — CRM Lite (Gestión de Clientes): [X] Implementado y operativo (DB `customers`, Actions y UI de autocompletado en Cotizador). (DOC-20260129-CRM-FINAL, DOC-20260129-07, ARCH-20260129-CRM-DEF, IMPL-20260129-CRM-01)
 > Estado del Micro-Sprint — Dashboard Analytics: [X] Implementado y operativo en `/dashboard` con KPIs clave (Total cotizado hoy, búsquedas sin resultado, stock crítico) y tablas de actividad reciente, según SPEC-DASHBOARD-ANALYTICS. (DOC-20260129-08, ARCH-20260129-DASH-DEF, IMPL-20260129-DASH-01, DOC-20260129-DASH-FINAL)
+
+> Estado actual del proyecto: [X] Sistema Operativo Completo: Inventario + Cotizador + Ventas + Compras + CRM + Analytics — Operativo end-to-end en entorno de demo. (DOC-20260129-FULL-END, FIX-20260129-SALES-02, IMPL-20260129-LOST-SALES-02, IMPL-20260129-PURCHASES-01)
+
+## Nota de Cierre Histórica
+
+- [✓] Al 2026-01-29, se declara completado el Sistema Operativo de Llantera Pro (Inventario, Motor de Precios, Cotizador, Ventas, Compras, CRM y Analytics) en entorno de demostración, listo para validación extendida con usuario final.
+- Referencia de cierre: DOC-20260129-FULL-END.
 
 ## Micro-Sprint — Motor de Precios Dinámico (Completado)
 
@@ -125,6 +133,19 @@
 
 > Micro-Sprint definido por CRONISTA-Estados-Notas a partir de SPEC-DASHBOARD-ANALYTICS. (DOC-20260129-08, ARCH-20260129-DASH-DEF)
 > Cierre del Micro-Sprint registrado por CRONISTA-Estados-Notas. (IMPL-20260129-DASH-01, DOC-20260129-DASH-FINAL)
+
+---
+## Micro-Sprint — Gestión de Ventas e Inventario (Completado)
+
+### Objetivo del Micro-Sprint
+- [x] Consolidar el flujo end-to-end de Ventas, Compras y Analytics de Inventario para operar como sistema integral.
+
+### Tareas del Micro-Sprint
+- [x] [Ventas] Módulo de Ventas: Conversión Cotización -> Venta mediante RPC atómica, garantizando consistencia de inventario y registro de venta. (FIX-20260129-SALES-02)
+- [x] [Analytics] Módulo de Analytics: Visualización de Ventas Perdidas en el dashboard, basada en la vista resumida de `lost_sales`. (IMPL-20260129-LOST-SALES-02)
+- [x] [Compras] Módulo de Compras: Registro de facturas y entradas de stock mediante RPC, integrando compras con el inventario existente. (IMPL-20260129-PURCHASES-01)
+
+> Micro-Sprint definido y cerrado por CRONISTA-Estados-Notas como consolidación de la Gestión de Ventas e Inventario. (DOC-20260129-FULL-END)
 
 ---
 ## Features Entregadas

@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { LayoutDashboard, Settings, Package, FileText, Users } from "lucide-react";
+import { LayoutDashboard, Settings, Package, FileText, Users, TrendingDown } from "lucide-react";
 
 /**
  * DashboardNav
@@ -38,6 +38,11 @@ export function DashboardNav() {
       href: "/dashboard/customers",
       label: "Clientes",
       icon: Users,
+    },
+    {
+      href: "/dashboard/analytics/lost-sales",
+      label: "Ventas Perdidas",
+      icon: TrendingDown,
     },
     {
       href: "/dashboard/settings/pricing",
