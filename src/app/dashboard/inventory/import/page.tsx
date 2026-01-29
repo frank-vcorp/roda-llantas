@@ -1,0 +1,314 @@
+'use client';
+
+import { useState } from 'react';
+import { FileUploader } from '@/components/inventory/file-uploader';
+import { parseInventoryExcel, InventoryItem } from '@/lib/logic/excel-parser';
+import { insertInventoryItems } from '@/app/dashboard/inventory/actions';
+import { Button } from '@/components/ui/button';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { AlertCircle, CheckCircle, Loader2, Info, FileSpreadsheet, ArrowLeft } from 'lucide-react';
+import Link from 'next/link';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+
+/**
+ * @fileoverview Página de importación de inventario
+ * @author SOFIA - Builder
+ * @id IMPL-20260129-SPRINT2
+ */
+
+/**
+ * @fileoverview Página de importación de inventario
+ * @author SOFIA - Builder
+ * @id IMPL-20260129-SPRINT2
+ */
+
+interface UIState {
+  step: 'upload' | 'preview' | 'success';
+  isLoading: boolean;
+  error: string | null;
+  successMessage: string | null;
+}
+
+export default function InventoryImportPage() {
+  const [state, setState] = useState<UIState>({
+    step: 'upload',
+    isLoading: false,
+    error: null,
+    successMessage: null,
+  });
+
+  const [previewData, setPreviewData] = useState<InventoryItem[]>([]);
+
+  const handleFileSelect = async (file: File) => {
+    setState((prev) => ({
+      ...prev,
+      isLoading: true,
+      error: null,
+    }));
+
+    try {
+      const items = await parseInventoryExcel(file);
+      setPreviewData(items);
+      setState((prev) => ({
+        ...prev,
+        step: 'preview',
+        isLoading: false,
+      }));
+    } catch (err) {
+      setState((prev) => ({
+        ...prev,
+        isLoading: false,
+        error: err instanceof Error ? err.message : 'Error al procesar archivo',
+      }));
+    }
+  };
+
+  const handleSaveToDatabase = async () => {
+    setState((prev) => ({
+      ...prev,
+      isLoading: true,
+      error: null,
+    }));
+
+    try {
+      const result = await insertInventoryItems(previewData);
+
+      if (result.success) {
+        setState((prev) => ({
+          ...prev,
+          step: 'success',
+          isLoading: false,
+          successMessage: result.message,
+        }));
+        setPreviewData([]);
+      } else {
+        setState((prev) => ({
+          ...prev,
+          isLoading: false,
+          error: result.message,
+        }));
+      }
+    } catch (err) {
+      setState((prev) => ({
+        ...prev,
+        isLoading: false,
+        error: err instanceof Error ? err.message : 'Error desconocido',
+      }));
+    }
+  };
+
+  const handleReset = () => {
+    setState({
+      step: 'upload',
+      isLoading: false,
+      error: null,
+      successMessage: null,
+    });
+    setPreviewData([]);
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-50 p-6">
+      <div className="max-w-6xl mx-auto">
+        {/* Header */}
+        <div className="mb-8">
+          <Link href="/dashboard/inventory" className="inline-flex items-center text-sm text-gray-500 hover:text-gray-900 mb-4 transition-colors">
+            <ArrowLeft className="w-4 h-4 mr-1" />
+            Volver al Inventario
+          </Link>
+          <h1 className="text-4xl font-bold text-gray-900">
+            Importar Inventario
+          </h1>
+          <p className="text-gray-600 mt-2">
+            Carga masiva de llantas desde Excel o CSV
+          </p>
+        </div>
+
+        {/* Upload Step */}
+        {state.step === 'upload' && (
+          <div className="space-y-6">
+            <Card className="p-6 bg-blue-50 border-blue-200">
+              <div className="flex gap-4">
+                <Info className="w-6 h-6 text-blue-600 flex-shrink-0" />
+                <div>
+                  <h3 className="font-semibold text-blue-900">Instrucciones de Formato</h3>
+                  <p className="text-sm text-blue-800 mt-1 mb-3">
+                    El archivo Excel (.xlsx) o CSV debe contener las siguientes columnas (el orden no importa, pero los nombres deben coincidir):
+                  </p>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                    <div>
+                      <span className="font-bold text-blue-900 block mb-1">Obligatorias:</span>
+                      <ul className="list-disc list-inside text-blue-800 space-y-1">
+                        <li><strong>Marca</strong> (ej: Michelin)</li>
+                        <li><strong>Medida</strong> (ej: 205/55R16)</li>
+                        <li><strong>Modelo</strong> (ej: Primacy 4)</li>
+                        <li><strong>Costo</strong> (ej: 1500.00)</li>
+                        <li><strong>Stock</strong> (ej: 4)</li>
+                      </ul>
+                    </div>
+                    <div>
+                      <span className="font-bold text-blue-900 block mb-1">Opcionales:</span>
+                      <ul className="list-disc list-inside text-blue-800 space-y-1">
+                        <li><strong>Índice</strong> (ej: 91V)</li>
+                        <li><strong>SKU</strong> (Código único)</li>
+                        <li><strong>Ubicación</strong> (ej: A-12)</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </Card>
+
+            <Card className="p-8">
+              <FileUploader
+                onFileSelect={handleFileSelect}
+                isLoading={state.isLoading}
+                error={state.error || undefined}
+              />
+            </Card>
+          </div>
+        )}
+
+        {/* Preview Step */}
+        {state.step === 'preview' && previewData.length > 0 && (
+          <div className="space-y-6">
+            <Alert>
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>
+                Se procesaron {previewData.length} items. Revisa los datos antes
+                de guardar.
+              </AlertDescription>
+            </Alert>
+
+            <Card className="overflow-x-auto">
+              <div className="p-6">
+                <h2 className="text-lg font-semibold text-gray-900 mb-4">
+                  Vista Previa de Datos
+                </h2>
+
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead className="bg-gray-100 border-b border-gray-200">
+                      <tr>
+                        <th className="px-4 py-2 text-left font-medium text-gray-700">
+                          Clave
+                        </th>
+                        <th className="px-4 py-2 text-left font-medium text-gray-700">
+                          Descripción (Original)
+                        </th>
+                        <th className="px-4 py-2 text-right font-medium text-gray-700">
+                          Costo
+                        </th>
+                        <th className="px-4 py-2 text-right font-medium text-gray-700">
+                          Stock
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-200">
+                      {previewData.map((item, idx) => (
+                        <tr
+                          key={idx}
+                          className="hover:bg-gray-50 transition-colors"
+                        >
+                          <td className="px-4 py-3 text-gray-700 font-mono text-xs">
+                            {item.sku || '-'}
+                          </td>
+                          <td className="px-4 py-3 text-gray-900 font-medium">
+                            <div className="flex items-center gap-2">
+                                <span className="font-medium text-sm">{item.description || item.medida_full}</span>
+                                <TooltipProvider>
+                                <Tooltip>
+                                    <TooltipTrigger asChild>
+                                        <Info className="h-4 w-4 text-gray-400 hover:text-blue-500 cursor-help" />
+                                    </TooltipTrigger>
+                                    <TooltipContent className="bg-slate-900 text-white p-3 max-w-xs shadow-xl z-50">
+                                        <div className="text-xs space-y-1">
+                                            <p className="font-bold border-b pb-1 mb-1 border-gray-600">Datos Detectados</p>
+                                            <p><strong>Marca:</strong> {item.brand}</p>
+                                            <p><strong>Modelo:</strong> {item.model}</p>
+                                            <p><strong>Medida:</strong> {item.medida_full}</p>
+                                            <p><strong>Ancho:</strong> {item.width} mm</p>
+                                            <p><strong>Perfil:</strong> {item.aspect_ratio}%</p>
+                                            <p><strong>Rin:</strong> {item.rim}"</p>
+                                        </div>
+                                    </TooltipContent>
+                                </Tooltip>
+                                </TooltipProvider>
+                            </div>
+                          </td>
+                          <td className="px-4 py-3 text-gray-900 font-semibold text-right">
+                            ${item.cost_price.toFixed(2)}
+                          </td>
+                          <td className="px-4 py-3 text-gray-700 text-right">
+                            {item.stock}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </Card>
+
+            <div className="flex gap-3 justify-end">
+              <Button
+                variant="outline"
+                onClick={handleReset}
+                disabled={state.isLoading}
+              >
+                Cargar otro archivo
+              </Button>
+              <Button
+                onClick={handleSaveToDatabase}
+                disabled={state.isLoading}
+                className="gap-2"
+              >
+                {state.isLoading && (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                )}
+                Guardar en Base de Datos
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {/* Success Step */}
+        {state.step === 'success' && state.successMessage && (
+          <div className="space-y-6">
+            <Card className="p-8 border-green-200 bg-green-50">
+              <div className="flex gap-4 items-start">
+                <CheckCircle className="w-6 h-6 text-green-600 flex-shrink-0 mt-1" />
+                <div>
+                  <h2 className="text-lg font-semibold text-green-900">
+                    ¡Éxito!
+                  </h2>
+                  <p className="text-green-800 mt-2">{state.successMessage}</p>
+                </div>
+              </div>
+            </Card>
+
+            <div className="flex justify-center">
+              <Button onClick={handleReset} size="lg">
+                Importar otro archivo
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {/* Error handling */}
+        {state.error && state.step !== 'upload' && (
+          <Alert variant="destructive" className="mt-4">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>{state.error}</AlertDescription>
+          </Alert>
+        )}
+      </div>
+    </div>
+  );
+}

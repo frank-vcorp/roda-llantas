@@ -1,0 +1,446 @@
+/**
+ * Estilos para la página de visualización de cotización
+ *
+ * @author SOFIA - Builder
+ * @id IMPL-20260129-QUOTES-04
+ * @ref context/SPEC-QUOTATIONS.md
+ * @description Estilos para impresión y presentación de la hoja de cotización
+ */
+
+.quotation-container {
+  padding: 1.5rem;
+  max-width: 900px;
+  margin: 0 auto;
+  background-color: #f9fafb;
+  min-height: 100vh;
+}
+
+/* ===== TARJETA DE COTIZACIÓN ===== */
+.quotation-sheet {
+  background-color: white;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  page-break-inside: avoid;
+}
+
+.quotation-header {
+  padding: 2rem;
+  border-bottom: 2px solid #f3f4f6;
+}
+
+/* ===== ENCABEZADO DE EMPRESA ===== */
+.company-header {
+  text-align: center;
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 3px solid #0f172a;
+}
+
+.company-name {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+  letter-spacing: 1px;
+}
+
+.company-subtitle {
+  font-size: 0.875rem;
+  color: #6b7280;
+  margin: 0.5rem 0 0 0;
+  font-style: italic;
+}
+
+/* ===== INFO DE COTIZACIÓN ===== */
+.quotation-info {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.info-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+}
+
+.info-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.info-item .label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 0.25rem;
+}
+
+.info-item .value {
+  font-size: 1rem;
+  font-weight: 500;
+  color: #1f2937;
+}
+
+/* ===== CONTENIDO PRINCIPAL ===== */
+.quotation-content {
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+/* ===== TABLA DE ITEMS ===== */
+.items-section {
+  overflow-x: auto;
+}
+
+.items-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 1rem;
+}
+
+.items-table thead {
+  background-color: #f3f4f6;
+  border-top: 2px solid #d1d5db;
+  border-bottom: 2px solid #d1d5db;
+}
+
+.items-table th {
+  padding: 0.875rem;
+  text-align: left;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #374151;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  word-break: break-word;
+}
+
+.items-table th.compact-header {
+  font-size: 0.75rem;
+}
+
+.items-table tbody tr {
+  border-bottom: 1px solid #e5e7eb;
+  page-break-inside: avoid;
+}
+
+.items-table tbody tr:last-child {
+  border-bottom: 2px solid #d1d5db;
+}
+
+.items-table tbody tr:hover {
+  background-color: #f9fafb;
+}
+
+.items-table td {
+  padding: 1rem 0.875rem;
+  font-size: 0.95rem;
+  color: #1f2937;
+  vertical-align: top;
+}
+
+/* Columnas específicas */
+.col-qty {
+  width: 8%;
+  text-align: center;
+  font-weight: 600;
+}
+
+.col-desc {
+  width: 55%;
+}
+
+.col-price {
+  width: 18%;
+  text-align: right;
+}
+
+.col-total {
+  width: 19%;
+  text-align: right;
+  font-weight: 600;
+}
+
+.desc-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.brand-model {
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.medida {
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+.sku {
+  font-size: 0.75rem;
+  color: #9ca3af;
+  font-style: italic;
+}
+
+/* ===== TOTALES ===== */
+.totals-section {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.75rem;
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #e5e7eb;
+  min-width: 300px;
+}
+
+.total-row {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  gap: 2rem;
+  font-size: 0.95rem;
+}
+
+.total-label {
+  font-weight: 500;
+  color: #374151;
+  text-align: left;
+}
+
+.total-value {
+  font-weight: 600;
+  color: #1f2937;
+  text-align: right;
+  min-width: 120px;
+  white-space: nowrap;
+}
+
+.discount-row .total-value {
+  color: #dc2626;
+}
+
+.grand-total {
+  padding-top: 0.75rem;
+  margin-top: 0.75rem;
+  border-top: 2px solid #0f172a;
+  font-size: 1.125rem;
+}
+
+.grand-total .total-label,
+.grand-total .total-value {
+  font-weight: 700;
+  color: #0f172a;
+  font-size: 1.125rem;
+}
+
+/* ===== PIE DE PÁGINA ===== */
+.footer-note {
+  margin-top: 2rem;
+  padding: 1rem;
+  background-color: #f3f4f6;
+  border-left: 4px solid #0f172a;
+  border-radius: 0 4px 4px 0;
+}
+
+.footer-note p {
+  margin: 0;
+  font-size: 0.875rem;
+  color: #4b5563;
+  line-height: 1.5;
+  font-style: italic;
+}
+
+/* ===== ESTILOS DE IMPRESIÓN (@media print) ===== */
+@media print {
+  /* Remover márgenes y padding globales */
+  body {
+    margin: 0;
+    padding: 0;
+    background-color: white;
+  }
+
+  /* Remover elementos que no deben imprimirse */
+  .print\:hidden {
+    display: none !important;
+  }
+
+  /* Contenedor */
+  .quotation-container {
+    padding: 0;
+    background-color: white;
+    min-height: auto;
+  }
+
+  /* Tarjeta */
+  .quotation-sheet {
+    box-shadow: none;
+    border: none;
+    page-break-inside: avoid;
+    max-width: 100%;
+  }
+
+  /* Fondo y texto */
+  * {
+    background: white !important;
+    color: black !important;
+    box-shadow: none !important;
+    border-color: #000 !important;
+  }
+
+  /* Encabezado */
+  .quotation-header {
+    border-bottom-color: #000;
+    page-break-inside: avoid;
+  }
+
+  .company-header {
+    border-bottom-color: #000;
+  }
+
+  /* Tabla */
+  .items-table thead {
+    background-color: white !important;
+    border-color: #000 !important;
+    page-break-inside: avoid;
+  }
+
+  .items-table tbody tr {
+    page-break-inside: avoid;
+  }
+
+  .items-table tbody tr:hover {
+    background-color: white !important;
+  }
+
+  /* Totales */
+  .totals-section {
+    page-break-inside: avoid;
+  }
+
+  .grand-total {
+    border-top-color: #000 !important;
+  }
+
+  /* Pie de página */
+  .footer-note {
+    border-left-color: #000 !important;
+    background-color: white !important;
+    page-break-inside: avoid;
+  }
+
+  /* Márgenes de página */
+  @page {
+    margin: 0.5in;
+  }
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+  .quotation-container {
+    padding: 1rem;
+  }
+
+  .quotation-header {
+    padding: 1.5rem;
+  }
+
+  .quotation-content {
+    padding: 1.5rem;
+  }
+
+  .info-row {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .company-name {
+    font-size: 1.5rem;
+  }
+
+  /* Ajustar tabla para móvil */
+  .items-table {
+    font-size: 0.85rem;
+  }
+
+  .items-table th,
+  .items-table td {
+    padding: 0.6rem 0.4rem;
+  }
+
+  .col-qty {
+    width: 10%;
+  }
+
+  .col-desc {
+    width: 50%;
+  }
+
+  .col-price {
+    width: 20%;
+  }
+
+  .col-total {
+    width: 20%;
+  }
+
+  .brand-model {
+    font-size: 0.9rem;
+  }
+
+  .medida,
+  .sku {
+    font-size: 0.75rem;
+  }
+
+  .totals-section {
+    min-width: 250px;
+  }
+
+  .total-row {
+    gap: 1rem;
+  }
+
+  .total-value {
+    min-width: 100px;
+  }
+}
+
+@media (max-width: 480px) {
+  .quotation-container {
+    padding: 0.5rem;
+  }
+
+  .quotation-header,
+  .quotation-content {
+    padding: 1rem;
+  }
+
+  .company-name {
+    font-size: 1.25rem;
+  }
+
+  .company-subtitle {
+    font-size: 0.75rem;
+  }
+
+  .items-table th,
+  .items-table td {
+    padding: 0.5rem 0.3rem;
+    font-size: 0.8rem;
+  }
+
+  .info-item .label {
+    font-size: 0.65rem;
+  }
+
+  .info-item .value {
+    font-size: 0.9rem;
+  }
+}

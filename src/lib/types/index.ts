@@ -1,0 +1,37 @@
+/**
+ * Tipos globales del proyecto
+ *
+ * @author SOFIA - Builder
+ * @id IMPL-20260129-SPRINT3
+ * @ref context/SPEC-DATA-MODEL.md
+ */
+
+export interface InventoryItem {
+  id: string;
+  profile_id: string;
+  sku: string | null;
+  description?: string; // Descripción original del Excel (Raw)
+  brand: string;
+  model: string;
+  medida_full: string;
+  width: number;
+  aspect_ratio: number;
+  rim: number;
+  load_index: string | null;
+  cost_price: number;
+  stock: number;
+  stock_location: string | null;
+  manual_price: number | null; // Precio manual override
+  updated_at: string;
+}
+
+export interface PricingRule {
+  id: string;
+  profile_id: string;
+  name: string;
+  brand_pattern: string | null;
+  margin_percentage: number;
+  priority: number;
+  is_active: boolean;
+}
+
