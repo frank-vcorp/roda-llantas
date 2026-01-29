@@ -22,7 +22,7 @@
 > Nota: Se aplicó el FIX-20260129-10 para ajustar el threshold de búsqueda fuzzy (`pg_trgm.similarity_threshold = 0.1`), mejorando la tolerancia a errores tipográficos en las consultas. (DOC-20260129-SEARCH-FINAL, FIX-20260129-10)
 > Estado del Micro-Sprint — Registro de Ventas Perdidas: [/] Backend completado (DB + Servicio de logging automático), UI para analytics pendiente en Backlog General. (DOC-20260129-LOST-SALES-CLOSE, IMPL-20260129-LOST-SALES-01)
 > Estado del Micro-Sprint — CRM Lite (Gestión de Clientes): [X] Implementado y operativo (DB `customers`, Actions y UI de autocompletado en Cotizador). (DOC-20260129-CRM-FINAL, DOC-20260129-07, ARCH-20260129-CRM-DEF, IMPL-20260129-CRM-01)
-> Estado del Micro-Sprint — Dashboard Analytics: [ ] Definido y priorizado en Backlog para exponer métricas clave en `/dashboard` (Total cotizado hoy, llantas bajo inventario, etc.), pendiente de implementación. (DOC-20260129-08, ARCH-20260129-DASH-DEF)
+> Estado del Micro-Sprint — Dashboard Analytics: [X] Implementado y operativo en `/dashboard` con KPIs clave (Total cotizado hoy, búsquedas sin resultado, stock crítico) y tablas de actividad reciente, según SPEC-DASHBOARD-ANALYTICS. (DOC-20260129-08, ARCH-20260129-DASH-DEF, IMPL-20260129-DASH-01, DOC-20260129-DASH-FINAL)
 
 ## Micro-Sprint — Motor de Precios Dinámico (Completado)
 
@@ -116,14 +116,15 @@
 ## Micro-Sprint — Dashboard Analytics
 
 ### Objetivo del Micro-Sprint
-- [ ] Visualizar KPIs clave (Cotizaciones, Demanda Insatisfecha, Stock) en la pantalla de inicio.
+- [x] Visualizar KPIs clave (Cotizaciones, Demanda Insatisfecha, Stock) en la pantalla de inicio.
 
 ### Tareas del Micro-Sprint
-- [ ] [Logic] Servicio `getDashboardMetrics`.
-- [ ] [UI] Cards de KPIs y Accesos Rápidos.
-- [ ] [UI] Tablas de Actividad Reciente.
+- [x] [Logic] Servicio `getDashboardMetrics`.
+- [x] [UI] Cards de KPIs y Accesos Rápidos.
+- [x] [UI] Tablas de Actividad Reciente.
 
 > Micro-Sprint definido por CRONISTA-Estados-Notas a partir de SPEC-DASHBOARD-ANALYTICS. (DOC-20260129-08, ARCH-20260129-DASH-DEF)
+> Cierre del Micro-Sprint registrado por CRONISTA-Estados-Notas. (IMPL-20260129-DASH-01, DOC-20260129-DASH-FINAL)
 
 ---
 ## Features Entregadas
