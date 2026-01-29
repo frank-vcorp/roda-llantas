@@ -18,7 +18,7 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { CheckCircle2 } from 'lucide-react';
 import { convertQuotationToSale } from '@/lib/actions/sales';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -41,7 +41,6 @@ export function ConvertToSaleButton({
   status = 'draft',
   onSuccess,
 }: ConvertToSaleButtonProps) {
-  const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [showDialog, setShowDialog] = useState(false);
 
@@ -63,10 +62,8 @@ export function ConvertToSaleButton({
       const result = await convertQuotationToSale(quotationId);
 
       if (result.success && result.sale_id) {
-        toast({
-          title: 'Venta confirmada',
+        toast.success('Venta confirmada', {
           description: `Venta registrada exitosamente. ID: ${result.sale_id.substring(0, 8).toUpperCase()}`,
-          variant: 'default',
         });
 
         // Llamar callback de éxito
@@ -79,18 +76,14 @@ export function ConvertToSaleButton({
           window.location.reload();
         }, 1000);
       } else {
-        toast({
-          title: 'Error al confirmar venta',
+        toast.error('Error al confirmar venta', {
           description: result.error || 'Ocurrió un error inesperado',
-          variant: 'destructive',
         });
       }
     } catch (error) {
       console.error('Error:', error);
-      toast({
-        title: 'Error',
+      toast.error('Error', {
         description: 'Error inesperado al procesar la venta',
-        variant: 'destructive',
       });
     } finally {
       setIsLoading(false);
