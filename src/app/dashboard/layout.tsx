@@ -1,20 +1,39 @@
 /**
- * IMPL-20260129-SPRINT1
+ * IMPL-20260129-SPRINT1, IMPL-20260129-ROLES-MOBILE
  * Layout para el dashboard protegido
- * Documentación: context/Documento de Especificaciones Técnicas Llantera.md
+ * Documentación: context/Documento de Especificaciones Técnicas Llantera.md, context/SPEC-ROLES-MOBILE.md
  *
  * @id IMPL-20260129-QUOTES-01 - Agregado QuoteProvider
+ * @id IMPL-20260129-ROLES-MOBILE - Agregado getUserRole y filtrado de navegación
  */
 
 import { DashboardNav } from "@/components/dashboard/nav";
 import { QuoteProvider } from "@/lib/contexts/quote-context";
 import { StickyQuoteFooter } from "@/components/quote/sticky-quote-footer";
+import { createClient } from "@/lib/supabase/server";
+import { getUserRole } from "@/lib/auth/role";
+import { UserRole } from "@/lib/types";
 
-export default function DashboardLayout({
+export default async function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  let userRole: UserRole | null = null;
+
+  try {
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (user) {
+      userRole = await getUserRole(user.id);
+    }
+  } catch (error) {
+    console.error("[DashboardLayout] Error fetching user role:", error);
+  }
+
   return (
     <QuoteProvider>
       <div className="min-h-screen bg-background flex flex-col">
@@ -22,7 +41,7 @@ export default function DashboardLayout({
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
             <div className="flex items-center gap-8">
               <h1 className="text-xl font-bold text-foreground">Roda Llantas</h1>
-              <DashboardNav />
+              <DashboardNav userRole={userRole} />
             </div>
           </div>
         </nav>
@@ -34,3 +53,4 @@ export default function DashboardLayout({
     </QuoteProvider>
   );
 }
+

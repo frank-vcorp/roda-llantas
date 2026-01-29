@@ -6,6 +6,13 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { LayoutDashboard, Settings, Package, FileText, Users, TrendingDown } from "lucide-react";
 
+interface NavLink {
+  href: string;
+  label: string;
+  icon: React.ComponentType<{ className?: string }>;
+  adminOnly?: boolean;
+}
+
 /**
  * DashboardNav
  *
@@ -13,17 +20,22 @@ import { LayoutDashboard, Settings, Package, FileText, Users, TrendingDown } fro
  * - Inventario
  * - Cotizaciones
  * - Clientes (CRM)
- * - Configuración de Precios
+ * - Ventas Perdidas (Admin)
+ * - Configuración de Precios (Admin)
  *
  * @author SOFIA - Builder
- * @id IMPL-20260129-CRM-03
- * @ref context/SPEC-CRM-LITE.md
+ * @id IMPL-20260129-CRM-03, IMPL-20260129-ROLES-MOBILE
+ * @ref context/SPEC-CRM-LITE.md, context/SPEC-ROLES-MOBILE.md
  */
 
-export function DashboardNav() {
+interface DashboardNavProps {
+  userRole?: "admin" | "seller" | null;
+}
+
+export function DashboardNav({ userRole = null }: DashboardNavProps) {
   const pathname = usePathname();
 
-  const links = [
+  const links: NavLink[] = [
     {
       href: "/dashboard/inventory",
       label: "Inventario",
@@ -43,17 +55,27 @@ export function DashboardNav() {
       href: "/dashboard/analytics/lost-sales",
       label: "Ventas Perdidas",
       icon: TrendingDown,
+      adminOnly: true,
     },
     {
       href: "/dashboard/settings/pricing",
       label: "Configuración de Precios",
       icon: Settings,
+      adminOnly: true,
     },
   ];
 
+  // Filtrar enlaces según rol
+  const visibleLinks = links.filter(link => {
+    if (link.adminOnly && userRole !== "admin") {
+      return false;
+    }
+    return true;
+  });
+
   return (
     <nav className="flex items-center space-x-4 lg:space-x-6">
-      {links.map((link) => {
+      {visibleLinks.map((link) => {
         const Icon = link.icon;
         const isActive = pathname.startsWith(link.href);
 
