@@ -12,6 +12,7 @@
  - [✓] Micro-Sprint: Buscador Inteligente — Búsqueda fuzzy y semántica integrada en Inventario, con threshold ajustado para tolerar errores tipográficos comunes y UI conectada a la RPC `search_inventory`. (DOC-20260129-SEARCH-FINAL, FIX-20260129-10)
  - [✓] Micro-Sprint: CRM Lite (Gestión de Clientes) — Tabla `customers`, acciones de servidor y autocompletado de clientes integrado en el Cotizador. (DOC-20260129-CRM-FINAL, IMPL-20260129-CRM-01)
  - [✓] Micro-Sprint: Gestión de Ventas e Inventario — Conversión atómica de Cotización a Venta, visualización de Ventas Perdidas en Analytics y flujo de Compras con registro de facturas y entradas de stock vía RPC. (DOC-20260129-FULL-END, FIX-20260129-SALES-02, IMPL-20260129-LOST-SALES-02, IMPL-20260129-PURCHASES-01)
+ - [✓] Micro-Sprint: Seguridad y Mobile UX — Roles y perfiles (tabla `profiles` con RLS, roles `admin`/`seller`) y UX móvil adaptativa con vista exclusiva de búsqueda y tarjetas en Inventario. (IMPL-20260129-ROLES-MOBILE, DOC-20260129-PHASE2-START)
 
 ## Flujo de Estados
 
@@ -26,6 +27,7 @@
 > Estado del Micro-Sprint — Dashboard Analytics: [X] Implementado y operativo en `/dashboard` con KPIs clave (Total cotizado hoy, búsquedas sin resultado, stock crítico) y tablas de actividad reciente, según SPEC-DASHBOARD-ANALYTICS. (DOC-20260129-08, ARCH-20260129-DASH-DEF, IMPL-20260129-DASH-01, DOC-20260129-DASH-FINAL)
 
 > Estado actual del proyecto: [X] Sistema Operativo Completo: Inventario + Cotizador + Ventas + Compras + CRM + Analytics — Operativo end-to-end en entorno de demo. (DOC-20260129-FULL-END, FIX-20260129-SALES-02, IMPL-20260129-LOST-SALES-02, IMPL-20260129-PURCHASES-01)
+> Estado actual del proyecto: [X] Sistema Consolidado: Roles implementados (RLS en `profiles` con roles `admin`/`seller`) y UX móvil optimizada (vista exclusiva de búsqueda y tarjetas en Inventario para móviles). (IMPL-20260129-ROLES-MOBILE, DOC-20260129-PHASE2-START)
 
 ## Nota de Cierre Histórica
 
