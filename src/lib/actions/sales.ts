@@ -45,13 +45,15 @@ interface ConversionResult {
  * 5. Decrementar stock en `products`
  * 6. Actualizar estado de cotización a 'sold'
  * 
+ * FIX-20260129-06: userId ahora es opcional (no se usa en el RPC de Supabase)
+ * 
  * @param quotationId - ID de la cotización a convertir
- * @param userId - ID del usuario autenticado (no usado en RPC)
+ * @param userId - ID del usuario autenticado (opcional, no usado en RPC)
  * @returns Resultado de la conversión
  */
 export async function convertQuotationToSale(
   quotationId: string,
-  userId: string
+  userId?: string
 ): Promise<ConversionResult> {
   try {
     // Llamar a la función RPC que maneja TODA la transacción de forma atómica
