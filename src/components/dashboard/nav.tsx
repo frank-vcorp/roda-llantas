@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { LayoutDashboard, Settings, Package, FileText, Users, TrendingDown } from "lucide-react";
+import { LayoutDashboard, Settings, Package, FileText, Users, TrendingDown, DollarSign } from "lucide-react";
 
 interface NavLink {
   href: string;
@@ -58,10 +58,10 @@ export function DashboardNav({ userRole = null }: DashboardNavProps) {
       adminOnly: true,
     },
     {
-      href: "/dashboard/settings/pricing",
-      label: "Configuración de Precios",
+      href: "/dashboard/settings",
+      label: "Configuración",
       icon: Settings,
-      adminOnly: true,
+      adminOnly: true, // Asumo que editar el negocio es de admin
     },
   ];
 
