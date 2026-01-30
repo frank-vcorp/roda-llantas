@@ -13,9 +13,11 @@
  */
 
 import { redirect } from "next/navigation";
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { SettingsForm } from "@/components/settings/settings-form";
 import { getOrganizationSettings } from "@/lib/actions/settings";
+import { Button } from "@/components/ui/button";
 
 export const metadata = {
   title: "Configuración | Dashboard",
@@ -40,11 +42,17 @@ export default async function SettingsPage() {
     <div className="container max-w-2xl py-10 px-4">
       <div className="space-y-6">
         {/* Header */}
-        <div>
-          <h1 className="text-3xl font-bold text-foreground">Configuración</h1>
-          <p className="text-muted-foreground mt-2">
-            Personaliza tu marca y la información que aparece en tus cotizaciones
-          </p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-foreground">Configuración</h1>
+            <p className="text-muted-foreground mt-2">
+              Personaliza tu marca y la información que aparece en tus cotizaciones
+            </p>
+          </div>
+          {/* Link a gestión de precios - FIX-20260130-ORPHAN-LINK */}
+          <Link href="/dashboard/settings/pricing">
+            <Button variant="outline">Gestionar Reglas de Precios</Button>
+          </Link>
         </div>
 
         {/* Form */}
