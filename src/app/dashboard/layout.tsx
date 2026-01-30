@@ -8,6 +8,7 @@
  */
 
 import { DashboardNav } from "@/components/dashboard/nav";
+import { UserNav } from "@/components/dashboard/user-nav";
 import { QuoteProvider } from "@/lib/contexts/quote-context";
 import { StickyQuoteFooter } from "@/components/quote/sticky-quote-footer";
 import { createClient } from "@/lib/supabase/server";
@@ -19,6 +20,7 @@ export default async function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
+  let userEmail: string | null = null;
   let userRole: UserRole | null = null;
 
   try {
@@ -28,6 +30,7 @@ export default async function DashboardLayout({
     } = await supabase.auth.getUser();
 
     if (user) {
+      userEmail = user.email || null;
       userRole = await getUserRole(user.id);
     }
   } catch (error) {
@@ -42,6 +45,9 @@ export default async function DashboardLayout({
             <div className="flex items-center gap-8">
               <h1 className="text-xl font-bold text-foreground">Roda Llantas</h1>
               <DashboardNav userRole={userRole} />
+            </div>
+            <div className="flex items-center gap-4">
+              <UserNav email={userEmail} role={userRole} />
             </div>
           </div>
         </nav>

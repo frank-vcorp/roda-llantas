@@ -48,10 +48,11 @@ export async function logLostSale(
     }
 
     // Insertar en lost_sales
+    // FIX REFERENCE: FIX-20260129-05 - Columna es search_term (de init_schema.sql)
     const { error: insertError } = await supabase.from("lost_sales").insert({
       profile_id: user.id,
-      query: query.trim(),
-      results_count: resultsCount,
+      search_term: query.trim(),
+      result_count: resultsCount,
     });
 
     if (insertError) {

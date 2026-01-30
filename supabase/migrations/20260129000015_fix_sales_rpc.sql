@@ -20,26 +20,26 @@ BEGIN
 
   -- 2. Validar Stock (Locking rows)
   FOR v_item IN SELECT * FROM quotation_items WHERE quotation_id = p_quotation_id LOOP
-    IF (SELECT stock FROM products WHERE id = v_item.product_id) < v_item.quantity THEN
-      RAISE EXCEPTION 'Stock insuficiente para el producto %', v_item.product_id;
+    IF (SELECT stock FROM inventory WHERE id = v_item.inventory_id) < v_item.quantity THEN
+      RAISE EXCEPTION 'Stock insuficiente para el producto %', v_item.inventory_id;
     END IF;
   END LOOP;
 
   -- 3. Crear Venta
-  INSERT INTO sales (quotation_id, customer_id, total_amount, status)
-  VALUES (p_quotation_id, v_quotation.customer_id, v_quotation.total_amount, 'completed')
+  INSERT INTO sales (quotation_id, customer_id, total_amount, status, profile_id)
+  VALUES (p_quotation_id, v_quotation.customer_id, v_quotation.total_amount, 'completed', v_quotation.profile_id)
   RETURNING id INTO v_sale_id;
 
   -- 4. Mover Items y Descontar Stock
   FOR v_item IN SELECT * FROM quotation_items WHERE quotation_id = p_quotation_id LOOP
     -- Insertar en sale_items
     INSERT INTO sale_items (sale_id, product_id, quantity, unit_price, total_price)
-    VALUES (v_sale_id, v_item.product_id, v_item.quantity, v_item.unit_price, v_item.total_price);
+    VALUES (v_sale_id, v_item.inventory_id, v_item.quantity, v_item.unit_price, v_item.subtotal);
     
     -- Descontar Stock
-    UPDATE products 
+    UPDATE inventory 
     SET stock = stock - v_item.quantity 
-    WHERE id = v_item.product_id;
+    WHERE id = v_item.inventory_id;
   END LOOP;
 
   -- 5. Cerrar Cotización

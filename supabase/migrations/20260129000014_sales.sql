@@ -4,12 +4,13 @@
  *
  * Autor: SOFIA - Builder
  * Fecha: 2026-01-29
+ * FIX REFERENCE: FIX-20260129-08 - Corregido FK de auth.profiles a auth.users
  */
 
 -- Tabla sales
 CREATE TABLE IF NOT EXISTS sales (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  profile_id UUID NOT NULL REFERENCES auth.profiles(id) ON DELETE CASCADE,
+  profile_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   quotation_id UUID REFERENCES quotations(id) ON DELETE SET NULL,
   customer_id UUID REFERENCES customers(id) ON DELETE SET NULL,
   total_amount NUMERIC(12, 2) NOT NULL DEFAULT 0,
@@ -22,7 +23,7 @@ CREATE TABLE IF NOT EXISTS sales (
 CREATE TABLE IF NOT EXISTS sale_items (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   sale_id UUID NOT NULL REFERENCES sales(id) ON DELETE CASCADE,
-  product_id UUID NOT NULL REFERENCES products(id) ON DELETE RESTRICT,
+  product_id UUID NOT NULL REFERENCES inventory(id) ON DELETE RESTRICT,
   quantity INT NOT NULL CHECK (quantity > 0),
   unit_price NUMERIC(12, 2) NOT NULL,
   total_price NUMERIC(12, 2) NOT NULL,

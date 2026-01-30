@@ -19,14 +19,68 @@ CREATE TABLE IF NOT EXISTS public.profiles (
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+-- 1b. Agregar columnas si la tabla ya existía sin ellas
+-- FIX REFERENCE: FIX-20260129-PROFILES-ROLE
+DO $$ 
+BEGIN 
+  -- Agregar columna 'email' si no existe
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns 
+    WHERE table_schema = 'public' 
+      AND table_name = 'profiles' 
+      AND column_name = 'email'
+  ) THEN 
+    ALTER TABLE public.profiles ADD COLUMN email TEXT; 
+    -- Poblar email desde auth.users para registros existentes
+    UPDATE public.profiles p SET email = u.email 
+    FROM auth.users u WHERE p.id = u.id AND p.email IS NULL;
+    -- Hacer NOT NULL después de poblar
+    ALTER TABLE public.profiles ALTER COLUMN email SET NOT NULL;
+  END IF;
+
+  -- Agregar columna 'role' si no existe
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns 
+    WHERE table_schema = 'public' 
+      AND table_name = 'profiles' 
+      AND column_name = 'role'
+  ) THEN 
+    ALTER TABLE public.profiles 
+      ADD COLUMN role TEXT NOT NULL DEFAULT 'seller' 
+      CHECK (role IN ('admin', 'seller')); 
+  END IF;
+  
+  -- Agregar columna 'full_name' si no existe
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns 
+    WHERE table_schema = 'public' 
+      AND table_name = 'profiles' 
+      AND column_name = 'full_name'
+  ) THEN 
+    ALTER TABLE public.profiles ADD COLUMN full_name TEXT; 
+  END IF;
+  
+  -- Agregar columna 'updated_at' si no existe
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns 
+    WHERE table_schema = 'public' 
+      AND table_name = 'profiles' 
+      AND column_name = 'updated_at'
+  ) THEN 
+    ALTER TABLE public.profiles ADD COLUMN updated_at TIMESTAMPTZ DEFAULT NOW(); 
+  END IF;
+END $$;
+
 -- 2. Habilitar RLS
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 
 -- 3. Política: Usuarios pueden leer su propio perfil
+DROP POLICY IF EXISTS "Users can view own profile" ON public.profiles;
 CREATE POLICY "Users can view own profile" ON public.profiles
   FOR SELECT USING (auth.uid() = id);
 
 -- 4. Política: Admins pueden leer/editar todos los perfiles
+DROP POLICY IF EXISTS "Admins can view all profiles" ON public.profiles;
 CREATE POLICY "Admins can view all profiles" ON public.profiles
   FOR SELECT USING (
     EXISTS (
@@ -35,6 +89,7 @@ CREATE POLICY "Admins can view all profiles" ON public.profiles
     )
   );
 
+DROP POLICY IF EXISTS "Admins can update profiles" ON public.profiles;
 CREATE POLICY "Admins can update profiles" ON public.profiles
   FOR UPDATE USING (
     EXISTS (

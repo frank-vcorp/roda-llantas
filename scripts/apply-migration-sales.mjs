@@ -19,7 +19,7 @@ const migration = `
 -- Tabla sales
 CREATE TABLE IF NOT EXISTS sales (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  profile_id UUID NOT NULL REFERENCES auth.profiles(id) ON DELETE CASCADE,
+  profile_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   quotation_id UUID REFERENCES quotations(id) ON DELETE SET NULL,
   customer_id UUID REFERENCES customers(id) ON DELETE SET NULL,
   total_amount NUMERIC(12, 2) NOT NULL DEFAULT 0,
