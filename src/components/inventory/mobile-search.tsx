@@ -87,8 +87,8 @@ export function MobileSearch({ initialItems = [] }: MobileSearchProps) {
 
   return (
     <div className="flex flex-col h-full bg-slate-50">
-      {/* Header */}
-      <div className="px-4 py-4 bg-white border-b border-slate-200 sticky top-0 z-10">
+      {/* Header - Fixed height to prevent layout shift */}
+      <div className="shrink-0 px-4 py-4 bg-white border-b border-slate-200 sticky top-0 z-10">
         <h1 className="text-2xl font-bold text-slate-900 mb-4">Buscar Llantas</h1>
 
         {/* Search Bar - Premium */}
@@ -100,12 +100,13 @@ export function MobileSearch({ initialItems = [] }: MobileSearchProps) {
             value={query}
             onChange={(e) => handleSearch(e.target.value)}
             autoFocus
-            className="pl-10 py-3 text-base border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+            className="h-12 pl-10 py-3 text-base border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
           />
         </div>
       </div>
 
-      {/* Resultados */}
+      {/* Resultados - Scrollable container */}
+      <div className="flex flex-col flex-1 overflow-hidden">
       <div className="flex-1 overflow-y-auto px-3 py-4 space-y-3">
         {loading && (
           <div className="flex items-center justify-center py-12">
@@ -172,12 +173,28 @@ export function MobileSearch({ initialItems = [] }: MobileSearchProps) {
                     </div>
                   </div>
 
-                  {/* SKU si existe */}
-                  {item.sku && (
-                    <p className="text-xs text-slate-500 mb-3 font-mono">
-                      SKU: {item.sku}
-                    </p>
-                  )}
+                  {/* Detalles Técnicos */}
+                  <div className="bg-slate-50 rounded-lg p-3 mb-3 border border-slate-100">
+                    <div className="grid grid-cols-2 gap-2 text-xs">
+                      {item.sku && (
+                        <div className="col-span-2">
+                          <p className="text-slate-500 font-mono">SKU: {item.sku}</p>
+                        </div>
+                      )}
+                      {item.rim && (
+                        <div>
+                          <p className="text-slate-400 font-semibold">Rin</p>
+                          <p className="text-slate-700 font-medium">{item.rim}"</p>
+                        </div>
+                      )}
+                      {item.width && (
+                        <div>
+                          <p className="text-slate-400 font-semibold">Ancho</p>
+                          <p className="text-slate-700 font-medium">{item.width} mm</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
 
                   {/* Footer: Precio + Botón */}
                   <div className="flex justify-between items-center gap-3 mt-auto pt-3 border-t border-slate-100">
@@ -213,6 +230,7 @@ export function MobileSearch({ initialItems = [] }: MobileSearchProps) {
 
         {/* Espaciador final */}
         <div className="h-4" />
+      </div>
       </div>
 
       {/* Modal de Cantidad - Mejorado */}
