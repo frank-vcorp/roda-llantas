@@ -2,9 +2,10 @@
  * Página de Visualización de Cotización
  *
  * @author SOFIA - Builder
- * @id IMPL-20260129-QUOTES-04
- * @ref context/SPEC-QUOTATIONS.md
+ * @id IMPL-20260130-WHITELABEL
+ * @ref context/SPEC-QUOTATIONS.md, context/SPEC-MOBILE-WHITELABEL.md
  * @description Renderiza la cotización generada con diseño imprimible
+ * @modified 2026-01-30: Integración con organization_settings para marca personalizada
  * @modified 2026-01-29: Implementación inicial con Server Component, fetching y estilos de impresión
  */
 
@@ -15,7 +16,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Home } from "lucide-react";
 import { PrintButton } from "@/components/quote/print-button";
+import { ConvertToSaleButton } from "@/components/sales/convert-to-sale-button";
 import { WhatsAppButton } from "@/components/quote/whatsapp-button";
+import { getOrganizationSettings } from "@/lib/actions/settings";
+import Image from "next/image";
 import "./styles.css";
 
 /**
@@ -62,6 +66,7 @@ interface QuotationWithItems {
   total_amount: number;
   created_at: string;
   status: string;
+  valid_until: string; // IMPL-20260130-V2-FEATURES: Fecha de expiración
   quotation_items: Array<{
     id: string;
     quantity: number;
@@ -100,42 +105,60 @@ export default async function QuotationViewPage({ params }: PageProps) {
     redirect("/auth/login");
   }
 
-  // Obtener cotización con items (join a inventory)
-  const { data: quotation, error } = await supabase
-    .from("quotations")
-    .select(
-      `
-      id,
-      customer_name,
-      customer_phone,
-      discount_type,
-      discount_value,
-      total_amount,
-      created_at,
-      status,
-      quotation_items (
+  // Obtener settings de la organización en paralelo
+  const [quotationResult, settingsResult] = await Promise.all([
+    // Obtener cotización con items (join a inventory)
+    supabase
+      .from("quotations")
+      .select(
+        `
         id,
-        quantity,
-        unit_price,
-        inventory_id,
-        inventory:inventory_id (
-          brand,
-          model,
-          medida_full,
-          sku
+        customer_name,
+        customer_phone,
+        discount_type,
+        discount_value,
+        total_amount,
+        created_at,
+        status,
+        valid_until,
+        quotation_items (
+          id,
+          quantity,
+          unit_price,
+          inventory_id,
+          inventory:inventory_id (
+            brand,
+            model,
+            medida_full,
+            sku
+          )
         )
+      `
       )
-    `
-    )
-    .eq("id", id)
-    .eq("profile_id", user.id)
-    .single();
+      .eq("id", id)
+      .eq("profile_id", user.id)
+      .single(),
+    // Obtener settings
+    getOrganizationSettings(),
+  ]);
+
+  const { data: quotation, error } = quotationResult;
 
   if (error || !quotation) {
     notFound();
   }
 
   const data = quotation as unknown as QuotationWithItems;
+  
+  // Settings por defecto si no existen
+  const settings = settingsResult || {
+    name: "Roda Llantas",
+    address: null,
+    phone: null,
+    website: null,
+    logo_url: null,
+    ticket_footer_message: "¡Gracias por su compra!",
+  };
 
   // Calcular subtotal
   const subtotal = data.quotation_items.reduce((acc, item) => {
@@ -178,16 +201,34 @@ export default async function QuotationViewPage({ params }: PageProps) {
             })}
           />
           <PrintButton />
+          <ConvertToSaleButton quotationId={data.id} status={data.status} validUntil={data.valid_until} />
         </div>
       </div>
 
       {/* Contenedor de la cotización - Imprimible */}
       <Card className="quotation-sheet">
         <CardHeader className="quotation-header">
-          {/* Encabezado con nombre de empresa */}
+          {/* Encabezado con nombre de empresa + Logo (si existe) */}
           <div className="company-header">
-            <h1 className="company-name">Roda Llantas</h1>
-            <p className="company-subtitle">Especialistas en Llantas</p>
+            {settings.logo_url && (
+              <div className="company-logo">
+                <Image
+                  src={settings.logo_url}
+                  alt={settings.name}
+                  width={120}
+                  height={60}
+                  className="max-w-sm h-auto"
+                  unoptimized
+                />
+              </div>
+            )}
+            <h1 className="company-name">{settings.name}</h1>
+            {settings.address && (
+              <p className="company-address">{settings.address}</p>
+            )}
+            {settings.phone && (
+              <p className="company-phone">Tel: {settings.phone}</p>
+            )}
           </div>
 
           {/* Datos de la cotización */}
@@ -200,6 +241,10 @@ export default async function QuotationViewPage({ params }: PageProps) {
               <div className="info-item">
                 <span className="label">Fecha:</span>
                 <span className="value">{formatDate(data.created_at)}</span>
+              </div>
+              <div className="info-item">
+                <span className="label">Vence:</span>
+                <span className="value text-muted-foreground">{formatDate(data.valid_until)}</span>
               </div>
             </div>
 
@@ -290,12 +335,9 @@ export default async function QuotationViewPage({ params }: PageProps) {
             </div>
           </div>
 
-          {/* Pie de página - Nota */}
+          {/* Pie de página - Usando mensaje personalizado de settings */}
           <div className="footer-note">
-            <p>
-              Esta cotización es válida por 7 días. Para efectuar la compra,
-              contáctenos.
-            </p>
+            <p>{settings.ticket_footer_message}</p>
           </div>
         </CardContent>
       </Card>

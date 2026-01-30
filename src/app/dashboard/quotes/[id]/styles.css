@@ -2,9 +2,10 @@
  * Estilos para la página de visualización de cotización
  *
  * @author SOFIA - Builder
- * @id IMPL-20260129-QUOTES-04
- * @ref context/SPEC-QUOTATIONS.md
- * @description Estilos para impresión y presentación de la hoja de cotización
+ * @id IMPL-20260130-WHITELABEL
+ * @ref context/SPEC-QUOTATIONS.md, context/SPEC-MOBILE-WHITELABEL.md
+ * @description Estilos para impresión y presentación de la hoja de cotización (con soporte para marca personalizada)
+ * @modified 2026-01-30: Agregado soporte para logo y información personalizada de la organización
  */
 
 .quotation-container {
@@ -34,6 +35,26 @@
   margin-bottom: 2rem;
   padding-bottom: 1.5rem;
   border-bottom: 3px solid #0f172a;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+/* Logo */
+.company-logo {
+  margin-bottom: 0.5rem;
+  max-width: 200px;
+  max-height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.company-logo img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
 }
 
 .company-name {
@@ -42,6 +63,19 @@
   color: #0f172a;
   margin: 0;
   letter-spacing: 1px;
+}
+
+.company-address {
+  font-size: 0.875rem;
+  color: #6b7280;
+  margin: 0;
+}
+
+.company-phone {
+  font-size: 0.875rem;
+  color: #6b7280;
+  margin: 0;
+  font-weight: 500;
 }
 
 .company-subtitle {

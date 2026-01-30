@@ -16,7 +16,8 @@ import { MobileSearch } from "@/components/inventory/mobile-search";
 import { columns } from "./columns";
 import { getInventoryItems } from "@/lib/services/inventory";
 import { getPricingRules, enrichInventoryWithPrices } from "@/lib/services/pricing";
-import { Plus } from "lucide-react";
+import { Plus, Info } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 export const dynamic = "force-dynamic";
 
@@ -38,7 +39,7 @@ export default async function InventoryPage(props: InventoryPageProps) {
   const pageIndex = Math.max(0, currentPage - 1);
 
   // Obtener items e invocar getPricingRules en paralelo
-  const [{ data: items, count }, rules] = await Promise.all([
+  const [{ data: items, count, suggestions }, rules] = await Promise.all([
     getInventoryItems({
       search: query,
       page: pageIndex,
@@ -47,8 +48,11 @@ export default async function InventoryPage(props: InventoryPageProps) {
     getPricingRules(),
   ]);
 
+  const hasSuggestions = items.length === 0 && (suggestions?.length || 0) > 0;
+  const displayItems = hasSuggestions ? (suggestions || []) : items;
+
   // Pre-calcular precios públicos en el servidor
-  const itemsWithPrices = enrichInventoryWithPrices(items, rules);
+  const itemsWithPrices = enrichInventoryWithPrices(displayItems, rules);
 
   // Para mobile: obtener todos los items (sin paginación) inicialmente
   const allItemsForMobile = count <= 200 ? itemsWithPrices : [];
@@ -81,6 +85,15 @@ export default async function InventoryPage(props: InventoryPageProps) {
 
         {/* DataTable */}
         <div className="space-y-4">
+          {hasSuggestions && (
+            <Alert variant="default" className="bg-blue-50 border-blue-200">
+              <Info className="h-4 w-4 text-blue-600" />
+              <AlertTitle className="text-blue-800">No encontramos resultados exactos</AlertTitle>
+              <AlertDescription className="text-blue-700">
+                Pero encontramos estas opciones disponibles en el mismo Rin.
+              </AlertDescription>
+            </Alert>
+          )}
           <DataTable columns={columns} data={itemsWithPrices} />
           {count > 0 && <CustomPagination totalPages={totalPages} />}
         </div>

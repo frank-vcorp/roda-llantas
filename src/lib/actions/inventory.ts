@@ -35,6 +35,11 @@ export async function searchInventoryAction(
       limit,
     });
 
+    // IMPL-20260130-V2-FEATURES: Smart Fallback logic
+    if ((result.data?.length || 0) === 0 && (result.suggestions?.length || 0) > 0) {
+       return result.suggestions!;
+    }
+
     return result.data || [];
   } catch (error) {
     console.error("[searchInventoryAction] Error:", error);

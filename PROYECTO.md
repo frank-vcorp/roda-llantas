@@ -156,24 +156,35 @@
 
 ## Backlog General
 
-### II. Buscador y Catálogo
-- [ ] Diseñar esquema de base de datos (Inventory, Brands)
-- [x] Implementar búsqueda Fuzzy (Búsqueda flexible)
-- [ ] Implementar lógica de sugerencias (Rin equivalente)
-- [ ] Visualización/Analytics de ventas perdidas (Lost Sales Log UI)
+### Histórico de Features V1.0 (Cerradas)
+- [✓] Diseñar esquema de base de datos (Inventory, Brands) — Consolidado en el modelo actual y migraciones de inventario. (DOC-20260129-FULL-END)
+- [✓] Implementar búsqueda Fuzzy (Búsqueda flexible) — Buscador Inteligente con `pg_trgm` y RPC `search_inventory`. (DOC-20260129-SEARCH-FINAL, CHK_20260129_SEARCH)
+- [✓] Visualización/Analytics de ventas perdidas (Lost Sales Log UI) — Vista de analytics integrada en el Dashboard. (IMPL-20260129-LOST-SALES-02, IMPL-20260129-DASH-01)
+- [✓] Tabla de reglas de margen por marca — Tabla `pricing_rules` operativa según SPEC-PRICING-ENGINE. (IMPL-20260129-PRICING-01, CHK_20260129_PRICING-PUBLIC)
+- [✓] Lógica de cálculo de precio final — Motor de precios dinámico y columna "Precio Público" en Inventario. (IMPL-20260129-PRICING-01)
+- [✓] Panel de administración de márgenes — Pantalla de configuración de márgenes en settings de pricing. (IMPL-20260129-PRICING-01)
+- [✓] Diseño de tarjeta de cotización (UI) — Vista resumen/imprimible de cotización y layout tipo hoja membretada. (IMPL-20260129-QUOTES-04, DOC-20260129-QUOTES-FINAL)
+ - [✓] Integración directa con WhatsApp (botón "Compartir cotización") reutilizando la hoja imprimible actual — Botón WhatsApp operativo en el flujo de cotización. (IMPL-20260129-QUOTES-06, DOC-20260130-WHATSAPP-FIX)
 
-### III. Motor de Precios
-- [ ] Tabla de reglas de margen por marca
-- [ ] Lógica de cálculo de precio final
-- [ ] Panel de administración de márgenes
-
-### IV. Generador de Cotizaciones
-- [ ] Diseño de tarjeta de cotización (UI)
-- [ ] Generación de imagen/PDF para WhatsApp
-- [ ] Lógica de expiración de cotizaciones
+### Backlog V2.0 (Pendiente)
+- [✓] Implementar lógica de sugerencias (Rin equivalente) en buscador/catálogo. (IMPL-20260130-V2-FEATURES, DOC-20260130-01, CHK_20260130_V2_FEATURES_QA, CHK_20260130_V2_FEATURES_CLOSE)
+- [✓] Lógica de expiración de cotizaciones (marcado de vencidas y reglas de negocio asociadas). (IMPL-20260130-V2-FEATURES, DOC-20260130-01, CHK_20260130_V2_FEATURES_QA, CHK_20260130_V2_FEATURES_CLOSE)
 
 ---
 
 ## Decisiones Arquitectónicas
 - **ADR-001:** Uso de Next.js como PWA.
 - **ADR-002:** Supabase como Backend-as-a-Service.
+
+## Micro-Sprint — UX Móvil y Personalización (En Progreso)
+
+### Objetivo del Micro-Sprint
+- [ ] Mejorar drásticamente la UX móvil de las tarjetas de inventario y permitir personalización de marca (Logo/Datos) en tickets.
+
+### Tareas del Micro-Sprint
+- [x] [DB] Tabla `organization_settings` y Storage Bucket `branding`.
+- [x] [UI] Pantalla de Configuración Global (`/dashboard/settings`).
+- [x] [UI/Mobile] Rediseño profesional de `MobileSearch` (Tarjetas de Inventario).
+- [x] [Feature] Integración de logo/datos dinámicos en PDF de Cotización.
+
+> Micro-Sprint definido a solicitud del usuario para pulir la experiencia antes del despliegue final. (ARCH-20260130-V2.1)

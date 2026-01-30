@@ -54,5 +54,18 @@ export interface UserProfile {
   updated_at: string;
 }
 
+export interface OrganizationSettings {
+  id: string;
+  profile_id: string;
+  name: string;
+  address: string | null;
+  phone: string | null;
+  website: string | null;
+  logo_url: string | null;
+  ticket_footer_message: string;
+  created_at: string;
+  updated_at: string;
+}
+
 export type UserRole = 'admin' | 'seller';
 

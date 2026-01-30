@@ -16,7 +16,7 @@
 
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { CheckCircle2 } from 'lucide-react';
+import { CheckCircle2, AlertTriangle, RefreshCw } from 'lucide-react';
 import { convertQuotationToSale } from '@/lib/actions/sales';
 import { toast } from 'sonner';
 import {
@@ -29,20 +29,26 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import Link from 'next/link';
 
 interface ConvertToSaleButtonProps {
   quotationId: string;
   status?: string;
+  validUntil?: string; // Fecha de vencimiento
   onSuccess?: (saleId: string) => void;
 }
 
 export function ConvertToSaleButton({
   quotationId,
   status = 'draft',
+  validUntil,
   onSuccess,
 }: ConvertToSaleButtonProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [showDialog, setShowDialog] = useState(false);
+
+  // Verificar si está vencida
+  const isExpired = validUntil ? new Date(validUntil) < new Date() : false;
 
   // No mostrar botón si ya está vendida
   if (status === 'sold') {
@@ -50,6 +56,24 @@ export function ConvertToSaleButton({
       <div className="flex items-center gap-2 text-green-600 bg-green-50 px-3 py-2 rounded-md border border-green-200">
         <CheckCircle2 className="h-4 w-4" />
         <span className="text-sm font-medium">Venta confirmada</span>
+      </div>
+    );
+  }
+
+  // Si está vencida y en borrador
+  if (isExpired && status === 'draft') {
+    return (
+      <div className="flex items-center gap-2">
+         <div className="flex items-center gap-2 text-red-600 bg-red-50 px-3 py-2 rounded-md border border-red-200">
+           <AlertTriangle className="h-4 w-4" />
+           <span className="text-sm font-medium">Cotización Vencida</span>
+         </div>
+         <Link href={`/dashboard/quotes/new?clone=${quotationId}`}>
+           <Button variant="outline" size="sm" className="gap-2">
+             <RefreshCw className="h-4 w-4" />
+             Recotizar
+           </Button>
+         </Link>
       </div>
     );
   }

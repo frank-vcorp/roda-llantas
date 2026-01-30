@@ -27,6 +27,7 @@ export interface Quotation {
   total_amount: number;
   status: string;
   created_at: string;
+  valid_until: string; // IMPL-20260130-V2-FEATURES: Fecha de expiración de cotización
 }
 
 interface CreateQuotationInput {

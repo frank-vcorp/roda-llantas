@@ -21,11 +21,33 @@ export interface GetInventoryOptions {
 }
 
 /**
- * Respuesta paginada con count total
+ * Respuesta paginada con count total y sugerencias opcionales
  */
 export interface InventoryResponse {
   data: InventoryItem[];
   count: number;
+  suggestions?: InventoryItem[]; // IMPL-20260130-V2-FEATURES: Items sugeridos si no hay resultados exactos
+}
+
+/**
+ * Extrae el RIN de un string de búsqueda
+ * Busca números de 2 dígitos que representen un RIN válido (13-24)
+ * 
+ * @example
+ * extractRimFromSearch("Rin 17 yokohama") => 17
+ * extractRimFromSearch("175 60 R17") => 17
+ * extractRimFromSearch("no hay rin aqui") => null
+ */
+function extractRimFromSearch(searchTerm: string): number | null {
+  // Regex para encontrar números de 2 dígitos (RIN válido: 13-24)
+  const rimMatch = searchTerm.match(/\b(1[3-9]|2[0-4])\b/);
+  if (rimMatch) {
+    const rim = parseInt(rimMatch[1], 10);
+    if (rim >= 13 && rim <= 24) {
+      return rim;
+    }
+  }
+  return null;
 }
 
 /**
@@ -35,11 +57,17 @@ export interface InventoryResponse {
  * - Si hay término de búsqueda: usa RPC `search_inventory` para búsqueda fuzzy con pg_trgm
  * - Si no hay búsqueda: usa select estándar con count exacto
  * 
+ * IMPL-20260130-V2-FEATURES: Smart Fallback
+ * - Si count=0 y hay término de búsqueda:
+ *   - Intenta extraer un RIN del texto
+ *   - Si se detecta un RIN válido: hace segunda consulta para encontrar items con ese RIN
+ *   - Retorna los items en el campo `suggestions`
+ * 
  * @param options - Opciones de búsqueda y paginación
  * @param options.search - Término de búsqueda para brand, model, medida_full, sku
  * @param options.page - Número de página (0-indexed, default: 0)
  * @param options.limit - Cantidad de items por página (default: 20)
- * @returns Objeto con data (array de items) y count (total de registros)
+ * @returns Objeto con data (array de items), count (total de registros), y suggestions opcionales
  * 
  * @example
  * const result = await getInventoryItems({
@@ -50,7 +78,8 @@ export interface InventoryResponse {
  * 
  * @author SOFIA - Builder
  * @id IMPL-20260129-SEARCH-02
- * @ref context/SPEC-SEARCH.md
+ * @id IMPL-20260130-V2-FEATURES (Smart Fallback)
+ * @ref context/SPEC-SEARCH.md, context/SPEC-V2-FEATURES.md
  */
 export async function getInventoryItems(
   options: GetInventoryOptions = {}
@@ -88,14 +117,38 @@ export async function getInventoryItems(
       }
 
       const count = (countData as number) || 0;
-      const result = {
+      const result: InventoryResponse = {
         data: (data as InventoryItem[]) || [],
         count,
       };
 
-      // Registrar venta perdida si no hay resultados (fire and forget)
-      // IMPL-20260129-LOST-SALES-01
+      // IMPL-20260130-V2-FEATURES: Smart Fallback - Si no hay resultados exactos, buscar por RIN
       if (count === 0) {
+        const detectedRim = extractRimFromSearch(searchTerm);
+        
+        if (detectedRim !== null) {
+          try {
+            // Segunda consulta: buscar por RIN detectado
+            const { data: suggestedItems, error: rimError } = await supabase
+              .from("inventory")
+              .select("*")
+              .eq("rim", detectedRim)
+              .limit(4);
+
+            if (!rimError && suggestedItems && suggestedItems.length > 0) {
+              result.suggestions = (suggestedItems as InventoryItem[]);
+              console.log(
+                `[getInventoryItems] No exact results, found ${suggestedItems.length} suggestions with Rin ${detectedRim}`
+              );
+            }
+          } catch (rimQueryError) {
+            console.error("[getInventoryItems] Error executing RIM fallback query:", rimQueryError);
+            // No fallar la búsqueda principal si falla el fallback
+          }
+        }
+
+        // Registrar venta perdida si no hay resultados (fire and forget)
+        // IMPL-20260129-LOST-SALES-01
         logLostSale(searchTerm, count).catch(() => {
           // Silenciar errores para no afectar la búsqueda principal
         });
