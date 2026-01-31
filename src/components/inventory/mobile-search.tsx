@@ -9,7 +9,7 @@
  * REDISEÑO: Tarjetas con shadow, rounded, jerarquía visual clara,
  * precio verde destacado (estilo e-commerce moderno).
  *
- * @id IMPL-20260130-WHITELABEL
+ * @id IMPL-20260130-WHITELABEL, FIX-20260131-MOBILE-CART
  * @author SOFIA - Builder
  * @ref context/SPEC-MOBILE-WHITELABEL.md
  */
@@ -22,6 +22,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { InventoryItem } from "@/lib/types";
 import { searchInventoryAction } from "@/lib/actions/inventory";
+import { useQuote } from "@/lib/contexts/quote-context";
+import { toast } from "sonner";
 
 interface MobileSearchProps {
   initialItems?: InventoryItem[];
@@ -34,6 +36,7 @@ export function MobileSearch({ initialItems = [] }: MobileSearchProps) {
   const [selectedItem, setSelectedItem] = useState<InventoryItem | null>(null);
   const [quantity, setQuantity] = useState(1);
   const [showQuantityModal, setShowQuantityModal] = useState(false);
+  const { addItem } = useQuote();
 
   // Manejar búsqueda
   const handleSearch = useCallback(
@@ -70,8 +73,8 @@ export function MobileSearch({ initialItems = [] }: MobileSearchProps) {
   const handleConfirmAdd = () => {
     if (!selectedItem) return;
 
-    console.log(`[MobileSearch] Agregado: ${selectedItem.medida_full} x${quantity}`);
-    // TODO: Enviar al contexto de cotización (QuoteContext)
+    addItem(selectedItem, quantity);
+    toast.success("Producto agregado a la cotización");
     setShowQuantityModal(false);
     setSelectedItem(null);
   };

@@ -176,10 +176,10 @@
 - **ADR-001:** Uso de Next.js como PWA.
 - **ADR-002:** Supabase como Backend-as-a-Service.
 
-## Micro-Sprint — UX Móvil y Personalización (En Progreso)
+## Micro-Sprint — UX Móvil y Personalización (Completado)
 
 ### Objetivo del Micro-Sprint
-- [ ] Mejorar drásticamente la UX móvil de las tarjetas de inventario y permitir personalización de marca (Logo/Datos) en tickets.
+- [x] Mejorar drásticamente la UX móvil de las tarjetas de inventario y permitir personalización de marca (Logo/Datos) en tickets.
 
 ### Tareas del Micro-Sprint
 - [x] [DB] Tabla `organization_settings` y Storage Bucket `branding`.
@@ -188,3 +188,23 @@
 - [x] [Feature] Integración de logo/datos dinámicos en PDF de Cotización.
 
 > Micro-Sprint definido a solicitud del usuario para pulir la experiencia antes del despliegue final. (ARCH-20260130-V2.1)
+> Cierre del Micro-Sprint registrado tras implementación de White Label y UX Móvil. (IMPL-20260130-WHITELABEL)
+
+---
+## Micro-Sprint — Optimización y Limpieza (Completado)
+
+### Objetivo del Micro-Sprint
+- [x] Preparar el código para entrega final: limpieza de logs, archivos temporales y optimización de assets.
+
+### Tareas del Micro-Sprint
+- [x] [Clean] Eliminar archivos temporales (`create-test-xlsx.mjs`, `user_pasted_data.txt`).
+- [x] [Refactor] Eliminar `console.log` de depuración en componentes de UI y lógica NO crítica.
+- [x] [Doc] Actualizar `README.md` con instrucciones finales.
+- [x] [QA] Verificación final de build.
+
+> Sprint de cierre técnico. (ARCH-20260131-OPTIMIZATION)
+
+---
+## Nota de Versionado Final
+
+- V2.1 RELEASE - 2026-01-31 (DOC-20260131-FINAL-HANDOFF)

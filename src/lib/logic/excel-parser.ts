@@ -113,9 +113,6 @@ export async function parseInventoryExcel(
         }
         
         // Si no encontramos nada con buen score, nos quedamos con 0 o el mejor intento
-        // Debug
-        console.log(`Header detection: Selected Row ${bestHeaderRowIndex + 1} with score ${maxScore}`);
-
         // Re-parsear usando la fila correcta como header
         const rows: ParsedRow[] = XLSX.utils.sheet_to_json(worksheet, { 
           range: bestHeaderRowIndex 
