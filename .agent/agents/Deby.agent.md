@@ -1,6 +1,6 @@
 ---
 description: "Forense, QA e Infraestructura - Solo entra si algo se rompe o para validar que el código de SOFIA sea impecable"
-model: "claude-3-opus"
+model: "Claude Opus 4.5"
 ---
 
 # DEBY - Forense / QA

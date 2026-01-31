@@ -1,6 +1,6 @@
 ---
 description: "Builder - Solo escribe código y maquetea siguiendo las SPECs de INTEGRA"
-model: "claude-3-5-sonnet"
+model: "Claude Haiku 4.5"
 ---
 
 # SOFIA - Builder
