@@ -134,9 +134,10 @@ export function MobileSearch({ initialItems = [] }: MobileSearchProps) {
 
           {/* Grid de tarjetas - Profesional */}
           <div className="grid grid-cols-1 gap-3">
-            {results.map((item) => {
+            {results.map((item: any) => {
               const hasStock = item.stock > 0;
-              const priceDisplay = formatPrice(item.manual_price);
+              const publicPrice = item._publicPrice?.public_price || item.manual_price || 0;
+              const priceDisplay = formatPrice(publicPrice);
 
               return (
                 <div
@@ -258,7 +259,7 @@ export function MobileSearch({ initialItems = [] }: MobileSearchProps) {
                 </p>
               )}
               <p className="text-3xl font-extrabold text-emerald-600 mt-3">
-                {formatPrice(selectedItem.manual_price)}
+                {formatPrice((selectedItem as any)._publicPrice?.public_price || selectedItem.manual_price)}
               </p>
             </div>
 
@@ -304,7 +305,7 @@ export function MobileSearch({ initialItems = [] }: MobileSearchProps) {
                 <span className="text-slate-600 font-medium">Subtotal:</span>
                 <span className="text-2xl font-extrabold text-emerald-600">
                   {formatPrice(
-                    (quantity * (selectedItem.manual_price || 0))
+                    (quantity * ((selectedItem as any)._publicPrice?.public_price || selectedItem.manual_price || 0))
                   )}
                 </span>
               </div>

@@ -27,6 +27,7 @@ import {
   TrendingUp,
   FileText,
   LayoutDashboard,
+  Settings,
 } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -130,28 +131,28 @@ export default async function DashboardPage() {
         <div className="space-y-4">
           <h2 className="text-sm font-black uppercase tracking-[0.2em] text-muted-foreground/50 ml-1">Accesos Directos</h2>
           <div className="grid gap-4 md:grid-cols-3">
-            <Link href="/dashboard/quotes/new" className="group">
+            <Link href="/dashboard/inventory" className="group">
               <Button className="w-full h-auto py-6 flex flex-col items-center gap-3 bg-white dark:bg-zinc-900 hover:bg-primary hover:text-primary-foreground border-none shadow-lg shadow-black/5 rounded-3xl transition-all duration-300 group-hover:-translate-y-1" variant="outline">
                 <div className="p-3 bg-primary/5 group-hover:bg-white/20 rounded-2xl transition-colors">
                   <Plus className="h-6 w-6" />
                 </div>
-                <span className="font-bold text-sm">Nueva Cotización</span>
+                <span className="font-bold text-sm">Vender / Cotizar</span>
               </Button>
             </Link>
-            <Link href="/dashboard/inventory" className="group">
+            <Link href="/dashboard/quotes" className="group">
               <Button className="w-full h-auto py-6 flex flex-col items-center gap-3 bg-white dark:bg-zinc-900 hover:bg-primary hover:text-primary-foreground border-none shadow-lg shadow-black/5 rounded-3xl transition-all duration-300 group-hover:-translate-y-1" variant="outline">
                 <div className="p-3 bg-primary/5 group-hover:bg-white/20 rounded-2xl transition-colors">
-                  <Package className="h-6 w-6" />
+                  <FileText className="h-6 w-6" />
                 </div>
-                <span className="font-bold text-sm">Gestión de Inventario</span>
+                <span className="font-bold text-sm">Ver Cotizaciones</span>
               </Button>
             </Link>
-            <Link href="/dashboard/inventory/import" className="group">
+            <Link href="/dashboard/settings" className="group">
               <Button className="w-full h-auto py-6 flex flex-col items-center gap-3 bg-white dark:bg-zinc-900 hover:bg-primary hover:text-primary-foreground border-none shadow-lg shadow-black/5 rounded-3xl transition-all duration-300 group-hover:-translate-y-1" variant="outline">
                 <div className="p-3 bg-primary/5 group-hover:bg-white/20 rounded-2xl transition-colors">
-                  <Upload className="h-6 w-6" />
+                  <Settings className="h-6 w-6" />
                 </div>
-                <span className="font-bold text-sm">Importar Catálogo</span>
+                <span className="font-bold text-sm">Configuración</span>
               </Button>
             </Link>
           </div>

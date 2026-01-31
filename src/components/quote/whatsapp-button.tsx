@@ -31,7 +31,7 @@ interface WhatsAppButtonProps {
  * Elimina espacios, guiones, paréntesis
  * Si el número es local (sin +), asume Colombia (+57)
  */
-function normalizePhoneNumber(phone: string): string {
+export function normalizePhoneNumber(phone: string): string {
   // Eliminar espacios, guiones, paréntesis
   let cleaned = phone.replace(/[\s\-()]/g, "");
 
@@ -53,7 +53,7 @@ function normalizePhoneNumber(phone: string): string {
 /**
  * Construye el mensaje de WhatsApp formateado
  */
-function buildWhatsAppMessage(
+export function buildWhatsAppMessage(
   customerName: string,
   folio: string,
   items: Array<{

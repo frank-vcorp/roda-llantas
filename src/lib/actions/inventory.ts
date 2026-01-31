@@ -35,12 +35,21 @@ export async function searchInventoryAction(
       limit,
     });
 
-    // IMPL-20260130-V2-FEATURES: Smart Fallback logic
-    if ((result.data?.length || 0) === 0 && (result.suggestions?.length || 0) > 0) {
-       return result.suggestions!;
+    const items = result.data || [];
+    const suggestions = result.suggestions || [];
+
+    // IMPL-20260130-V2-FEATURES: Fetch pricing rules to enrich items
+    const { getPricingRules, enrichInventoryWithPrices } = await import("@/lib/services/pricing");
+    const rules = await getPricingRules();
+
+    const enrichedItems = enrichInventoryWithPrices(items, rules);
+    const enrichedSuggestions = enrichInventoryWithPrices(suggestions, rules);
+
+    if (enrichedItems.length === 0 && enrichedSuggestions.length > 0) {
+      return enrichedSuggestions;
     }
 
-    return result.data || [];
+    return enrichedItems;
   } catch (error) {
     console.error("[searchInventoryAction] Error:", error);
     return [];
