@@ -30,12 +30,19 @@ interface NavLink {
 
 interface DashboardNavProps {
   userRole?: "admin" | "seller" | null;
+  className?: string;
+  variant?: "sidebar" | "mobile";
 }
 
-export function DashboardNav({ userRole = null }: DashboardNavProps) {
+export function DashboardNav({ userRole = null, className, variant = "sidebar" }: DashboardNavProps) {
   const pathname = usePathname();
 
   const links: NavLink[] = [
+    {
+      href: "/dashboard",
+      label: "Inicio",
+      icon: LayoutDashboard,
+    },
     {
       href: "/dashboard/inventory",
       label: "Inventario",
@@ -53,7 +60,7 @@ export function DashboardNav({ userRole = null }: DashboardNavProps) {
     },
     {
       href: "/dashboard/analytics/lost-sales",
-      label: "Ventas Perdidas",
+      label: "Oportunidades",
       icon: TrendingDown,
       adminOnly: true,
     },
@@ -61,7 +68,7 @@ export function DashboardNav({ userRole = null }: DashboardNavProps) {
       href: "/dashboard/settings",
       label: "Configuración",
       icon: Settings,
-      adminOnly: true, // Asumo que editar el negocio es de admin
+      adminOnly: true,
     },
   ];
 
@@ -73,22 +80,49 @@ export function DashboardNav({ userRole = null }: DashboardNavProps) {
     return true;
   });
 
+  if (variant === "mobile") {
+    return (
+      <nav className={cn("flex items-center justify-around w-full px-2", className)}>
+        {visibleLinks.map((link) => {
+          const Icon = link.icon;
+          const isActive = pathname === link.href || (link.href !== "/dashboard" && pathname.startsWith(link.href));
+
+          return (
+            <Link
+              key={link.href}
+              href={link.href}
+              className={cn(
+                "flex flex-col items-center gap-1 p-2 transition-all duration-300",
+                isActive ? "text-primary scale-110" : "text-muted-foreground opacity-60 hover:opacity-100"
+              )}
+            >
+              <Icon className={cn("h-5 w-5", isActive && "stroke-[3px]")} />
+              <span className="text-[10px] font-bold uppercase tracking-tighter">{link.label}</span>
+            </Link>
+          );
+        })}
+      </nav>
+    );
+  }
+
   return (
-    <nav className="flex items-center space-x-4 lg:space-x-6">
+    <nav className={cn("grid gap-2", className)}>
       {visibleLinks.map((link) => {
         const Icon = link.icon;
-        const isActive = pathname.startsWith(link.href);
+        const isActive = pathname === link.href || (link.href !== "/dashboard" && pathname.startsWith(link.href));
 
         return (
           <Link
             key={link.href}
             href={link.href}
             className={cn(
-              "text-sm font-medium transition-colors hover:text-primary flex items-center gap-2",
-              isActive ? "text-primary font-bold" : "text-muted-foreground"
+              "group flex items-center gap-3 px-4 py-3 text-sm font-bold transition-all duration-200 rounded-2xl",
+              isActive
+                ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20 scale-[1.02]"
+                : "text-muted-foreground hover:bg-muted hover:text-foreground"
             )}
           >
-            <Icon className="h-4 w-4" />
+            <Icon className={cn("h-5 w-5", isActive ? "opacity-100" : "opacity-50 group-hover:opacity-100")} />
             {link.label}
           </Link>
         );

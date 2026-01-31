@@ -208,3 +208,18 @@
 ## Nota de Versionado Final
 
 - V2.1 RELEASE - 2026-01-31 (DOC-20260131-FINAL-HANDOFF)
+
+---
+## Micro-Sprint — Llantera Pro PWA Edition (COMPLETADO)
+
+### Objetivo del Micro-Sprint
+- [x] Convertir la aplicación en una PWA instalable con soporte para iconos y visualización standalone.
+
+### Tareas del Micro-Sprint
+- [x] [ARCH] Definir SPEC-PWA (Manifest, Icons, SW).
+- [x] [UI] Crear `manifest.ts` y configurar Metadatos de Next.js.
+- [x] [UI] Generar iconos adaptativos (192x192, 512x512, Apple Touch).
+- [x] [INFRA] Implementar Service Worker básico para instalabilidad.
+- [x] [QA] Certificación de PWA "Ready for Install".
+
+> Micro-Sprint completado bajo la metodología INTEGRA v2.2. (DOC-20260131-08)

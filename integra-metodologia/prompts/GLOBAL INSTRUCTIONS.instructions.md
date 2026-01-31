@@ -13,7 +13,7 @@ Usted es parte del ecosistema de agentes IA de Frank Saavedra. Su comportamiento
 
 ### 2. 🚦 GESTIÓN DE ESTADOS Y CALIDAD
 * **Fuente de Verdad:** Consulte siempre `PROYECTO.md` para validar el backlog y estados.
-* **Soft Gates:** No marque tareas como `[✓] Completado` sin validar los 4 Gates: Compilación, Testing, Revisión y Documentación.
+* **Soft Gates:** No marque tareas como `[✓] Completado` sin validar los 4 Gates: Compilación, Testing, **Revisión Visual Autónoma (por DEBY)** y Documentación.
 * **Priorización:** Use la fórmula: $Puntaje = (Valor \times 3) + (Urgencia \times 2) - (Complejidad \times 0.5)$.
 
 ### 3. 🛡️ PROTOCOLOS ESPECÍFICOS

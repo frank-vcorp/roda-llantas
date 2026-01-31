@@ -45,52 +45,79 @@ export default function LoginPage() {
   };
 
   return (
-    <Card>
-      <CardHeader className="space-y-1">
-        <CardTitle className="text-2xl font-bold">Iniciar Sesión</CardTitle>
-        <p className="text-sm text-muted-foreground">
-          Ingresa tus credenciales para acceder a Roda Llantas
-        </p>
-      </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {error && (
-            <Alert variant="destructive">
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
-          )}
-
-          <div className="space-y-2">
-            <Label htmlFor="email">Correo Electrónico</Label>
-            <Input
-              id="email"
-              type="email"
-              placeholder="tu@email.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              disabled={isLoading}
-              required
-            />
+    <div className="relative group">
+      <div className="absolute -inset-1 bg-gradient-to-r from-primary/20 to-blue-500/20 rounded-3xl blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
+      <Card className="relative bg-card/80 backdrop-blur-xl border-white/20 shadow-2xl rounded-3xl overflow-hidden">
+        <CardHeader className="space-y-3 pb-8 text-center">
+          <div className="mx-auto w-12 h-12 bg-primary rounded-2xl flex items-center justify-center mb-2 shadow-lg shadow-primary/20">
+            <span className="text-primary-foreground font-black text-xl">R</span>
           </div>
+          <CardTitle className="text-3xl font-black tracking-tight bg-gradient-to-br from-foreground to-foreground/70 bg-clip-text text-transparent">
+            Llantera Pro
+          </CardTitle>
+          <p className="text-sm text-muted-foreground font-medium">
+            Ingresa tus credenciales para acceder al sistema
+          </p>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit} className="space-y-5">
+            {error && (
+              <Alert variant="destructive" className="bg-destructive/10 border-destructive/20 text-destructive animate-in fade-in slide-in-from-top-1">
+                <AlertDescription className="font-medium text-xs">{error}</AlertDescription>
+              </Alert>
+            )}
 
-          <div className="space-y-2">
-            <Label htmlFor="password">Contraseña</Label>
-            <Input
-              id="password"
-              type="password"
-              placeholder="••••••••"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              disabled={isLoading}
-              required
-            />
-          </div>
+            <div className="space-y-2">
+              <Label htmlFor="email" className="text-xs font-bold uppercase tracking-wider text-muted-foreground/80 ml-1">
+                Correo Electrónico
+              </Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="nombre@empresa.com"
+                className="h-12 bg-background/50 border-muted-foreground/10 focus:bg-background transition-all rounded-xl"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                disabled={isLoading}
+                required
+              />
+            </div>
 
-          <Button type="submit" className="w-full" disabled={isLoading}>
-            {isLoading ? "Iniciando sesión..." : "Iniciar Sesión"}
-          </Button>
-        </form>
-      </CardContent>
-    </Card>
+            <div className="space-y-2">
+              <div className="flex items-center justify-between ml-1">
+                <Label htmlFor="password" className="text-xs font-bold uppercase tracking-wider text-muted-foreground/80">
+                  Contraseña
+                </Label>
+                <button type="button" className="text-[10px] font-bold text-primary hover:underline uppercase tracking-tight opacity-70">
+                  ¿Olvidaste tu contraseña?
+                </button>
+              </div>
+              <Input
+                id="password"
+                type="password"
+                placeholder="••••••••"
+                className="h-12 bg-background/50 border-muted-foreground/10 focus:bg-background transition-all rounded-xl"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                disabled={isLoading}
+                required
+              />
+            </div>
+
+            <Button type="submit" className="w-full h-12 rounded-xl text-sm font-bold shadow-xl shadow-primary/10 transition-all active:scale-[0.98]" disabled={isLoading}>
+              {isLoading ? (
+                <span className="flex items-center gap-2">
+                  <div className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  Verificando...
+                </span>
+              ) : "Entrar al Panel"}
+            </Button>
+            <p className="text-center text-[10px] text-muted-foreground/60 font-medium">
+              V2.2 - Sistema de Gestión de Llantas
+            </p>
+          </form>
+        </CardContent>
+      </Card>
+    </div>
   );
 }
