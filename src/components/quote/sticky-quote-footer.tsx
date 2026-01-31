@@ -16,16 +16,7 @@ import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 
-/**
- * Formato de moneda
- */
-const formatCurrency = (value: number): string => {
-  return new Intl.NumberFormat("es-CO", {
-    style: "currency",
-    currency: "COP",
-    minimumFractionDigits: 0,
-  }).format(value);
-};
+import { formatCurrency } from "@/lib/utils";
 
 export function StickyQuoteFooter() {
   const { items, getTotalAmount, getItemCount } = useQuote();

@@ -22,16 +22,7 @@ import { getOrganizationSettings } from "@/lib/actions/settings";
 import Image from "next/image";
 import "./styles.css";
 
-/**
- * Función auxiliar para formatear moneda COP
- */
-function formatCurrency(value: number): string {
-  return new Intl.NumberFormat("es-CO", {
-    style: "currency",
-    currency: "COP",
-    minimumFractionDigits: 0,
-  }).format(value);
-}
+import { formatCurrency } from "@/lib/utils";
 
 /**
  * Función auxiliar para formatear fechas
@@ -149,7 +140,7 @@ export default async function QuotationViewPage({ params }: PageProps) {
   }
 
   const data = quotation as unknown as QuotationWithItems;
-  
+
   // Settings por defecto si no existen
   const settings = settingsResult || {
     name: "Roda Llantas",

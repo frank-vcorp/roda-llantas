@@ -45,16 +45,7 @@ function getUnitPrice(item: any): number {
   return item.cost_price * 1.3;
 }
 
-/**
- * Formato de moneda COP
- */
-function formatCurrency(value: number): string {
-  return new Intl.NumberFormat("es-CO", {
-    style: "currency",
-    currency: "COP",
-    minimumFractionDigits: 0,
-  }).format(value);
-}
+import { formatCurrency } from "@/lib/utils";
 
 export default function QuoteSummaryPage() {
   const router = useRouter();

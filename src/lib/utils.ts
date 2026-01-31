@@ -22,3 +22,17 @@ export function formatDate(dateString: string): string {
     return dateString
   }
 }
+
+/**
+ * Formatea moneda a MXN garantizando:
+ * - Símbolo $
+ * - Coma para miles
+ * - Punto para decimales
+ * - 2 decimales fijos
+ */
+export function formatCurrency(amount: number): string {
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+  }).format(amount);
+}

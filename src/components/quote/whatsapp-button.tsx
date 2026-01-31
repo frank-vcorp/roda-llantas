@@ -11,6 +11,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Share2 } from "lucide-react";
+import { formatCurrency } from "@/lib/utils";
 
 interface WhatsAppButtonProps {
   customerName: string;
@@ -34,15 +35,15 @@ function normalizePhoneNumber(phone: string): string {
   // Eliminar espacios, guiones, paréntesis
   let cleaned = phone.replace(/[\s\-()]/g, "");
 
-  // Si no comienza con +, agregar +57 (Colombia)
+  // Si no comienza con +, agregar +52 (México)
   if (!cleaned.startsWith("+")) {
-    // Si comienza con 0, eliminarlo (formato colombiano)
+    // Si comienza con 0, eliminarlo
     if (cleaned.startsWith("0")) {
       cleaned = cleaned.substring(1);
     }
-    cleaned = "57" + cleaned;
+    cleaned = "52" + cleaned;
   } else {
-    // Remover el + para la URL (wa.me no lo necesita)
+    // Remover el + para la URL
     cleaned = cleaned.substring(1);
   }
 
@@ -69,21 +70,13 @@ function buildWhatsAppMessage(
 
   // Agregar items
   items.forEach((item) => {
-    const formattedPrice = new Intl.NumberFormat("es-CO", {
-      style: "currency",
-      currency: "COP",
-      minimumFractionDigits: 0,
-    }).format(item.subtotal);
+    const formattedPrice = formatCurrency(item.subtotal);
 
     lines.push(`${item.quantity}x ${item.description} (${formattedPrice})`);
   });
 
   // Agregar total
-  const formattedTotal = new Intl.NumberFormat("es-CO", {
-    style: "currency",
-    currency: "COP",
-    minimumFractionDigits: 0,
-  }).format(totalAmount);
+  const formattedTotal = formatCurrency(totalAmount);
 
   lines.push("");
   lines.push(`*Total: ${formattedTotal}*`);

@@ -23,16 +23,7 @@ import { MoreHorizontal } from "lucide-react";
 import { InventoryItem } from "@/lib/types";
 import { useQuote } from "@/lib/contexts/quote-context";
 
-/**
- * Formato de moneda para precios
- */
-const formatCurrency = (value: number): string => {
-  return new Intl.NumberFormat("es-CO", {
-    style: "currency",
-    currency: "COP",
-    minimumFractionDigits: 0,
-  }).format(value);
-};
+import { formatCurrency } from "@/lib/utils";
 
 import { ArrowUpDown, Info } from "lucide-react";
 import {
@@ -106,32 +97,32 @@ export const columns: ColumnDef<InventoryItem>[] = [
     accessorKey: "description",
     header: "Descripción (Original)",
     cell: ({ row }) => {
-        const item = row.original;
-        // Si no existe description (DB vieja), construir una
-        const displayText = item.description || `${item.brand} ${item.model} ${item.medida_full}`;
-        
-        return (
-          <div className="flex items-center gap-2">
-            <span className="font-medium text-sm">{displayText}</span>
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                   <Info className="h-4 w-4 text-gray-400 hover:text-blue-500 cursor-help" />
-                </TooltipTrigger>
-                <TooltipContent className="bg-slate-900 text-white p-3 max-w-xs">
-                  <div className="text-xs space-y-1">
-                    <p className="font-bold border-b pb-1 mb-1">Datos Estructurados</p>
-                    <p><strong>Marca:</strong> {item.brand}</p>
-                    <p><strong>Modelo:</strong> {item.model}</p>
-                    <p><strong>Medida:</strong> {item.medida_full}</p>
-                    <p><strong>Rin:</strong> {item.rim}"</p>
-                    <p><strong>Ancho:</strong> {item.width} mm</p>
-                  </div>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          </div>
-        );
+      const item = row.original;
+      // Si no existe description (DB vieja), construir una
+      const displayText = item.description || `${item.brand} ${item.model} ${item.medida_full}`;
+
+      return (
+        <div className="flex items-center gap-2">
+          <span className="font-medium text-sm">{displayText}</span>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Info className="h-4 w-4 text-gray-400 hover:text-blue-500 cursor-help" />
+              </TooltipTrigger>
+              <TooltipContent className="bg-slate-900 text-white p-3 max-w-xs">
+                <div className="text-xs space-y-1">
+                  <p className="font-bold border-b pb-1 mb-1">Datos Estructurados</p>
+                  <p><strong>Marca:</strong> {item.brand}</p>
+                  <p><strong>Modelo:</strong> {item.model}</p>
+                  <p><strong>Medida:</strong> {item.medida_full}</p>
+                  <p><strong>Rin:</strong> {item.rim}"</p>
+                  <p><strong>Ancho:</strong> {item.width} mm</p>
+                </div>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        </div>
+      );
     },
   },
   {
@@ -169,11 +160,10 @@ export const columns: ColumnDef<InventoryItem>[] = [
                     OFERTA
                   </Badge>
                 )}
-                <span className={`font-semibold ${
-                  priceData.is_manual 
-                    ? "text-amber-600" 
+                <span className={`font-semibold ${priceData.is_manual
+                    ? "text-amber-600"
                     : "text-green-600"
-                }`}>
+                  }`}>
                   {formatCurrency(priceData.public_price)}
                 </span>
               </div>

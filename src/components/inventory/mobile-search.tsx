@@ -24,6 +24,7 @@ import { InventoryItem } from "@/lib/types";
 import { searchInventoryAction } from "@/lib/actions/inventory";
 import { useQuote } from "@/lib/contexts/quote-context";
 import { toast } from "sonner";
+import { formatCurrency } from "@/lib/utils";
 
 interface MobileSearchProps {
   initialItems?: InventoryItem[];
@@ -81,11 +82,7 @@ export function MobileSearch({ initialItems = [] }: MobileSearchProps) {
 
   const formatPrice = (price: number | null): string => {
     if (!price || price === 0) return "Consultar";
-    return new Intl.NumberFormat("es-CO", {
-      style: "currency",
-      currency: "COP",
-      minimumFractionDigits: 0,
-    }).format(price);
+    return formatCurrency(price);
   };
 
   return (
@@ -110,130 +107,127 @@ export function MobileSearch({ initialItems = [] }: MobileSearchProps) {
 
       {/* Resultados - Scrollable container */}
       <div className="flex flex-col flex-1 overflow-hidden">
-      <div className="flex-1 overflow-y-auto px-3 py-4 space-y-3">
-        {loading && (
-          <div className="flex items-center justify-center py-12">
-            <div className="text-center">
-              <div className="animate-spin h-8 w-8 border-2 border-emerald-500 border-t-transparent rounded-full mx-auto mb-2" />
-              <p className="text-sm text-slate-600">Buscando...</p>
+        <div className="flex-1 overflow-y-auto px-3 py-4 space-y-3">
+          {loading && (
+            <div className="flex items-center justify-center py-12">
+              <div className="text-center">
+                <div className="animate-spin h-8 w-8 border-2 border-emerald-500 border-t-transparent rounded-full mx-auto mb-2" />
+                <p className="text-sm text-slate-600">Buscando...</p>
+              </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {!loading && results.length === 0 && query && (
-          <div className="text-center py-12">
-            <SearchIcon className="h-12 w-12 mx-auto text-slate-300 mb-3" />
-            <p className="text-slate-600 font-medium">No se encontraron resultados</p>
-            <p className="text-sm text-slate-500 mt-1">"{query}"</p>
-          </div>
-        )}
+          {!loading && results.length === 0 && query && (
+            <div className="text-center py-12">
+              <SearchIcon className="h-12 w-12 mx-auto text-slate-300 mb-3" />
+              <p className="text-slate-600 font-medium">No se encontraron resultados</p>
+              <p className="text-sm text-slate-500 mt-1">"{query}"</p>
+            </div>
+          )}
 
-        {!loading && results.length === 0 && !query && (
-          <div className="text-center py-12 text-slate-500">
-            <p className="font-medium">Escribe una medida para buscar llantas</p>
-            <p className="text-sm mt-2">Ejemplos: 205/55R16, MICHELIN, P205</p>
-          </div>
-        )}
+          {!loading && results.length === 0 && !query && (
+            <div className="text-center py-12 text-slate-500">
+              <p className="font-medium">Escribe una medida para buscar llantas</p>
+              <p className="text-sm mt-2">Ejemplos: 205/55R16, MICHELIN, P205</p>
+            </div>
+          )}
 
-        {/* Grid de tarjetas - Profesional */}
-        <div className="grid grid-cols-1 gap-3">
-          {results.map((item) => {
-            const hasStock = item.stock > 0;
-            const priceDisplay = formatPrice(item.manual_price);
+          {/* Grid de tarjetas - Profesional */}
+          <div className="grid grid-cols-1 gap-3">
+            {results.map((item) => {
+              const hasStock = item.stock > 0;
+              const priceDisplay = formatPrice(item.manual_price);
 
-            return (
-              <div
-                key={item.id}
-                className={`bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden transition-all hover:shadow-md ${
-                  !hasStock ? "opacity-60" : ""
-                }`}
-              >
-                {/* Contenedor Principal */}
-                <div className="p-4 flex flex-col h-full">
-                  {/* Header: Medida + Stock Badge */}
-                  <div className="flex justify-between items-start gap-3 mb-3">
-                    <div className="flex-1">
-                      {/* Medida (Principal - Grande y Bold) */}
-                      <h3 className="text-xl font-extrabold text-slate-900 leading-tight">
-                        {item.medida_full}
-                      </h3>
+              return (
+                <div
+                  key={item.id}
+                  className={`bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden transition-all hover:shadow-md ${!hasStock ? "opacity-60" : ""
+                    }`}
+                >
+                  {/* Contenedor Principal */}
+                  <div className="p-4 flex flex-col h-full">
+                    {/* Header: Medida + Stock Badge */}
+                    <div className="flex justify-between items-start gap-3 mb-3">
+                      <div className="flex-1">
+                        {/* Medida (Principal - Grande y Bold) */}
+                        <h3 className="text-xl font-extrabold text-slate-900 leading-tight">
+                          {item.medida_full}
+                        </h3>
 
-                      {/* Marca y Modelo (Secundario - Pequeño, gris) */}
-                      <p className="text-xs font-semibold text-slate-400 uppercase tracking-widest mt-1">
-                        {item.brand} {item.model}
-                      </p>
-                    </div>
+                        {/* Marca y Modelo (Secundario - Pequeño, gris) */}
+                        <p className="text-xs font-semibold text-slate-400 uppercase tracking-widest mt-1">
+                          {item.brand} {item.model}
+                        </p>
+                      </div>
 
-                    {/* Stock Badge */}
-                    <div
-                      className={`px-2.5 py-1 rounded-lg text-xs font-bold whitespace-nowrap ${
-                        hasStock
+                      {/* Stock Badge */}
+                      <div
+                        className={`px-2.5 py-1 rounded-lg text-xs font-bold whitespace-nowrap ${hasStock
                           ? "bg-emerald-100 text-emerald-700"
                           : "bg-red-100 text-red-700"
-                      }`}
-                    >
-                      {hasStock ? `${item.stock} en stock` : "Sin stock"}
-                    </div>
-                  </div>
-
-                  {/* Detalles Técnicos */}
-                  <div className="bg-slate-50 rounded-lg p-3 mb-3 border border-slate-100">
-                    <div className="grid grid-cols-2 gap-2 text-xs">
-                      {item.sku && (
-                        <div className="col-span-2">
-                          <p className="text-slate-500 font-mono">SKU: {item.sku}</p>
-                        </div>
-                      )}
-                      {item.rim && (
-                        <div>
-                          <p className="text-slate-400 font-semibold">Rin</p>
-                          <p className="text-slate-700 font-medium">{item.rim}"</p>
-                        </div>
-                      )}
-                      {item.width && (
-                        <div>
-                          <p className="text-slate-400 font-semibold">Ancho</p>
-                          <p className="text-slate-700 font-medium">{item.width} mm</p>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Footer: Precio + Botón */}
-                  <div className="flex justify-between items-center gap-3 mt-auto pt-3 border-t border-slate-100">
-                    {/* Precio - Verde y Grande */}
-                    <div className="flex-1">
-                      <p className="text-xs text-slate-500 font-medium mb-0.5">
-                        Precio unitario
-                      </p>
-                      <p className="text-lg font-bold text-emerald-600">
-                        {priceDisplay}
-                      </p>
+                          }`}
+                      >
+                        {hasStock ? `${item.stock} en stock` : "Sin stock"}
+                      </div>
                     </div>
 
-                    {/* Botón Agregar */}
-                    <Button
-                      onClick={() => handleAddToCart(item)}
-                      disabled={!hasStock}
-                      className={`rounded-lg h-10 px-4 font-semibold transition-all gap-2 ${
-                        hasStock
+                    {/* Detalles Técnicos */}
+                    <div className="bg-slate-50 rounded-lg p-3 mb-3 border border-slate-100">
+                      <div className="grid grid-cols-2 gap-2 text-xs">
+                        {item.sku && (
+                          <div className="col-span-2">
+                            <p className="text-slate-500 font-mono">SKU: {item.sku}</p>
+                          </div>
+                        )}
+                        {item.rim && (
+                          <div>
+                            <p className="text-slate-400 font-semibold">Rin</p>
+                            <p className="text-slate-700 font-medium">{item.rim}"</p>
+                          </div>
+                        )}
+                        {item.width && (
+                          <div>
+                            <p className="text-slate-400 font-semibold">Ancho</p>
+                            <p className="text-slate-700 font-medium">{item.width} mm</p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Footer: Precio + Botón */}
+                    <div className="flex justify-between items-center gap-3 mt-auto pt-3 border-t border-slate-100">
+                      {/* Precio - Verde y Grande */}
+                      <div className="flex-1">
+                        <p className="text-xs text-slate-500 font-medium mb-0.5">
+                          Precio unitario
+                        </p>
+                        <p className="text-lg font-bold text-emerald-600">
+                          {priceDisplay}
+                        </p>
+                      </div>
+
+                      {/* Botón Agregar */}
+                      <Button
+                        onClick={() => handleAddToCart(item)}
+                        disabled={!hasStock}
+                        className={`rounded-lg h-10 px-4 font-semibold transition-all gap-2 ${hasStock
                           ? "bg-emerald-600 hover:bg-emerald-700 text-white"
                           : "bg-slate-200 text-slate-400 cursor-not-allowed"
-                      }`}
-                    >
-                      <ShoppingCart className="h-4 w-4" />
-                      <span className="hidden sm:inline">Agregar</span>
-                    </Button>
+                          }`}
+                      >
+                        <ShoppingCart className="h-4 w-4" />
+                        <span className="hidden sm:inline">Agregar</span>
+                      </Button>
+                    </div>
                   </div>
                 </div>
-              </div>
-            );
-          })}
-        </div>
+              );
+            })}
+          </div>
 
-        {/* Espaciador final */}
-        <div className="h-4" />
-      </div>
+          {/* Espaciador final */}
+          <div className="h-4" />
+        </div>
       </div>
 
       {/* Modal de Cantidad - Mejorado */}

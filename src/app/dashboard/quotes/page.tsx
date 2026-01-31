@@ -17,6 +17,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Eye, Trash2, Plus } from "lucide-react";
 import { DeleteQuotationButton } from "@/components/quote/delete-quotation-button";
+import { formatCurrency } from "@/lib/utils";
 
 export default async function QuotationsPage() {
   // Obtener cotizaciones del historial y del día
@@ -50,14 +51,7 @@ export default async function QuotationsPage() {
     });
   };
 
-  // Formatear moneda COP
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat("es-CO", {
-      style: "currency",
-      currency: "COP",
-      minimumFractionDigits: 0,
-    }).format(amount);
-  };
+
 
   return (
     <div className="space-y-8">

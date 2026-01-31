@@ -31,15 +31,7 @@ import {
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
-/**
- * Formatea moneda a MXN
- */
-function formatCurrency(amount: number): string {
-  return new Intl.NumberFormat("es-MX", {
-    style: "currency",
-    currency: "MXN",
-  }).format(amount);
-}
+import { formatCurrency } from "@/lib/utils";
 
 /**
  * Formatea fecha a formato corto
