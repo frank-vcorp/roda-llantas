@@ -223,3 +223,15 @@
 - [x] [QA] Certificación de PWA "Ready for Install".
 
 > Micro-Sprint completado bajo la metodología INTEGRA v2.2. (DOC-20260131-08)
+
+---
+## Micro-Sprint — Hotfix Service Worker (Completado)
+
+### Objetivo del Micro-Sprint
+- [x] Corregir error de "Pantalla Blanca" en producción causado por bloqueo de redirecciones en el Service Worker.
+
+### Tareas del Micro-Sprint
+- [x] [INFRA] Ajustar `sw.js` para ignorar peticiones de navegación (`mode: navigate`).
+- [x] [QA] Validación forense del error de redirección 307.
+
+> Hotfix de emergencia aplicado por DEBY. (FIX-20260201-01, CHK_20260201_FIX_SW)
