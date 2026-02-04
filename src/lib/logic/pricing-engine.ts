@@ -11,6 +11,7 @@ export interface PriceCalculationResult {
   method: 'manual' | 'rule' | 'default';
   ruleName?: string;
   margin_percentage?: number;
+  volume_tiers?: { min_qty: number; price: number; margin: number }[];
 }
 
 /**
@@ -55,17 +56,37 @@ export function calculateItemPrice(
       ? "Regla Global"
       : `Marca: ${matchedRule.brand_pattern}`;
 
+    // Pre-calcular tiers de volumen si existen
+    let computedTiers: { min_qty: number; price: number; margin: number }[] = [];
+    let volumeRules: any[] = [];
+
     // 4. Verificar reglas por volumen (Kits)
     if (matchedRule.volume_rules && matchedRule.volume_rules.length > 0) {
       // Parsear si viene como string (defensivo)
-      let volumeRules = matchedRule.volume_rules;
-      if (typeof volumeRules === 'string') {
-        try { volumeRules = JSON.parse(volumeRules); } catch (e) { volumeRules = []; }
+      let rawVR = matchedRule.volume_rules;
+      if (typeof rawVR === 'string') {
+        try { volumeRules = JSON.parse(rawVR); } catch (e) { volumeRules = []; }
+      } else {
+        volumeRules = rawVR;
       }
 
       if (Array.isArray(volumeRules)) {
         // Ordenar por cantidad mínima descendente
         const sortedVolumeRules = [...volumeRules].sort((a, b) => b.min_qty - a.min_qty);
+
+        // Calcular los precios para cada tier para mostrar en UI
+        // Invertimos el orden para mostrar de menor a mayor cantidad en el array de tiers
+        computedTiers = [...sortedVolumeRules]
+          .sort((a, b) => a.min_qty - b.min_qty)
+          .map(vr => {
+            const mMultiplier = 1 + (vr.margin_percentage / 100);
+            return {
+              min_qty: vr.min_qty,
+              margin: vr.margin_percentage,
+              price: Math.round(item.cost_price * mMultiplier)
+            };
+          });
+
         const matchedVolume = sortedVolumeRules.find(vr => quantity >= vr.min_qty);
 
         if (matchedVolume) {
@@ -83,13 +104,12 @@ export function calculateItemPrice(
       price: price,
       method: 'rule',
       ruleName: ruleName,
-      margin_percentage: marginPercentage
+      margin_percentage: marginPercentage,
+      volume_tiers: computedTiers.length > 0 ? computedTiers : undefined
     };
   }
 
   // 5. Fallback Default (Coste puro, sin margen si no hay reglas)
-  // El sistema original usaba cost * 1.3 como fallback en UI, pero el servicio retornaba cost
-  // Retornaremos cost para ser consistentes con el servicio
   return {
     price: item.cost_price,
     method: 'default',
