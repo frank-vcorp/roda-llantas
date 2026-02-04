@@ -116,7 +116,20 @@ export const columns: ColumnDef<InventoryItem>[] = [
                   <p><strong>Modelo:</strong> {item.model}</p>
                   <p><strong>Medida:</strong> {item.medida_full}</p>
                   <p><strong>Rin:</strong> {item.rim}"</p>
-                  <p><strong>Ancho:</strong> {item.width} mm</p>
+
+                  {(item as any)._publicPrice?.volume_tiers?.length > 0 && (
+                    <div className="mt-3 pt-2 border-t border-slate-700">
+                      <p className="font-bold text-emerald-400 mb-1">Precios por Volumen</p>
+                      <div className="space-y-1">
+                        {(item as any)._publicPrice.volume_tiers.map((tier: any, i: number) => (
+                          <div key={i} className="flex justify-between text-[11px]">
+                            <span>x{tier.min_qty} piezas:</span>
+                            <span className="font-mono text-emerald-300">{formatCurrency(tier.price)}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               </TooltipContent>
             </Tooltip>
@@ -161,8 +174,8 @@ export const columns: ColumnDef<InventoryItem>[] = [
                   </Badge>
                 )}
                 <span className={`font-semibold ${priceData.is_manual
-                    ? "text-amber-600"
-                    : "text-green-600"
+                  ? "text-amber-600"
+                  : "text-green-600"
                   }`}>
                   {formatCurrency(priceData.public_price)}
                 </span>

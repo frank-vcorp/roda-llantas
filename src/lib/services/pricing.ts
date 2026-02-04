@@ -18,6 +18,7 @@ export interface PriceCalculationResult {
   is_manual: boolean;
   rule_applied?: string;
   margin_percentage?: number;
+  volume_tiers?: { min_qty: number; price: number; margin: number }[];
 }
 
 /**
@@ -137,7 +138,8 @@ export function calculatePublicPrice(
     public_price: result.price,
     is_manual: result.method === 'manual',
     rule_applied: result.ruleName,
-    margin_percentage: result.margin_percentage
+    margin_percentage: result.margin_percentage,
+    volume_tiers: result.volume_tiers
   };
 }
 
