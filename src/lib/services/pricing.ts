@@ -62,7 +62,7 @@ export async function getPricingRules(): Promise<PricingRule[]> {
  */
 async function getPricingRulesFallback(): Promise<PricingRule[]> {
   const supabase = await createClient();
-  
+
   const { data, error } = await supabase
     .from("pricing_rules")
     .select("*");
@@ -126,7 +126,8 @@ function findApplicableRule(
  */
 export function calculatePublicPrice(
   item: InventoryItem,
-  rules: PricingRule[]
+  rules: PricingRule[],
+  quantity: number = 1 // FIX-20260204: Soporte para cantidad
 ): PriceCalculationResult {
   // 1. Precio manual tiene prioridad absoluta
   if (item.manual_price && item.manual_price > 0) {
@@ -141,19 +142,33 @@ export function calculatePublicPrice(
   const applicableRule = findApplicableRule(item, rules);
 
   if (applicableRule) {
-    // FIX REFERENCE: FIX-20260129-06 - Corregido uso de margin_percentage
+    let marginPercentage = applicableRule.margin_percentage;
+    let ruleName = applicableRule.brand_pattern === "*"
+      ? "Regla Global"
+      : `Marca: ${applicableRule.brand_pattern}`;
+
+    // FIX-20260204: Verificar reglas por volumen
+    if (applicableRule.volume_rules && applicableRule.volume_rules.length > 0) {
+      // Ordenar por cantidad mínima descendente para encontrar el tramo correcto
+      const volumeRules = [...applicableRule.volume_rules].sort((a, b) => b.min_qty - a.min_qty);
+
+      const matchedVolumeRule = volumeRules.find(vr => quantity >= vr.min_qty);
+
+      if (matchedVolumeRule) {
+        marginPercentage = matchedVolumeRule.margin_percentage;
+        ruleName += ` (Volumen x${matchedVolumeRule.min_qty})`;
+      }
+    }
+
     // margin_percentage = 30 significa +30% sobre cost_price
-    const marginMultiplier = 1 + (applicableRule.margin_percentage / 100);
+    const marginMultiplier = 1 + (marginPercentage / 100);
     const publicPrice = Math.round(item.cost_price * marginMultiplier);
 
     return {
       public_price: publicPrice,
       is_manual: false,
-      rule_applied:
-        applicableRule.brand_pattern === "*"
-          ? "Regla Global"
-          : `Marca: ${applicableRule.brand_pattern}`,
-      margin_percentage: applicableRule.margin_percentage,
+      rule_applied: ruleName,
+      margin_percentage: marginPercentage,
     };
   }
 

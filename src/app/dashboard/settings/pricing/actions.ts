@@ -41,6 +41,7 @@ export async function createPricingRule(
           margin_percentage: data.margin_percentage,
           is_active: data.is_active !== false,
           priority: data.priority || 1,
+          volume_rules: data.volume_rules ? JSON.stringify(data.volume_rules) : undefined,
         },
       ])
       .select()
@@ -71,7 +72,10 @@ export async function updatePricingRule(
 
     const { data: rule, error } = await supabase
       .from("pricing_rules")
-      .update(data)
+      .update({
+        ...data,
+        volume_rules: data.volume_rules ? JSON.stringify(data.volume_rules) : (data.volume_rules === null ? null : undefined)
+      })
       .eq("id", id)
       .select()
       .single();
@@ -137,7 +141,7 @@ export async function getPricingRules(): Promise<{
     const { data: rules, error } = await supabase
       .from("pricing_rules")
       .select("*")
-      .eq("profile_id", user.id)
+      // .eq("profile_id", user.id) // FIX-20260204: Permitir ver reglas globales
       .order("priority", { ascending: false });
 
     if (error) {

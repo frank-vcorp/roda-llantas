@@ -33,6 +33,12 @@ export interface PricingRule {
   margin_percentage: number;
   priority: number;
   is_active: boolean;
+  volume_rules?: VolumeRule[]; // FIX-20260204: Escalas por volumen
+}
+
+export interface VolumeRule {
+  min_qty: number;
+  margin_percentage: number;
 }
 
 export interface Customer {

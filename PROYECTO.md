@@ -27,7 +27,9 @@
 > Estado del Micro-Sprint — Dashboard Analytics: [X] Implementado y operativo en `/dashboard` con KPIs clave (Total cotizado hoy, búsquedas sin resultado, stock crítico) y tablas de actividad reciente, según SPEC-DASHBOARD-ANALYTICS. (DOC-20260129-08, ARCH-20260129-DASH-DEF, IMPL-20260129-DASH-01, DOC-20260129-DASH-FINAL)
 
 > Estado actual del proyecto: [X] Sistema Operativo Completo: Inventario + Cotizador + Ventas + Compras + CRM + Analytics — Operativo end-to-end en entorno de demo. (DOC-20260129-FULL-END, FIX-20260129-SALES-02, IMPL-20260129-LOST-SALES-02, IMPL-20260129-PURCHASES-01)
-> Estado actual del proyecto: [X] Sistema Consolidado: Roles implementados (RLS en `profiles` con roles `admin`/`seller`) y UX móvil optimizada (vista exclusiva de búsqueda y tarjetas en Inventario para móviles). (IMPL-20260129-ROLES-MOBILE, DOC-20260129-PHASE2-START)
+> Estado actual del proyecto: [X] Sistema Consolidado: Roles implementados (RLS en `profiles` con roles `admin`/`seller`) y UX móvil optimizada. (IMPL-20260129-ROLES-MOBILE, DOC-20260129-PHASE2-START)
+> Estado del Micro-Sprint — Buscador Inteligente: [✓] MEJORA CRÍTICA: Implementado ordenamiento por "Coincidencia Numérica Exacta" (V2) para diferenciar medidas similares (ej. R13 vs R14). (FIX-20260204-SEARCH-V2)
+> Estado del Módulo de Precios: [✓] Implementado soporte para Kits de Descuento (Escalas por Volumen) y corrección de visibilidad global de reglas. (FIX-20260204-PRICING-VOL)
 
 ## Nota de Cierre Histórica
 
@@ -235,3 +237,18 @@
 - [x] [QA] Validación forense del error de redirección 307.
 
 > Hotfix de emergencia aplicado por DEBY. (FIX-20260201-01, CHK_20260201_FIX_SW)
+
+---
+## Micro-Sprint — Refinamiento de Búsqueda y Precios (Completado)
+
+### Objetivo
+- [x] Corregir ordenamiento de búsqueda para priorizar coincidencias numéricas exactas (R13 vs R14).
+- [x] Implementar Kits de Descuento por Volumen (Escalas de precios) y asegurar visibilidad global de reglas.
+
+### Tareas
+- [x] [DB] Migración `search_inventory` V2 (Coincidencia Numérica + GREATEST similarity).
+- [x] [DB] Migración `pricing_rules` (Columna JSON `volume_rules` + RLS Fix).
+- [x] [Logic] Actualizar `pricing.ts` para cálculo de precios por volumen.
+- [x] [UI] Actualizar `PricingRuleDialog` y `PricingRulesList` para gestión de escalas.
+
+> Sprint completado. Implementación de busqueda V2 y Kits de Descuento. (DOC-20260204-SEARCH-PRICING)

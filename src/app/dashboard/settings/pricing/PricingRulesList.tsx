@@ -113,6 +113,11 @@ export function PricingRulesList({
               </TableCell>
               <TableCell>
                 {`${rule.margin_percentage}%`}
+                {rule.volume_rules && rule.volume_rules.length > 0 && (
+                  <span className="ml-2 text-xs text-muted-foreground bg-muted px-1.5 py-0.5 rounded">
+                    +Escalas
+                  </span>
+                )}
               </TableCell>
               <TableCell>
                 <span className="text-sm font-semibold">
