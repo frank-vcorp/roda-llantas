@@ -5,6 +5,7 @@
  *
  * @id IMPL-20260129-QUOTES-01 - Agregado QuoteProvider
  * @id IMPL-20260129-ROLES-MOBILE - Agregado getUserRole y filtrado de navegación
+ * @id IMPL-20260204-SIDEBAR - Integrated Collapsible Sidebar
  */
 
 import { DashboardNav } from "@/components/dashboard/nav";
@@ -14,6 +15,7 @@ import { StickyQuoteFooter } from "@/components/quote/sticky-quote-footer";
 import { createClient } from "@/lib/supabase/server";
 import { getUserRole } from "@/lib/auth/role";
 import { UserRole } from "@/lib/types";
+import { Sidebar } from "@/components/dashboard/sidebar";
 
 export default async function DashboardLayout({
   children,
@@ -41,31 +43,7 @@ export default async function DashboardLayout({
     <QuoteProvider>
       <div className="min-h-screen bg-background flex flex-col md:flex-row overflow-hidden">
         {/* Sidebar - Desktop */}
-        <aside className="hidden md:flex w-72 flex-col bg-card border-r border-border/50 p-6 z-20 shadow-2xl shadow-black/5">
-          <div className="flex items-center gap-3 px-2 mb-10">
-            <div className="h-10 w-10 bg-primary rounded-2xl flex items-center justify-center shadow-lg shadow-primary/20">
-              <span className="text-primary-foreground font-black text-lg">R</span>
-            </div>
-            <div>
-              <h1 className="text-lg font-black tracking-tight leading-none">Roda Llantas</h1>
-              <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Admin Panel</span>
-            </div>
-          </div>
-
-          <div className="flex-1 overflow-y-auto">
-            <DashboardNav userRole={userRole} variant="sidebar" />
-          </div>
-
-          <div className="mt-auto pt-6 border-t border-border/50">
-            <div className="bg-muted/30 p-4 rounded-3xl flex items-center justify-between">
-              <div className="overflow-hidden">
-                <p className="text-xs font-bold truncate">{userEmail?.split('@')[0]}</p>
-                <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-tighter">{userRole || 'Vendedor'}</p>
-              </div>
-              <UserNav email={userEmail} role={userRole} />
-            </div>
-          </div>
-        </aside>
+        <Sidebar userRole={userRole} userEmail={userEmail} />
 
         {/* Mobile Header (Top) */}
         <header className="md:hidden flex items-center justify-between px-6 py-4 bg-card border-b border-border/50 sticky top-0 z-30 backdrop-blur-md bg-card/80">
@@ -94,4 +72,3 @@ export default async function DashboardLayout({
     </QuoteProvider>
   );
 }
-

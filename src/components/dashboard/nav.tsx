@@ -28,13 +28,21 @@ interface NavLink {
  * @ref context/SPEC-CRM-LITE.md, context/SPEC-ROLES-MOBILE.md
  */
 
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+
 interface DashboardNavProps {
   userRole?: "admin" | "seller" | null;
   className?: string;
   variant?: "sidebar" | "mobile";
+  isCollapsed?: boolean;
 }
 
-export function DashboardNav({ userRole = null, className, variant = "sidebar" }: DashboardNavProps) {
+export function DashboardNav({ userRole = null, className, variant = "sidebar", isCollapsed = false }: DashboardNavProps) {
   const pathname = usePathname();
 
   const links: NavLink[] = [
@@ -105,28 +113,50 @@ export function DashboardNav({ userRole = null, className, variant = "sidebar" }
     );
   }
 
+  // Sidebar Desktop Variant
   return (
     <nav className={cn("grid gap-2", className)}>
-      {visibleLinks.map((link) => {
-        const Icon = link.icon;
-        const isActive = pathname === link.href || (link.href !== "/dashboard" && pathname.startsWith(link.href));
+      <TooltipProvider delayDuration={0}>
+        {visibleLinks.map((link) => {
+          const Icon = link.icon;
+          const isActive = pathname === link.href || (link.href !== "/dashboard" && pathname.startsWith(link.href));
 
-        return (
-          <Link
-            key={link.href}
-            href={link.href}
-            className={cn(
-              "group flex items-center gap-3 px-4 py-3 text-sm font-bold transition-all duration-200 rounded-2xl",
-              isActive
-                ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20 scale-[1.02]"
-                : "text-muted-foreground hover:bg-muted hover:text-foreground"
-            )}
-          >
-            <Icon className={cn("h-5 w-5", isActive ? "opacity-100" : "opacity-50 group-hover:opacity-100")} />
-            {link.label}
-          </Link>
-        );
-      })}
+          const NavItem = (
+            <Link
+              key={link.href}
+              href={link.href}
+              className={cn(
+                "group flex items-center transition-all duration-200 rounded-2xl relative",
+                isCollapsed ? "justify-center p-3" : "gap-3 px-4 py-3",
+                isActive
+                  ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20 scale-[1.02]"
+                  : "text-muted-foreground hover:bg-muted hover:text-foreground"
+              )}
+            >
+              <Icon className={cn("h-5 w-5 shrink-0 transition-opacity", isActive ? "opacity-100" : "opacity-50 group-hover:opacity-100")} />
+
+              {!isCollapsed && (
+                <span className="text-sm font-bold whitespace-nowrap overflow-hidden fade-in animate-in duration-300">
+                  {link.label}
+                </span>
+              )}
+            </Link>
+          );
+
+          if (isCollapsed) {
+            return (
+              <Tooltip key={link.href}>
+                <TooltipTrigger asChild>{NavItem}</TooltipTrigger>
+                <TooltipContent side="right" className="font-bold">
+                  {link.label}
+                </TooltipContent>
+              </Tooltip>
+            )
+          }
+
+          return NavItem;
+        })}
+      </TooltipProvider>
     </nav>
   );
 }

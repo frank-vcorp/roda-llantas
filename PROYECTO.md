@@ -255,3 +255,4 @@
 > Refinamiento UI: Corregido bug de edición y carga de reglas, y agregada columna de escalas en listado. (FIX-20260204-UI-PRICING)
 > Refinamiento Lógico: Cotizador ahora aplica dinámicamente las reglas de volumen al cambiar cantidad. Corrección de UI móvil (overlap footer). (FIX-20260204-QUOTE-LOGIC)
 > Mejora UX: Agregado desglose de precios por volumen en el tooltip de descripción del inventario. (UX-20260204-TOOLTIP-TIERS)
+> Mejora UX: Implementada barra lateral colapsable (Toggle Manual) persistente. (UX-20260204-SIDEBAR-COLLAPSE)
