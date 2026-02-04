@@ -6,73 +6,95 @@ import { PricingRule, InventoryItem } from '@/lib/types';
  * @ref context/SPEC-PRICING-ENGINE.md
  */
 
-export class PricingEngine {
-  private rules: PricingRule[];
+export interface PriceCalculationResult {
+  price: number;
+  method: 'manual' | 'rule' | 'default';
+  ruleName?: string;
+  margin_percentage?: number;
+}
 
-  constructor(rules: PricingRule[]) {
-    // Las reglas ya vienen ordenadas por prioridad del servidor
-    // Si tienen campo priority, ordenarlas; si no, usarlas como están
-    this.rules = rules.sort((a, b) => {
-      const priorityA = a.priority || 50;
-      const priorityB = b.priority || 50;
-      return priorityB - priorityA;
-    });
-  }
-
-  /**
-   * Calcula el precio público para un item
-   */
-  public calculatePrice(item: InventoryItem): { price: number; method: 'manual' | 'rule' | 'default'; ruleName?: string } {
-    
-    // 1. Verificar precio manual override
-    if (item.manual_price && item.manual_price > 0) {
-      return { price: item.manual_price, method: 'manual' };
-    }
-
-    // 2. Buscar regla coincidente
-    const matchedRule = this.rules.find(rule => {
-      const isActive = rule.is_active !== false; // Default: true si no especificado
-      if (!isActive) return false;
-      
-      // Si no hay patrón de marca o es "*", es una regla global
-      if (!rule.brand_pattern || rule.brand_pattern === '*') return true;
-
-      const brand = item.brand?.toLowerCase() || '';
-      const pattern = rule.brand_pattern.toLowerCase();
-      
-      return brand.includes(pattern);
-    });
-
-    if (matchedRule) {
-      // FIX REFERENCE: FIX-20260129-06 - Corregido uso de margin_percentage
-      // margin_percentage = 30 significa +30% sobre cost_price
-      const marginMultiplier = 1 + (matchedRule.margin_percentage / 100);
-      const price = item.cost_price * marginMultiplier;
-
-      return { 
-        price: this.roundPrice(price), 
-        method: 'rule', 
-        ruleName: matchedRule.brand_pattern === '*' 
-          ? 'Regla Global' 
-          : `Marca: ${matchedRule.brand_pattern}`
-      };
-    }
-
-    // 3. Fallback Default (margen del 25%)
-    const GLOBAL_MARGIN = 1.25; // 25% de margen
-    const price = item.cost_price * GLOBAL_MARGIN;
-
-    return { 
-      price: this.roundPrice(price), 
-      method: 'default',
-      ruleName: 'Margen Global (25%)'
+/**
+ * Calcula el precio público para un item (Función pura)
+ * Reutilizable en Server y Client
+ */
+export function calculateItemPrice(
+  item: InventoryItem,
+  rules: PricingRule[],
+  quantity: number = 1
+): PriceCalculationResult {
+  // 1. Verificar precio manual override (Prioridad absoluta)
+  if (item.manual_price && item.manual_price > 0) {
+    return {
+      price: item.manual_price,
+      method: 'manual',
+      ruleName: 'OFERTA (Manual)'
     };
   }
 
-  /**
-   * Redondeo psicológico (Opcional, por ahora Math.ceil a entero)
-   */
-  private roundPrice(value: number): number {
-    return Math.ceil(value);
+  // 2. Ordenar reglas por prioridad
+  const sortedRules = [...rules].sort((a, b) => (b.priority || 0) - (a.priority || 0));
+
+  // 3. Buscar regla coincidente
+  const matchedRule = sortedRules.find(rule => {
+    // Si no está activa explícitamente falsa, asumimos true
+    if (rule.is_active === false) return false;
+
+    // Si no hay patrón de marca o es "*", es una regla global
+    if (!rule.brand_pattern || rule.brand_pattern === '*') return true;
+
+    const brand = (item.brand || '').toLowerCase();
+    const pattern = rule.brand_pattern.toLowerCase();
+
+    // Match parcial (ILIKE behavior simulado)
+    return brand.includes(pattern) || pattern.includes(brand);
+  });
+
+  if (matchedRule) {
+    let marginPercentage = matchedRule.margin_percentage;
+    let ruleName = matchedRule.brand_pattern === "*"
+      ? "Regla Global"
+      : `Marca: ${matchedRule.brand_pattern}`;
+
+    // 4. Verificar reglas por volumen (Kits)
+    if (matchedRule.volume_rules && matchedRule.volume_rules.length > 0) {
+      // Parsear si viene como string (defensivo)
+      let volumeRules = matchedRule.volume_rules;
+      if (typeof volumeRules === 'string') {
+        try { volumeRules = JSON.parse(volumeRules); } catch (e) { volumeRules = []; }
+      }
+
+      if (Array.isArray(volumeRules)) {
+        // Ordenar por cantidad mínima descendente
+        const sortedVolumeRules = [...volumeRules].sort((a, b) => b.min_qty - a.min_qty);
+        const matchedVolume = sortedVolumeRules.find(vr => quantity >= vr.min_qty);
+
+        if (matchedVolume) {
+          marginPercentage = matchedVolume.margin_percentage;
+          ruleName += ` (Volumen x${matchedVolume.min_qty})`;
+        }
+      }
+    }
+
+    // Cálculo: Costo + Margen
+    const marginMultiplier = 1 + (marginPercentage / 100);
+    const price = Math.round(item.cost_price * marginMultiplier);
+
+    return {
+      price: price,
+      method: 'rule',
+      ruleName: ruleName,
+      margin_percentage: marginPercentage
+    };
   }
+
+  // 5. Fallback Default (Coste puro, sin margen si no hay reglas)
+  // El sistema original usaba cost * 1.3 como fallback en UI, pero el servicio retornaba cost
+  // Retornaremos cost para ser consistentes con el servicio
+  return {
+    price: item.cost_price,
+    method: 'default',
+    ruleName: 'Costo (Sin Regla)',
+    margin_percentage: 0
+  };
 }
+

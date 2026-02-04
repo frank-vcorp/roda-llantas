@@ -81,6 +81,8 @@ async function getPricingRulesFallback(): Promise<PricingRule[]> {
   })) as PricingRule[];
 }
 
+import { calculateItemPrice } from "@/lib/logic/pricing-engine";
+
 /**
  * Encuentra la regla más aplicable para un item (por marca y prioridad)
  * 
@@ -129,55 +131,13 @@ export function calculatePublicPrice(
   rules: PricingRule[],
   quantity: number = 1 // FIX-20260204: Soporte para cantidad
 ): PriceCalculationResult {
-  // 1. Precio manual tiene prioridad absoluta
-  if (item.manual_price && item.manual_price > 0) {
-    return {
-      public_price: item.manual_price,
-      is_manual: true,
-      rule_applied: "OFERTA (Manual)",
-    };
-  }
+  const result = calculateItemPrice(item, rules, quantity);
 
-  // 2. Buscar regla aplicable por marca
-  const applicableRule = findApplicableRule(item, rules);
-
-  if (applicableRule) {
-    let marginPercentage = applicableRule.margin_percentage;
-    let ruleName = applicableRule.brand_pattern === "*"
-      ? "Regla Global"
-      : `Marca: ${applicableRule.brand_pattern}`;
-
-    // FIX-20260204: Verificar reglas por volumen
-    if (applicableRule.volume_rules && applicableRule.volume_rules.length > 0) {
-      // Ordenar por cantidad mínima descendente para encontrar el tramo correcto
-      const volumeRules = [...applicableRule.volume_rules].sort((a, b) => b.min_qty - a.min_qty);
-
-      const matchedVolumeRule = volumeRules.find(vr => quantity >= vr.min_qty);
-
-      if (matchedVolumeRule) {
-        marginPercentage = matchedVolumeRule.margin_percentage;
-        ruleName += ` (Volumen x${matchedVolumeRule.min_qty})`;
-      }
-    }
-
-    // margin_percentage = 30 significa +30% sobre cost_price
-    const marginMultiplier = 1 + (marginPercentage / 100);
-    const publicPrice = Math.round(item.cost_price * marginMultiplier);
-
-    return {
-      public_price: publicPrice,
-      is_manual: false,
-      rule_applied: ruleName,
-      margin_percentage: marginPercentage,
-    };
-  }
-
-  // 3. Default: retornar costo sin margen (sin ganancia)
   return {
-    public_price: item.cost_price,
-    is_manual: false,
-    rule_applied: "Sin margen (Costo)",
-    margin_percentage: 0,
+    public_price: result.price,
+    is_manual: result.method === 'manual',
+    rule_applied: result.ruleName,
+    margin_percentage: result.margin_percentage
   };
 }
 

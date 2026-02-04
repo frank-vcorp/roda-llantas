@@ -77,7 +77,10 @@ export function StickyQuoteFooter() {
   };
 
   return (
-    <div className={`fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 shadow-[0_-8px_30px_rgb(0,0,0,0.08)] z-50 transition-all duration-300 ease-in-out ${isExpanded ? 'h-[70vh]' : 'h-20'}`}>
+    <div className={`fixed left-0 right-0 bg-white border-t border-slate-200 shadow-[0_-8px_30px_rgb(0,0,0,0.08)] z-50 transition-all duration-300 ease-in-out ${isExpanded
+        ? 'h-[70vh] bottom-0'
+        : 'h-20 bottom-24 md:bottom-0'
+      }`}>
 
       {/* Botón Expansor / Header */}
       <button

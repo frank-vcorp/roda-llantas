@@ -253,3 +253,4 @@
 
 > Sprint completado. Implementación de busqueda V2 y Kits de Descuento. (DOC-20260204-SEARCH-PRICING)
 > Refinamiento UI: Corregido bug de edición y carga de reglas, y agregada columna de escalas en listado. (FIX-20260204-UI-PRICING)
+> Refinamiento Lógico: Cotizador ahora aplica dinámicamente las reglas de volumen al cambiar cantidad. Corrección de UI móvil (overlap footer). (FIX-20260204-QUOTE-LOGIC)
