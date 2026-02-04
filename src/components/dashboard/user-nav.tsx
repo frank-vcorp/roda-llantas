@@ -15,9 +15,10 @@ import { signOutAction } from '@/lib/actions/auth';
 interface UserNavProps {
   email?: string | null;
   role?: string | null;
+  align?: "center" | "start" | "end";
 }
 
-export function UserNav({ email, role }: UserNavProps) {
+export function UserNav({ email, role, align = "end" }: UserNavProps) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -27,7 +28,7 @@ export function UserNav({ email, role }: UserNavProps) {
           </div>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-56" align="end" forceMount>
+      <DropdownMenuContent className="w-56" align={align} forceMount>
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1">
             <p className="text-sm font-medium leading-none">Mi Cuenta</p>
