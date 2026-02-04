@@ -91,7 +91,8 @@ export function PricingRulesList({
             <TableHead>Nombre</TableHead>
             <TableHead>Marca</TableHead>
             <TableHead>Tipo</TableHead>
-            <TableHead>Valor</TableHead>
+            <TableHead>Valor Base</TableHead>
+            <TableHead>Escalas (Kits)</TableHead>
             <TableHead>Prioridad</TableHead>
             <TableHead>Estado</TableHead>
             <TableHead className="text-right">Acciones</TableHead>
@@ -112,11 +113,22 @@ export function PricingRulesList({
                 <Badge variant="outline">%</Badge>
               </TableCell>
               <TableCell>
-                {`${rule.margin_percentage}%`}
-                {rule.volume_rules && rule.volume_rules.length > 0 && (
-                  <span className="ml-2 text-xs text-muted-foreground bg-muted px-1.5 py-0.5 rounded">
-                    +Escalas
-                  </span>
+                <div className="flex flex-col gap-1">
+                  <span className="font-semibold text-base">{`${rule.margin_percentage}%`}</span>
+                </div>
+              </TableCell>
+              <TableCell>
+                {rule.volume_rules && rule.volume_rules.length > 0 ? (
+                  <div className="flex flex-col gap-1 text-xs">
+                    {(typeof rule.volume_rules === 'string' ? JSON.parse(rule.volume_rules) : rule.volume_rules).map((vr: any, idx: number) => (
+                      <div key={idx} className="bg-muted px-1.5 py-0.5 rounded border flex justify-between gap-2 max-w-[120px]">
+                        <span>x{vr.min_qty}</span>
+                        <span className="font-medium">Magen: {vr.margin_percentage}%</span>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <span className="text-muted-foreground text-xs">-</span>
                 )}
               </TableCell>
               <TableCell>

@@ -8,7 +8,7 @@
 
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -97,6 +97,41 @@ export function PricingRuleDialog({
         is_active: true,
       },
   });
+
+  // Efecto para actualizar el formulario cuando cambia la regla seleccionada
+  useEffect(() => {
+    if (rule) {
+      // Intentar parsear volume_rules si viene como string (desde la DB) o usarlo directo si ya es objeto
+      let formattedVolumeRules = [];
+      if (typeof rule.volume_rules === 'string') {
+        try {
+          formattedVolumeRules = JSON.parse(rule.volume_rules);
+        } catch (e) {
+          formattedVolumeRules = [];
+        }
+      } else if (Array.isArray(rule.volume_rules)) {
+        formattedVolumeRules = rule.volume_rules;
+      }
+
+      form.reset({
+        name: rule.name || "",
+        brand_pattern: rule.brand_pattern || null,
+        margin_percentage: rule.margin_percentage,
+        priority: rule.priority || 1,
+        is_active: rule.is_active !== false,
+        volume_rules: formattedVolumeRules,
+      });
+    } else {
+      form.reset({
+        name: "",
+        brand_pattern: null,
+        margin_percentage: 25,
+        priority: 1,
+        is_active: true,
+        volume_rules: [],
+      });
+    }
+  }, [rule, form]);
 
   async function onSubmit(values: FormValues) {
     setIsLoading(true);
