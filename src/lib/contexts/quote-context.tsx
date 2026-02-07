@@ -103,6 +103,43 @@ export function QuoteProvider({ children }: { children: React.ReactNode }) {
     // Importamos la lógica pura (dinámica)
     const { calculateItemPrice } = require("@/lib/logic/pricing-engine");
 
+    // FIX-20260207: Seguridad para usuarios públicos (sin reglas cargadas)
+    // Si no hay reglas (usuario público), usar el precio pre-calculado del servidor
+    // para evitar caer en el fallback de costo.
+    if (!pricingRules || pricingRules.length === 0) {
+      if (item._publicPrice) {
+        let finalPrice = item._publicPrice.public_price;
+        let ruleName = item._publicPrice.rule_applied;
+        let margin = item._publicPrice.margin_percentage;
+
+        // Verificar si aplica tier de volumen pre-calculado
+        if (item._publicPrice.volume_tiers && item._publicPrice.volume_tiers.length > 0) {
+          // Buscar tier que encaje con la cantidad
+          // (Asumimos tiers ordenados por min_qty asc o desc, buscamos el mayor min_qty <= quantity)
+          const applicableTier = item._publicPrice.volume_tiers
+            .slice() // Copia para no mutar
+            .sort((a, b) => b.min_qty - a.min_qty) // Orden desc
+            .find(tier => quantity >= tier.min_qty);
+
+          if (applicableTier) {
+            finalPrice = applicableTier.price;
+            margin = applicableTier.margin;
+            ruleName += ` (Volumen x${applicableTier.min_qty})`;
+          }
+        }
+
+        return {
+          ...item,
+          _publicPrice: {
+            ...item._publicPrice,
+            public_price: finalPrice,
+            rule_applied: ruleName,
+            margin_percentage: margin
+          }
+        };
+      }
+    }
+
     const calcResult = calculateItemPrice(item, pricingRules, quantity);
 
     // Actualizamos la metadata del item con el nuevo precio
@@ -112,7 +149,8 @@ export function QuoteProvider({ children }: { children: React.ReactNode }) {
         public_price: calcResult.price,
         is_manual: calcResult.method === 'manual',
         rule_applied: calcResult.ruleName,
-        margin_percentage: calcResult.margin_percentage
+        margin_percentage: calcResult.margin_percentage,
+        volume_tiers: calcResult.volume_tiers
       }
     };
   };

@@ -1,5 +1,5 @@
 // Basic Service Worker for Roda Llantas Pro
-const CACHE_NAME = 'roda-llantas-v1';
+const CACHE_NAME = 'roda-llantas-v2';
 
 self.addEventListener('install', (event) => {
     event.waitUntil(
@@ -18,6 +18,11 @@ self.addEventListener('fetch', (event) => {
         return;
     }
 
+    // Skip non-GET requests (like POST for server actions)
+    if (event.request.method !== 'GET') {
+        return;
+    }
+
     // Skip navigation requests (document) to allow server-side redirects/middleware to work
     if (event.request.mode === 'navigate') {
         return;
@@ -25,7 +30,11 @@ self.addEventListener('fetch', (event) => {
 
     event.respondWith(
         caches.match(event.request).then((response) => {
-            return response || fetch(event.request);
+            return response || fetch(event.request).catch((err) => {
+                console.log('[SW] Fetch failed:', err);
+                // Optionally return a fallback or rethrow
+                throw err;
+            });
         })
     );
 });

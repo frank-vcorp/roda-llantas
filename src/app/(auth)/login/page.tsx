@@ -77,9 +77,10 @@ export default function LoginPage() {
                 placeholder="nombre@empresa.com"
                 className="h-12 bg-background/50 border-muted-foreground/10 focus:bg-background transition-all rounded-xl"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
                 disabled={isLoading}
                 required
+                autoComplete="username"
+                name="email"
               />
             </div>
 
@@ -98,9 +99,10 @@ export default function LoginPage() {
                 placeholder="••••••••"
                 className="h-12 bg-background/50 border-muted-foreground/10 focus:bg-background transition-all rounded-xl"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
                 disabled={isLoading}
                 required
+                autoComplete="current-password"
+                name="password"
               />
             </div>
 

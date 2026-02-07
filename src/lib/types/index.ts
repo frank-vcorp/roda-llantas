@@ -23,6 +23,13 @@ export interface InventoryItem {
   stock_location: string | null;
   manual_price: number | null; // Precio manual override
   updated_at: string;
+  _publicPrice?: {
+    public_price: number;
+    is_manual: boolean;
+    rule_applied?: string;
+    margin_percentage?: number;
+    volume_tiers?: { min_qty: number; price: number; margin: number }[];
+  };
 }
 
 export interface PricingRule {

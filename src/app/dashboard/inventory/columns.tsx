@@ -165,7 +165,7 @@ export const columns: ColumnDef<InventoryItem>[] = [
         return <span className="text-gray-400">-</span>;
       }
 
-      return (
+
       const userRole = (row.getAllCells()[0].getContext().table.options.meta as any)?.userRole;
       const isAdmin = userRole === 'admin';
 
