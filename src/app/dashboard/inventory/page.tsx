@@ -28,12 +28,21 @@ interface InventoryPageProps {
   }>;
 }
 
+import { createClient } from "@/lib/supabase/server";
+import { getUserRole } from "@/lib/auth/role";
+
+// ... previous imports
+
 export default async function InventoryPage(props: InventoryPageProps) {
   const searchParams = await props.searchParams;
-  
+
   const query = searchParams?.query || "";
   const currentPage = Number(searchParams?.page) || 1;
   const limit = 50;
+
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  const userRole = user ? await getUserRole(user.id) : null;
 
   // Convertir página 1-based (URL) a 0-based (Backend)
   const pageIndex = Math.max(0, currentPage - 1);
@@ -94,14 +103,14 @@ export default async function InventoryPage(props: InventoryPageProps) {
               </AlertDescription>
             </Alert>
           )}
-          <DataTable columns={columns} data={itemsWithPrices} />
+          <DataTable columns={columns} data={itemsWithPrices} userRole={userRole} />
           {count > 0 && <CustomPagination totalPages={totalPages} />}
         </div>
       </div>
 
       {/* MOBILE VERSION */}
       <div className="md:hidden h-[calc(100vh-200px)]">
-        <MobileSearch initialItems={allItemsForMobile} />
+        <MobileSearch initialItems={allItemsForMobile} userRole={userRole} />
       </div>
     </div>
   );

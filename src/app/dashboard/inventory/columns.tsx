@@ -166,6 +166,10 @@ export const columns: ColumnDef<InventoryItem>[] = [
       }
 
       return (
+      const userRole = (row.getAllCells()[0].getContext().table.options.meta as any)?.userRole;
+      const isAdmin = userRole === 'admin';
+
+      return (
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
@@ -185,18 +189,25 @@ export const columns: ColumnDef<InventoryItem>[] = [
             </TooltipTrigger>
             <TooltipContent className="bg-slate-900 text-white p-3 max-w-xs">
               <div className="text-xs space-y-1">
-                <p className="font-bold border-b pb-1 mb-1">Detalle (Privado)</p>
-                <p>
-                  <strong className="text-slate-400">Costo:</strong> {formatCurrency(row.original.cost_price)}
-                </p>
+                {isAdmin && (
+                  <>
+                    <p className="font-bold border-b pb-1 mb-1">Detalle (Privado)</p>
+                    <p>
+                      <strong className="text-slate-400">Costo:</strong> {formatCurrency(row.original.cost_price)}
+                    </p>
+                  </>
+                )}
+
                 <p>
                   <strong>Método:</strong> {priceData.is_manual ? "Manual (Oferta)" : "Automático"}
                 </p>
-                {priceData.margin_percentage !== undefined && (
+
+                {isAdmin && priceData.margin_percentage !== undefined && (
                   <p>
                     <strong className="text-emerald-400">Margen:</strong> +{priceData.margin_percentage}%
                   </p>
                 )}
+
                 <p>
                   <strong>Regla:</strong> {priceData.rule_applied || "-"}
                 </p>
