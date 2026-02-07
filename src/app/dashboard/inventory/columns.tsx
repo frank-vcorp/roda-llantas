@@ -185,22 +185,18 @@ export const columns: ColumnDef<InventoryItem>[] = [
             </TooltipTrigger>
             <TooltipContent className="bg-slate-900 text-white p-3 max-w-xs">
               <div className="text-xs space-y-1">
-                <p className="font-bold border-b pb-1 mb-1">Detalle</p>
-                {/* 
+                <p className="font-bold border-b pb-1 mb-1">Detalle (Privado)</p>
                 <p>
-                  <strong>Costo:</strong> {formatCurrency(row.original.cost_price)}
+                  <strong className="text-slate-400">Costo:</strong> {formatCurrency(row.original.cost_price)}
                 </p>
-                 */}
                 <p>
                   <strong>Método:</strong> {priceData.is_manual ? "Manual (Oferta)" : "Automático"}
                 </p>
-                {/*
                 {priceData.margin_percentage !== undefined && (
                   <p>
-                    <strong>Margen:</strong> +{priceData.margin_percentage}%
+                    <strong className="text-emerald-400">Margen:</strong> +{priceData.margin_percentage}%
                   </p>
                 )}
-                */}
                 <p>
                   <strong>Regla:</strong> {priceData.rule_applied || "-"}
                 </p>

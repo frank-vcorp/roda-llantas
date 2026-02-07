@@ -257,6 +257,6 @@
 > Mejora UX: Agregado desglose de precios por volumen en el tooltip de descripción del inventario. (UX-20260204-TOOLTIP-TIERS)
 > Mejora UX: Implementada barra lateral colapsable (Toggle Manual) persistente. (UX-20260204-SIDEBAR-COLLAPSE)
 > Mejora UX: Desglose de precios por volumen agregado a las tarjetas de vista móvil (Mobile Search). (UX-20260204-MOBILE-TIERS)
-> Refinamiento UX: Ocultados costos y márgenes en el listado de inventario (Data Table y Tooltip) para facilitar cotización presencial con clientes. El costo sigue disponible en edición. (UX-20260207-PRICING-VISIBILITY)
+> Refinamiento UX: Ocultada columna de costo en listado para seguridad, pero RESTAURADO el detalle de costos/márgenes en el Tooltip (letra pequeña) para negociación del vendedor. (UX-20260207-PRICING-NEGOTIATION)
 
 > CIERRE DE SESIÓN: Dashboard pulido con features de UI/UX (Tooltip, Sidebar, Mobile Fix) y lógica de Cotización robustecida con precios dinámicos por volumen. El sistema está estable y desplegado. (DOC-20260204-SESSION-CLOSE)
