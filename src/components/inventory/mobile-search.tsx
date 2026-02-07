@@ -195,6 +195,24 @@ export function MobileSearch({ initialItems = [] }: MobileSearchProps) {
                       </div>
                     </div>
 
+                    {/* Volume Tiers - Mobile View */}
+                    {(item as any)._publicPrice?.volume_tiers?.length > 0 && (
+                      <div className="mb-3 bg-emerald-50/50 rounded-lg p-2 border border-emerald-100/50">
+                        <p className="text-[10px] font-bold text-emerald-700 uppercase tracking-wider mb-1 flex items-center gap-1">
+                          <span className="inline-block w-1 h-1 rounded-full bg-emerald-500"></span>
+                          Precios de Mayoreo
+                        </p>
+                        <div className="space-y-1">
+                          {(item as any)._publicPrice.volume_tiers.map((tier: any, i: number) => (
+                            <div key={i} className="flex justify-between items-center text-xs">
+                              <span className="text-slate-600 font-medium">Llevando {tier.min_qty}+ pz:</span>
+                              <span className="font-bold text-emerald-600">{formatCurrency(tier.price)}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
                     {/* Footer: Precio + Botón */}
                     <div className="flex justify-between items-center gap-3 mt-auto pt-3 border-t border-slate-100">
                       {/* Precio - Verde y Grande */}
