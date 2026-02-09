@@ -30,6 +30,15 @@ export interface PriceCalculationResult {
 export async function getPricingRules(): Promise<PricingRule[]> {
   const supabase = await createClient();
 
+  // FIX-20260207: Manejo de acceso público
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) {
+    // Si no hay usuario, retornamos reglas vacías (o reglas públicas si existieran)
+    // para evitar fallos por RLS o acceso no autorizado.
+    return [];
+  }
+
   // Consulta defensiva: si las columnas is_active/priority no existen,
   // la consulta falla. En ese caso, hacemos fallback a consulta básica.
   try {
@@ -46,7 +55,8 @@ export async function getPricingRules(): Promise<PricingRule[]> {
         return await getPricingRulesFallback();
       }
       console.error("[getPricingRules] Error:", error);
-      throw new Error(`Failed to fetch pricing rules: ${error.message}`);
+      // En vez de throw, retornamos array vacío para no tumbar la página entera
+      return [];
     }
 
     return (data as PricingRule[]) || [];
