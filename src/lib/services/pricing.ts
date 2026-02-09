@@ -36,7 +36,17 @@ export async function getPricingRules(): Promise<PricingRule[]> {
 
   // Si NO hay usuario, usar Cliente Admin para saltar RLS y obtener reglas globales
   // Si HAY usuario, usar Cliente Normal
-  const client = user ? supabase : createAdminClient();
+  let client;
+  if (user) {
+    client = supabase;
+  } else {
+    try {
+      client = createAdminClient();
+    } catch (e) {
+      console.error("[getPricingRules] Failed to create Admin Client (Check SUPABASE_SERVICE_ROLE_KEY):", e);
+      return [];
+    }
+  }
 
   // Consulta defensiva: si las columnas is_active/priority no existen,
   // la consulta falla. En ese caso, hacemos fallback a consulta básica.
