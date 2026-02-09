@@ -14,14 +14,26 @@ import { getPricingRules, enrichInventoryWithPrices } from "@/lib/services/prici
 import { MobileSearch } from "@/components/inventory/mobile-search";
 import { getUserRole } from "@/lib/auth/role";
 import { QuoteProvider } from "@/lib/contexts/quote-context";
-import { DataTable } from "@/components/inventory/data-table";
+import Link from "next/link";
+import { redirect } from "next/navigation";
+import { createClient } from "@/lib/supabase/server";
+import { getInventoryItems } from "@/lib/services/inventory";
+import { getPricingRules } from "@/lib/services/pricing";
+import { MobileSearch } from "@/components/inventory/mobile-search";
+import { QuoteProvider } from "@/lib/contexts/quote-context";
 import { SearchBar } from "@/components/inventory/search-bar";
 import { CustomPagination } from "@/components/inventory/pagination";
-import { columns } from "@/app/dashboard/inventory/columns";
 import { Button } from "@/components/ui/button";
 import { LogIn } from "lucide-react";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Info } from "lucide-react";
+import { PublicInventoryTable } from "@/components/inventory/public-inventory-table";
+import { enrichInventoryWithPrices } from "@/lib/services/pricing"; // Kept for mobile items if needed, or move logic?
+// MobileSearch expects items with prices, so we still need enrichInventoryWithPrices here or move it to MobileSearch too?
+// MobileSearch is a client component? Let's check. 
+// For now, I'll keep enrich for Mobile, but PublicInventoryTable does its own enrich.
+// Actually, to avoid double calculation, I can pass raw items to PublicTable?
+// My PublicTable implementation does enrich inside. 
+// So I only need enrich for MobileSearch.
+
 
 export const dynamic = "force-dynamic";
 
@@ -124,40 +136,28 @@ export default async function Home(props: HomeProps) {
             </div>
 
             {/* DataTable */}
-            <div className="space-y-4">
-              {hasSuggestions && (
-                <Alert variant="default" className="bg-blue-50 border-blue-200">
-                  <Info className="h-4 w-4 text-blue-600" />
-                  <AlertTitle className="text-blue-800">No encontramos resultados exactos</AlertTitle>
-                  <AlertDescription className="text-blue-700">
-                    Pero encontramos estas opciones disponibles en el mismo Rin.
-                  </AlertDescription>
-                </Alert>
-              )}
-
-              <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-                <DataTable
-                  columns={publicColumns}
-                  data={hasSuggestions ? enrichInventoryWithPrices(suggestions || [], rules) : itemsWithPrices}
-                  userRole={null}
-                />
-              </div>
-
-              {count > 0 && <CustomPagination totalPages={totalPages} />}
-            </div>
-          </div>
-
-          {/* MOBILE VERSION */}
-          <div className="md:hidden h-screen bg-white">
-            <MobileSearch
-              initialItems={itemsWithPrices}
-              userRole={null}
-              showLoginButton={true}
+            {/* Moved table logic to Client Component to avoid "columns.filter is not a function" error */}
+            <PublicInventoryTable
+              items={items}
+              suggestions={suggestions || []}
+              rules={rules}
             />
-          </div>
 
+            {count > 0 && <CustomPagination totalPages={totalPages} />}
+          </div>
         </div>
-      </QuoteProvider>
+
+        {/* MOBILE VERSION */}
+        <div className="md:hidden h-screen bg-white">
+          <MobileSearch
+            initialItems={itemsWithPrices}
+            userRole={null}
+            showLoginButton={true}
+          />
+        </div>
+
+      </div>
+      </QuoteProvider >
     );
 
   } catch (e) {
