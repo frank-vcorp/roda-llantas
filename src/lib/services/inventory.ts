@@ -8,7 +8,6 @@
  */
 
 import { createClient } from "@/lib/supabase/server";
-import { createAdminClient } from "@/lib/supabase/admin";
 import { InventoryItem } from "@/lib/types";
 import { logLostSale } from "@/lib/services/analytics";
 
