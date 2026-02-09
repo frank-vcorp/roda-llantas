@@ -172,7 +172,7 @@ export async function getInventoryItems(
 
   // Estrategia 2: Browse estándar (sin búsqueda)
   try {
-    const query = supabase
+    const query = client
       .from("inventory")
       .select("*", { count: "exact" })
       .range(offset, offset + limit - 1)
