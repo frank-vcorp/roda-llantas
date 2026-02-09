@@ -149,24 +149,6 @@ export function calculatePublicPrice(
   const result = calculateItemPrice(item, rules, quantity);
 
   return {
-    price: result.price, // Mapped to price in interface, but public_price in old return? 
-    // Wait, the interface in pricing.ts had 'public_price', but PricingEngine return has 'price'.
-    // public-inventory-table uses '_publicPrice.public_price'.
-    // I need to maintain compatibility or update the interface.
-    // The previous calculatePublicPrice in pricing.ts returned { public_price: ... }
-    // Let's check the interface in pricing.ts again.
-    // It exported PriceCalculationResult with public_price. 
-    // pricing-engine.ts exports PriceCalculationResult with 'price'.
-    // This is confusing. I should probably adapt the return to match what consumers expect.
-    // public-inventory-table expects public_price.
-    // Let's keep the return shape consistent with what was in pricing.ts
-    // But I can't redeclare PriceCalculationResult if it's already exported.
-    // I will export a new interface or just return an object that matches.
-    // Actually, let's look at pricing-engine.ts again. 
-    // It has PriceCalculationResult. 
-    // The function calculatePublicPrice in pricing.ts returned:
-    // { public_price: ..., is_manual: ..., ... }
-    // I will replicate that structure.
     public_price: result.price,
     is_manual: result.method === 'manual',
     rule_applied: result.ruleName,
