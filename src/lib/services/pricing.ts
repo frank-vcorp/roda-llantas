@@ -86,49 +86,5 @@ async function getPricingRulesFallback(): Promise<PricingRule[]> {
   })) as PricingRule[];
 }
 
-import { calculateItemPrice } from "@/lib/logic/pricing-engine";
 
-/**
- * Encuentra la regla más aplicable para un item (por marca y prioridad)
- * 
- * @param item - Item del inventario
- * @param rules - Array de reglas disponibles
- * @returns Regla aplicable o null si no hay match
- */
-function findApplicableRule(
-  item: InventoryItem,
-  rules: PricingRule[]
-): PricingRule | null {
-  // Las reglas ya vienen ordenadas por prioridad del servidor
-  // Buscar primera regla que coincida con la marca
-  for (const rule of rules) {
-    if (!rule.brand_pattern || rule.brand_pattern === "*") {
-      // Regla por defecto
-      return rule;
-    }
-
-    // Comparación case-insensitive ILIKE
-    const pattern = rule.brand_pattern.toLowerCase();
-    const brand = item.brand.toLowerCase();
-
-    if (brand.includes(pattern) || pattern.includes(brand)) {
-      return rule;
-    }
-  }
-
-  return null;
-}
-
-/**
- * Calcula el precio público basado en reglas de margen
- * 
- * Jerarquía:
- * 1. Si existe manual_price, retornar ese (OFERTA)
- * 2. Si existe regla para la marca, aplicar su margen
- * 3. Caso contrario, retornar costo (sin margen)
- * 
- * @param item - Item del inventario
- * @param rules - Array de reglas de precios
- * @returns Objeto con precio calculado y metadata
- */
 
