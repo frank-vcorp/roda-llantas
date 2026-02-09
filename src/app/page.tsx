@@ -33,119 +33,135 @@ interface HomeProps {
 }
 
 export default async function Home(props: HomeProps) {
+  console.log("[Home] Starting render...");
   const searchParams = await props.searchParams;
   const query = searchParams?.query || "";
   const currentPage = Number(searchParams?.page) || 1;
   const limit = 50;
 
+  console.log("[Home] Creating Supabase client...");
   const supabase = await createClient();
+
+  console.log("[Home] Checking session...");
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
   // Si ya está logueado, ir al dashboard
   if (user) {
+    console.log("[Home] User found, redirecting to /dashboard");
     redirect("/dashboard");
   }
 
   // Convertir página 1-based (URL) a 0-based (Backend)
   const pageIndex = Math.max(0, currentPage - 1);
 
-  // Obtener items e invocar getPricingRules en paralelo
-  const [{ data: items, count, suggestions }, rules] = await Promise.all([
-    getInventoryItems({
-      search: query,
-      page: pageIndex,
-      limit,
-    }),
-    getPricingRules(),
-  ]);
+  console.log("[Home] Fetching inventory and rules...");
+  try {
+    // Obtener items e invocar getPricingRules en paralelo
+    const [{ data: items, count, suggestions }, rules] = await Promise.all([
+      getInventoryItems({
+        search: query,
+        page: pageIndex,
+        limit,
+      }),
+      getPricingRules(),
+    ]);
 
-  // Pre-calcular precios públicos (sin rol de admin, visibility restringida)
-  const itemsWithPrices = enrichInventoryWithPrices(items, rules);
+    console.log(`[Home] Data fetched. Items: ${items?.length}, Rules: ${rules?.length}`);
 
-  // Para mobile: obtener todos los items (sin paginación) inicialmente
-  // Nota: MobileSearch usa su propio sistema de filtrado client-side si se le pasan items,
-  // pero aquí le pasamos items paginados si hay query? 
-  // MobileSearch espera 'initialItems'. Si hay query, MobileSearch filtra?
-  // Re-leí MobileSearch: Si recibe initialItems, los usa. Si escribe en su input, busca en servidor.
-  // Así que pasarle los items paginados está bien como estado inicial.
+    // Pre-calcular precios públicos (sin rol de admin, visibility restringida)
+    console.log("[Home] Enriching items with prices...");
+    const itemsWithPrices = enrichInventoryWithPrices(items, rules);
 
-  const hasSuggestions = items.length === 0 && (suggestions?.length || 0) > 0;
-  const displayItems = hasSuggestions ? (suggestions || []) : itemsWithPrices; // Usar items enriquecidos
+    // ... rest of logic ...
 
-  const totalPages = Math.ceil(count / limit);
+    // Move result calculation here to be safe
+    const hasSuggestions = items.length === 0 && (suggestions?.length || 0) > 0;
 
-  // Filter out actions column for public view
-  const publicColumns = columns.filter(col => col.id !== "actions");
+    console.log("[Home] Ready to render JSX");
 
-  return (
-    <QuoteProvider>
-      {/* Background */}
-      <div className="min-h-screen bg-slate-50">
+    // ... rest of the component
 
-        {/* DESKTOP VERSION */}
-        <div className="hidden md:block max-w-7xl mx-auto px-6 py-8 space-y-6">
-          {/* Header */}
-          <div className="flex items-center justify-between">
-            <div>
-              <div className="flex items-center gap-3 mb-2">
-                <div className="h-10 w-10 bg-primary rounded-xl flex items-center justify-center shadow-md">
-                  <span className="text-primary-foreground font-black text-xl">R</span>
+    // Need to reconstruct the return because I can't just replace the top block easily with this tool's constraints if I don't include the rest.
+    // I will return the original logic but with logs.
+
+    // Re-declaring variables from original code that follow this block
+    const totalPages = Math.ceil(count / limit);
+    const publicColumns = columns.filter(col => col.id !== "actions");
+
+    return (
+      <QuoteProvider>
+        {/* Background */}
+        <div className="min-h-screen bg-slate-50">
+
+          {/* DESKTOP VERSION */}
+          <div className="hidden md:block max-w-7xl mx-auto px-6 py-8 space-y-6">
+            {/* Header */}
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="h-10 w-10 bg-primary rounded-xl flex items-center justify-center shadow-md">
+                    <span className="text-primary-foreground font-black text-xl">R</span>
+                  </div>
+                  <h1 className="text-3xl font-black tracking-tight text-slate-900">Roda Llantas</h1>
                 </div>
-                <h1 className="text-3xl font-black tracking-tight text-slate-900">Roda Llantas</h1>
+                <p className="text-sm text-slate-500">
+                  Catálogo Público • {count} resultados
+                </p>
               </div>
-              <p className="text-sm text-slate-500">
-                Catálogo Público • {count} resultados
-              </p>
+
+              <Link href="/login">
+                <Button className="gap-2 font-bold bg-slate-900 text-white hover:bg-slate-800">
+                  <LogIn className="h-4 w-4" />
+                  Acceso Admin
+                </Button>
+              </Link>
             </div>
 
-            <Link href="/login">
-              <Button className="gap-2 font-bold bg-slate-900 text-white hover:bg-slate-800">
-                <LogIn className="h-4 w-4" />
-                Acceso Admin
-              </Button>
-            </Link>
-          </div>
-
-          <div className="flex items-center gap-4 bg-white p-4 rounded-2xl shadow-sm border border-slate-100">
-            <SearchBar placeholder="Buscar por marca, modelo, medida (ej. 205/55R16)..." />
-          </div>
-
-          {/* DataTable */}
-          <div className="space-y-4">
-            {hasSuggestions && (
-              <Alert variant="default" className="bg-blue-50 border-blue-200">
-                <Info className="h-4 w-4 text-blue-600" />
-                <AlertTitle className="text-blue-800">No encontramos resultados exactos</AlertTitle>
-                <AlertDescription className="text-blue-700">
-                  Pero encontramos estas opciones disponibles en el mismo Rin.
-                </AlertDescription>
-              </Alert>
-            )}
-
-            <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-              <DataTable
-                columns={publicColumns}
-                data={hasSuggestions ? enrichInventoryWithPrices(suggestions || [], rules) : itemsWithPrices}
-                userRole={null}
-              />
+            <div className="flex items-center gap-4 bg-white p-4 rounded-2xl shadow-sm border border-slate-100">
+              <SearchBar placeholder="Buscar por marca, modelo, medida (ej. 205/55R16)..." />
             </div>
 
-            {count > 0 && <CustomPagination totalPages={totalPages} />}
+            {/* DataTable */}
+            <div className="space-y-4">
+              {hasSuggestions && (
+                <Alert variant="default" className="bg-blue-50 border-blue-200">
+                  <Info className="h-4 w-4 text-blue-600" />
+                  <AlertTitle className="text-blue-800">No encontramos resultados exactos</AlertTitle>
+                  <AlertDescription className="text-blue-700">
+                    Pero encontramos estas opciones disponibles en el mismo Rin.
+                  </AlertDescription>
+                </Alert>
+              )}
+
+              <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                <DataTable
+                  columns={publicColumns}
+                  data={hasSuggestions ? enrichInventoryWithPrices(suggestions || [], rules) : itemsWithPrices}
+                  userRole={null}
+                />
+              </div>
+
+              {count > 0 && <CustomPagination totalPages={totalPages} />}
+            </div>
           </div>
-        </div>
 
-        {/* MOBILE VERSION */}
-        <div className="md:hidden h-screen bg-white">
-          <MobileSearch
-            initialItems={itemsWithPrices}
-            userRole={null}
-            showLoginButton={true}
-          />
-        </div>
+          {/* MOBILE VERSION */}
+          <div className="md:hidden h-screen bg-white">
+            <MobileSearch
+              initialItems={itemsWithPrices}
+              userRole={null}
+              showLoginButton={true}
+            />
+          </div>
 
-      </div>
-    </QuoteProvider>
-  );
+        </div>
+      </QuoteProvider>
+    );
+
+  } catch (e) {
+    console.error("[Home] Error during data fetch or rendering:", e);
+    throw e; // Rethrow to show error page, but now logged on server
+  }
 }
