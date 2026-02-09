@@ -10,17 +10,16 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getInventoryItems } from "@/lib/services/inventory";
-import { getPricingRules, enrichInventoryWithPrices } from "@/lib/services/pricing";
+import { getPricingRules } from "@/lib/services/pricing";
+import { enrichInventoryWithPrices } from "@/lib/logic/pricing-engine";
 import { MobileSearch } from "@/components/inventory/mobile-search";
-import { getUserRole } from "@/lib/auth/role";
 import { QuoteProvider } from "@/lib/contexts/quote-context";
-
 import { SearchBar } from "@/components/inventory/search-bar";
 import { CustomPagination } from "@/components/inventory/pagination";
 import { Button } from "@/components/ui/button";
 import { LogIn } from "lucide-react";
 import { PublicInventoryTable } from "@/components/inventory/public-inventory-table";
-import { enrichInventoryWithPrices } from "@/lib/services/pricing"; // Kept for mobile items if needed, or move logic?
+
 // MobileSearch expects items with prices, so we still need enrichInventoryWithPrices here or move it to MobileSearch too?
 // MobileSearch is a client component? Let's check. 
 // For now, I'll keep enrich for Mobile, but PublicInventoryTable does its own enrich.

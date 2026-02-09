@@ -13,13 +13,7 @@ import { InventoryItem, PricingRule } from "@/lib/types";
 /**
  * Resultado del cálculo de precio con desglose
  */
-export interface PriceCalculationResult {
-  public_price: number;
-  is_manual: boolean;
-  rule_applied?: string;
-  margin_percentage?: number;
-  volume_tiers?: { min_qty: number; price: number; margin: number }[];
-}
+
 
 /**
  * Obtiene todas las reglas de precios activas del usuario
@@ -137,35 +131,4 @@ function findApplicableRule(
  * @param rules - Array de reglas de precios
  * @returns Objeto con precio calculado y metadata
  */
-export function calculatePublicPrice(
-  item: InventoryItem,
-  rules: PricingRule[],
-  quantity: number = 1 // FIX-20260204: Soporte para cantidad
-): PriceCalculationResult {
-  const result = calculateItemPrice(item, rules, quantity);
 
-  return {
-    public_price: result.price,
-    is_manual: result.method === 'manual',
-    rule_applied: result.ruleName,
-    margin_percentage: result.margin_percentage,
-    volume_tiers: result.volume_tiers
-  };
-}
-
-/**
- * Extiende items de inventario con precio público calculado
- * 
- * @param items - Array de items del inventario
- * @param rules - Array de reglas de precios
- * @returns Array de items con propiedad _publicPrice
- */
-export function enrichInventoryWithPrices(
-  items: InventoryItem[],
-  rules: PricingRule[]
-): any[] {
-  return items.map((item) => ({
-    ...item,
-    _publicPrice: calculatePublicPrice(item, rules),
-  }));
-}

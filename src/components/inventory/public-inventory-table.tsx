@@ -3,7 +3,7 @@
 import { InventoryItem, PricingRule } from "@/lib/types";
 import { DataTable } from "@/components/inventory/data-table";
 import { columns } from "@/app/dashboard/inventory/columns";
-import { enrichInventoryWithPrices } from "@/lib/services/pricing";
+import { enrichInventoryWithPrices } from "@/lib/logic/pricing-engine";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Info } from "lucide-react";
 

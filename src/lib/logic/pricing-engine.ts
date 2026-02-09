@@ -6,6 +6,7 @@ import { PricingRule, InventoryItem } from '@/lib/types';
  * @ref context/SPEC-PRICING-ENGINE.md
  */
 
+
 export interface PriceCalculationResult {
   price: number;
   method: 'manual' | 'rule' | 'default';
@@ -13,6 +14,15 @@ export interface PriceCalculationResult {
   margin_percentage?: number;
   volume_tiers?: { min_qty: number; price: number; margin: number }[];
 }
+
+export interface PublicPriceResult {
+  public_price: number;
+  is_manual: boolean;
+  rule_applied?: string;
+  margin_percentage?: number;
+  volume_tiers?: { min_qty: number; price: number; margin: number }[];
+}
+
 
 /**
  * Calcula el precio público para un item (Función pura)
@@ -118,3 +128,66 @@ export function calculateItemPrice(
   };
 }
 
+
+/**
+ * Calcula el precio público basado en reglas de margen
+ * 
+ * Jerarquía:
+ * 1. Si existe manual_price, retornar ese (OFERTA)
+ * 2. Si existe regla para la marca, aplicar su margen
+ * 3. Caso contrario, retornar costo (sin margen)
+ * 
+ * @param item - Item del inventario
+ * @param rules - Array de reglas de precios
+ * @returns Objeto con precio calculado y metadata
+ */
+export function calculatePublicPrice(
+  item: InventoryItem,
+  rules: PricingRule[],
+  quantity: number = 1
+): PublicPriceResult {
+  const result = calculateItemPrice(item, rules, quantity);
+
+  return {
+    price: result.price, // Mapped to price in interface, but public_price in old return? 
+    // Wait, the interface in pricing.ts had 'public_price', but PricingEngine return has 'price'.
+    // public-inventory-table uses '_publicPrice.public_price'.
+    // I need to maintain compatibility or update the interface.
+    // The previous calculatePublicPrice in pricing.ts returned { public_price: ... }
+    // Let's check the interface in pricing.ts again.
+    // It exported PriceCalculationResult with public_price. 
+    // pricing-engine.ts exports PriceCalculationResult with 'price'.
+    // This is confusing. I should probably adapt the return to match what consumers expect.
+    // public-inventory-table expects public_price.
+    // Let's keep the return shape consistent with what was in pricing.ts
+    // But I can't redeclare PriceCalculationResult if it's already exported.
+    // I will export a new interface or just return an object that matches.
+    // Actually, let's look at pricing-engine.ts again. 
+    // It has PriceCalculationResult. 
+    // The function calculatePublicPrice in pricing.ts returned:
+    // { public_price: ..., is_manual: ..., ... }
+    // I will replicate that structure.
+    public_price: result.price,
+    is_manual: result.method === 'manual',
+    rule_applied: result.ruleName,
+    margin_percentage: result.margin_percentage,
+    volume_tiers: result.volume_tiers
+  };
+}
+
+/**
+ * Extiende items de inventario con precio público calculado
+ * 
+ * @param items - Array de items del inventario
+ * @param rules - Array de reglas de precios
+ * @returns Array de items con propiedad _publicPrice
+ */
+export function enrichInventoryWithPrices(
+  items: InventoryItem[],
+  rules: PricingRule[]
+): any[] {
+  return items.map((item) => ({
+    ...item,
+    _publicPrice: calculatePublicPrice(item, rules),
+  }));
+}
