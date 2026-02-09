@@ -139,19 +139,19 @@ export default async function Home(props: HomeProps) {
 
             {count > 0 && <CustomPagination totalPages={totalPages} />}
           </div>
-        </div>
 
-        {/* MOBILE VERSION */}
-        <div className="md:hidden h-screen bg-white">
-          <MobileSearch
-            initialItems={itemsWithPrices}
-            userRole={null}
-            showLoginButton={true}
-          />
-        </div>
 
-      </div>
-      </QuoteProvider >
+          {/* MOBILE VERSION */}
+          <div className="md:hidden h-screen bg-white">
+            <MobileSearch
+              initialItems={itemsWithPrices}
+              userRole={null}
+              showLoginButton={true}
+            />
+          </div>
+
+        </div>
+      </QuoteProvider>
     );
 
   } catch (e) {
