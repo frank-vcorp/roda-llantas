@@ -12,7 +12,12 @@ import { updateSession } from "@/lib/supabase/middleware";
  */
 
 export async function middleware(request: NextRequest) {
-  return await updateSession(request);
+  console.log(`[Middleware] Processing request for: ${request.nextUrl.pathname}`);
+  const response = await updateSession(request);
+  if (response.headers.get("location")) {
+    console.log(`[Middleware] Redirecting to: ${response.headers.get("location")}`);
+  }
+  return response;
 }
 
 export const config = {
