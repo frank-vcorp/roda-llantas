@@ -252,8 +252,8 @@ export default async function DashboardPage() {
       </div>
     );
   } catch (error) {
-    console.error("[DashboardPage] Error loading metrics:", error);
+    console.error("[DashboardPage] Error loading metrics (redirecting to login):", error);
     // Mostrar fallback o redirigir si no hay sesión
-    return redirect("/auth/login");
+    return redirect("/login");
   }
 }
