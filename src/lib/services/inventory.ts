@@ -86,22 +86,7 @@ export async function getInventoryItems(
 ): Promise<InventoryResponse> {
   const supabase = await createClient();
 
-  // Verificar sesión
-  const { data: { user } } = await supabase.auth.getUser();
 
-  // Si NO hay usuario, usar Cliente Admin para saltar RLS
-  // Si HAY usuario, usar Cliente Normal (scoped por RLS)
-  let client;
-  if (user) {
-    client = supabase;
-  } else {
-    try {
-      client = createAdminClient();
-    } catch (e) {
-      console.error("[getInventoryItems] Failed to create Admin Client (Check SUPABASE_SERVICE_ROLE_KEY):", e);
-      return { data: [], count: 0 };
-    }
-  }
 
   const { search = "", page = 0, limit = 20 } = options;
   const offset = page * limit;
@@ -181,7 +166,7 @@ export async function getInventoryItems(
 
   // Estrategia 2: Browse estándar (sin búsqueda)
   try {
-    const query = client
+    const query = supabase
       .from("inventory")
       .select("*", { count: "exact" })
       .range(offset, offset + limit - 1)
