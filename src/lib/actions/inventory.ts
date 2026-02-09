@@ -39,7 +39,8 @@ export async function searchInventoryAction(
     const suggestions = result.suggestions || [];
 
     // IMPL-20260130-V2-FEATURES: Fetch pricing rules to enrich items
-    const { getPricingRules, enrichInventoryWithPrices } = await import("@/lib/services/pricing");
+    const { getPricingRules } = await import("@/lib/services/pricing");
+    const { enrichInventoryWithPrices } = await import("@/lib/logic/pricing-engine");
     const rules = await getPricingRules();
 
     const enrichedItems = enrichInventoryWithPrices(items, rules);
