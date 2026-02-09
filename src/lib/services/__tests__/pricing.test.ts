@@ -6,7 +6,7 @@
  * @ref context/SPEC-PRICING-ENGINE.md
  */
 
-import { calculatePublicPrice, enrichInventoryWithPrices } from "@/lib/services/pricing";
+import { calculatePublicPrice, enrichInventoryWithPrices } from "@/lib/logic/pricing-engine";
 import { InventoryItem, PricingRule } from "@/lib/types";
 
 describe("Pricing Service - calculatePublicPrice()", () => {

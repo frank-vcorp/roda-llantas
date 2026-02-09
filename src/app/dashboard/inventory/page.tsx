@@ -15,7 +15,8 @@ import { CustomPagination } from "@/components/inventory/pagination";
 import { MobileSearch } from "@/components/inventory/mobile-search";
 import { columns } from "./columns";
 import { getInventoryItems } from "@/lib/services/inventory";
-import { getPricingRules, enrichInventoryWithPrices } from "@/lib/services/pricing";
+import { getPricingRules } from "@/lib/services/pricing";
+import { enrichInventoryWithPrices } from "@/lib/logic/pricing-engine";
 import { Plus, Info } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
