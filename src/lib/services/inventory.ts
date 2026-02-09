@@ -8,6 +8,7 @@
  */
 
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { InventoryItem } from "@/lib/types";
 import { logLostSale } from "@/lib/services/analytics";
 
@@ -85,6 +86,14 @@ export async function getInventoryItems(
   options: GetInventoryOptions = {}
 ): Promise<InventoryResponse> {
   const supabase = await createClient();
+
+  // Verificar sesión
+  const { data: { user } } = await supabase.auth.getUser();
+
+  // Si NO hay usuario, usar Cliente Admin para saltar RLS
+  // Si HAY usuario, usar Cliente Normal (scoped por RLS)
+  const client = user ? supabase : createAdminClient();
+
   const { search = "", page = 0, limit = 20 } = options;
   const offset = page * limit;
 
@@ -125,7 +134,7 @@ export async function getInventoryItems(
       // IMPL-20260130-V2-FEATURES: Smart Fallback - Si no hay resultados exactos, buscar por RIN
       if (count === 0) {
         const detectedRim = extractRimFromSearch(searchTerm);
-        
+
         if (detectedRim !== null) {
           try {
             // Segunda consulta: buscar por RIN detectado
@@ -195,7 +204,7 @@ export async function getInventoryItems(
 
 export async function getInventoryItemById(id: string): Promise<InventoryItem | null> {
   const supabase = await createClient();
-  
+
   const { data, error } = await supabase
     .from('inventory')
     .select('*')
@@ -208,6 +217,6 @@ export async function getInventoryItemById(id: string): Promise<InventoryItem | 
     }
     return null;
   }
-  
+
   return data;
 }
