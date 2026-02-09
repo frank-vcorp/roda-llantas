@@ -94,7 +94,7 @@ export default async function Home(props: HomeProps) {
 
     // Re-declaring variables from original code that follow this block
     const totalPages = Math.ceil(count / limit);
-    const publicColumns = columns.filter(col => col.id !== "actions");
+
 
     return (
       <QuoteProvider>
