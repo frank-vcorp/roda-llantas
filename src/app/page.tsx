@@ -14,13 +14,7 @@ import { getPricingRules, enrichInventoryWithPrices } from "@/lib/services/prici
 import { MobileSearch } from "@/components/inventory/mobile-search";
 import { getUserRole } from "@/lib/auth/role";
 import { QuoteProvider } from "@/lib/contexts/quote-context";
-import Link from "next/link";
-import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
-import { getInventoryItems } from "@/lib/services/inventory";
-import { getPricingRules } from "@/lib/services/pricing";
-import { MobileSearch } from "@/components/inventory/mobile-search";
-import { QuoteProvider } from "@/lib/contexts/quote-context";
+
 import { SearchBar } from "@/components/inventory/search-bar";
 import { CustomPagination } from "@/components/inventory/pagination";
 import { Button } from "@/components/ui/button";
