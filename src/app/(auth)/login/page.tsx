@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { login } from "@/app/auth/actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -10,9 +9,10 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { toast } from "sonner";
 
 /**
- * IMPL-20260129-SPRINT1
+ * IMPL-20260129-SPRINT1, FIX-20260212-03
  * Página de login - Formulario de autenticación
- * Documentación: context/Documento de Especificaciones Técnicas Llantera.md
+ * Usa API Route en lugar de Server Action para evitar
+ * errores de serialización JSON en Vercel
  */
 
 export default function LoginPage() {
@@ -27,12 +27,19 @@ export default function LoginPage() {
     setIsLoading(true);
 
     try {
-      const result = await login(email, password);
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const result = await res.json();
+
       if (result.success) {
-        // Redirect to dashboard on successful login
         window.location.href = "/dashboard";
         return;
       }
+
       setError(result.error || "Error al iniciar sesión");
       toast.error("Error", {
         description: result.error || "Credenciales inválidas",
@@ -46,6 +53,7 @@ export default function LoginPage() {
       setIsLoading(false);
     }
   };
+
 
   return (
     <div className="relative group">
