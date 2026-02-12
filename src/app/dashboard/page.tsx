@@ -46,6 +46,8 @@ function formatDate(isoString: string): string {
   });
 }
 
+export const dynamic = "force-dynamic";
+
 export default async function DashboardPage() {
   try {
     // Obtener métricas del dashboard

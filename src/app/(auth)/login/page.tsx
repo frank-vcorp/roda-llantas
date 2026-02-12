@@ -46,8 +46,8 @@ export default function LoginPage() {
 
   return (
     <div className="relative group">
-      <div className="absolute -inset-1 bg-gradient-to-r from-primary/20 to-blue-500/20 rounded-3xl blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
-      <Card className="relative bg-card/80 backdrop-blur-xl border-white/20 shadow-2xl rounded-3xl overflow-hidden">
+      <div className="absolute -inset-1 bg-gradient-to-r from-primary/20 to-blue-500/20 rounded-3xl blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200 pointer-events-none"></div>
+      <Card className="relative z-10 bg-card/80 backdrop-blur-xl border-white/20 shadow-2xl rounded-3xl overflow-hidden">
         <CardHeader className="space-y-3 pb-8 text-center">
           <div className="mx-auto w-12 h-12 bg-primary rounded-2xl flex items-center justify-center mb-2 shadow-lg shadow-primary/20">
             <span className="text-primary-foreground font-black text-xl">R</span>
@@ -77,6 +77,7 @@ export default function LoginPage() {
                 placeholder="nombre@empresa.com"
                 className="h-12 bg-background/50 border-muted-foreground/10 focus:bg-background transition-all rounded-xl"
                 value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 disabled={isLoading}
                 required
                 autoComplete="username"
@@ -99,6 +100,7 @@ export default function LoginPage() {
                 placeholder="••••••••"
                 className="h-12 bg-background/50 border-muted-foreground/10 focus:bg-background transition-all rounded-xl"
                 value={password}
+                onChange={(e) => setPassword(e.target.value)}
                 disabled={isLoading}
                 required
                 autoComplete="current-password"
