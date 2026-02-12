@@ -19,12 +19,14 @@ export async function login(email: string, password: string) {
 
   if (error) {
     return {
-      success: false,
+      success: false as const,
       error: error.message,
     };
   }
 
-  redirect("/dashboard");
+  return {
+    success: true as const,
+  };
 }
 
 export async function signout() {

@@ -28,12 +28,15 @@ export default function LoginPage() {
 
     try {
       const result = await login(email, password);
-      if (!result.success) {
-        setError(result.error || "Error al iniciar sesión");
-        toast.error("Error", {
-          description: result.error || "Credenciales inválidas",
-        });
+      if (result.success) {
+        // Redirect to dashboard on successful login
+        window.location.href = "/dashboard";
+        return;
       }
+      setError(result.error || "Error al iniciar sesión");
+      toast.error("Error", {
+        description: result.error || "Credenciales inválidas",
+      });
     } catch (err) {
       const errorMsg =
         err instanceof Error ? err.message : "Error desconocido";
