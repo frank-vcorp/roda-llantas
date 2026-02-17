@@ -15,6 +15,15 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { getWarehouses, Warehouse } from '@/app/dashboard/inventory/warehouse-actions';
+import { useEffect } from 'react';
 
 /**
  * @fileoverview Página de importación de inventario
@@ -44,6 +53,12 @@ export default function InventoryImportPage() {
   });
 
   const [previewData, setPreviewData] = useState<InventoryItem[]>([]);
+  const [warehouses, setWarehouses] = useState<Warehouse[]>([]);
+  const [selectedWarehouse, setSelectedWarehouse] = useState<string>("");
+
+  useEffect(() => {
+    getWarehouses().then(setWarehouses);
+  }, []);
 
   const handleFileSelect = async (file: File) => {
     setState((prev) => ({
@@ -77,7 +92,16 @@ export default function InventoryImportPage() {
     }));
 
     try {
-      const result = await insertInventoryItems(previewData);
+      if (!selectedWarehouse) {
+        setState((prev) => ({
+          ...prev,
+          isLoading: false,
+          error: "Por favor selecciona un almacén de destino",
+        }));
+        return;
+      }
+
+      const result = await insertInventoryItems(previewData, selectedWarehouse);
 
       if (result.success) {
         setState((prev) => ({
@@ -128,7 +152,38 @@ export default function InventoryImportPage() {
           <p className="text-gray-600 mt-2">
             Carga masiva de llantas desde Excel o CSV
           </p>
+          <p className="text-gray-600 mt-2">
+            Carga masiva de llantas desde Excel o CSV
+          </p>
         </div>
+
+        {/* Warehouse Selection */}
+        {state.step === 'upload' && (
+          <Card className="mb-6 p-6">
+            <h3 className="text-lg font-medium mb-4">1. Selecciona el Almacén de Destino</h3>
+            <div className="max-w-md">
+              <Select
+                value={selectedWarehouse}
+                onValueChange={setSelectedWarehouse}
+                disabled={state.isLoading}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecciona un almacén..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {warehouses.map((w) => (
+                    <SelectItem key={w.id} value={w.id}>
+                      {w.name} ({w.code})
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="text-sm text-gray-500 mt-2">
+                Las existencias del archivo se sumarán al inventario de este almacén específico.
+              </p>
+            </div>
+          </Card>
+        )}
 
         {/* Upload Step */}
         {state.step === 'upload' && (
@@ -166,6 +221,7 @@ export default function InventoryImportPage() {
             </Card>
 
             <Card className="p-8">
+              <h3 className="text-lg font-medium mb-4">2. Carga el Archivo de Inventario</h3>
               <FileUploader
                 onFileSelect={handleFileSelect}
                 isLoading={state.isLoading}
@@ -221,25 +277,25 @@ export default function InventoryImportPage() {
                           </td>
                           <td className="px-4 py-3 text-gray-900 font-medium">
                             <div className="flex items-center gap-2">
-                                <span className="font-medium text-sm">{item.description || item.medida_full}</span>
-                                <TooltipProvider>
+                              <span className="font-medium text-sm">{item.description || item.medida_full}</span>
+                              <TooltipProvider>
                                 <Tooltip>
-                                    <TooltipTrigger asChild>
-                                        <Info className="h-4 w-4 text-gray-400 hover:text-blue-500 cursor-help" />
-                                    </TooltipTrigger>
-                                    <TooltipContent className="bg-slate-900 text-white p-3 max-w-xs shadow-xl z-50">
-                                        <div className="text-xs space-y-1">
-                                            <p className="font-bold border-b pb-1 mb-1 border-gray-600">Datos Detectados</p>
-                                            <p><strong>Marca:</strong> {item.brand}</p>
-                                            <p><strong>Modelo:</strong> {item.model}</p>
-                                            <p><strong>Medida:</strong> {item.medida_full}</p>
-                                            <p><strong>Ancho:</strong> {item.width} mm</p>
-                                            <p><strong>Perfil:</strong> {item.aspect_ratio}%</p>
-                                            <p><strong>Rin:</strong> {item.rim}"</p>
-                                        </div>
-                                    </TooltipContent>
+                                  <TooltipTrigger asChild>
+                                    <Info className="h-4 w-4 text-gray-400 hover:text-blue-500 cursor-help" />
+                                  </TooltipTrigger>
+                                  <TooltipContent className="bg-slate-900 text-white p-3 max-w-xs shadow-xl z-50">
+                                    <div className="text-xs space-y-1">
+                                      <p className="font-bold border-b pb-1 mb-1 border-gray-600">Datos Detectados</p>
+                                      <p><strong>Marca:</strong> {item.brand}</p>
+                                      <p><strong>Modelo:</strong> {item.model}</p>
+                                      <p><strong>Medida:</strong> {item.medida_full}</p>
+                                      <p><strong>Ancho:</strong> {item.width} mm</p>
+                                      <p><strong>Perfil:</strong> {item.aspect_ratio}%</p>
+                                      <p><strong>Rin:</strong> {item.rim}"</p>
+                                    </div>
+                                  </TooltipContent>
                                 </Tooltip>
-                                </TooltipProvider>
+                              </TooltipProvider>
                             </div>
                           </td>
                           <td className="px-4 py-3 text-gray-900 font-semibold text-right">

@@ -9,7 +9,53 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { InventoryItem } from "@/lib/types";
+
 import { logLostSale } from "@/lib/services/analytics";
+
+/**
+ * Enriches inventory items with warehouse stock breakdown
+ */
+async function enrichInventoryWithStock(items: InventoryItem[]) {
+  if (!items.length) return items;
+
+  const supabase = await createClient();
+  const productIds = items.map(i => i.id);
+
+  const { data: stockData } = await supabase
+    .from('product_stock')
+    .select(`
+      product_id,
+      quantity,
+      warehouses (name, code)
+    `)
+    .in('product_id', productIds)
+    .gt('quantity', 0); // Only showing where there IS stock
+
+  if (!stockData) return items;
+
+  // Map stock to items
+  // We explicitly cast to unknown then to the expected type because Supabase types might verify strict relationships
+  // that we defined in SQL but TypeScript doesn't know about fully yet for the nested join.
+  type StockRecord = {
+    product_id: string;
+    quantity: number;
+    warehouses: { name: string; code: string } | null; // One-to-one from the join perspective of product_stock -> warehouses
+  };
+
+  const stocks = stockData as unknown as StockRecord[];
+
+  items.forEach(item => {
+    const itemStocks = stocks.filter(s => s.product_id === item.id);
+    if (itemStocks.length > 0) {
+      item.warehouses = itemStocks.map(s => ({
+        name: s.warehouses?.name || 'Desconocido',
+        quantity: s.quantity
+      }));
+    }
+  });
+
+  return items;
+}
 
 /**
  * Opciones para la búsqueda y paginación de inventario
@@ -120,8 +166,13 @@ export async function getInventoryItems(
       }
 
       const count = (countData as number) || 0;
+      let items = (data as InventoryItem[]) || [];
+
+      // Enrich with stock breakdown
+      items = await enrichInventoryWithStock(items);
+
       const result: InventoryResponse = {
-        data: (data as InventoryItem[]) || [],
+        data: items,
         count,
       };
 
@@ -180,8 +231,13 @@ export async function getInventoryItems(
     }
 
     const totalCount = count || 0;
+    let items = (data as InventoryItem[]) || [];
+
+    // Enrich with stock breakdown
+    items = await enrichInventoryWithStock(items);
+
     const result = {
-      data: (data as InventoryItem[]) || [],
+      data: items,
       count: totalCount,
     };
 

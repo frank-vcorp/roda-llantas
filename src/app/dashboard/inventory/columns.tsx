@@ -40,14 +40,39 @@ import { InventoryActions } from "@/components/inventory/inventory-actions";
  * - Verde si stock > 4
  * - Amarillo si stock 1-4
  */
-const StockBadge = ({ stock }: { stock: number }) => {
-  if (stock === 0) {
-    return <Badge variant="destructive">{stock} unidades</Badge>;
-  } else if (stock > 4) {
-    return <Badge variant="default" className="bg-green-600 hover:bg-green-700">{stock} unidades</Badge>;
-  } else {
-    return <Badge variant="secondary">{stock} unidades</Badge>;
-  }
+const StockBadge = ({ row }: { row: any }) => {
+  const stock = row.getValue("stock");
+  const item = row.original as InventoryItem;
+  const warehouses = item.warehouses || [];
+
+  const badge = (
+    stock === 0 ? <Badge variant="destructive">{stock}</Badge> :
+      stock > 4 ? <Badge variant="default" className="bg-green-600 hover:bg-green-700">{stock}</Badge> :
+        <Badge variant="secondary">{stock}</Badge>
+  );
+
+  if (warehouses.length === 0) return badge;
+
+  return (
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <div className="cursor-help">{badge}</div>
+        </TooltipTrigger>
+        <TooltipContent className="bg-slate-900 text-white p-2">
+          <div className="text-xs font-mono space-y-1">
+            <p className="font-bold border-b border-slate-700 pb-1 mb-1">Ubicación</p>
+            {warehouses.map((w, i) => (
+              <div key={i} className="flex justify-between gap-4">
+                <span>{w.name}:</span>
+                <span className="text-green-400">{w.quantity}</span>
+              </div>
+            ))}
+          </div>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  );
 };
 
 /**
@@ -141,7 +166,7 @@ export const columns: ColumnDef<InventoryItem>[] = [
   {
     accessorKey: "stock",
     header: "Stock",
-    cell: ({ row }) => <StockBadge stock={row.getValue("stock")} />,
+    cell: ({ row }) => <StockBadge row={row} />,
   },
   /*
   {

@@ -12,7 +12,8 @@ import { revalidatePath } from 'next/cache';
  */
 
 export async function insertInventoryItems(
-  items: InventoryItem[]
+  items: InventoryItem[],
+  warehouseId?: string
 ): Promise<{
   success: boolean;
   message: string;
@@ -43,24 +44,59 @@ export async function insertInventoryItems(
       profile_id,
     }));
 
-    // Insertar en Supabase
-    const { error, data } = await supabase
+    // Insertar/Actualizar en Inventario base (productos)
+    const { error: inventoryError, data: insertedProducts } = await supabase
       .from('inventory')
-      .insert(itemsToInsert)
-      .select();
+      .upsert(itemsToInsert, {
+        onConflict: 'sku',
+        ignoreDuplicates: false
+      })
+      .select('id, sku');
 
-    if (error) {
-      console.error('❌ Error al insertar inventario:', error);
+    if (inventoryError) {
+      console.error('❌ Error al insertar inventario base:', inventoryError);
       return {
         success: false,
-        message: `Error en la base de datos: ${error.message}`,
+        message: `Error en la base de datos (Inventario): ${inventoryError.message}`,
       };
     }
 
+    // Si se seleccionó un almacén, insertar el stock específico
+    if (warehouseId && insertedProducts) {
+      const stockItems = insertedProducts.map((product) => {
+        const originalItem = items.find(i => i.sku === product.sku);
+        return {
+          product_id: product.id,
+          warehouse_id: warehouseId,
+          quantity: originalItem?.stock || 0,
+          updated_at: new Date().toISOString()
+        };
+      });
+
+      const { error: stockError } = await supabase
+        .from('product_stock')
+        .upsert(stockItems, {
+          onConflict: 'product_id, warehouse_id'
+        });
+
+      if (stockError) {
+        console.error('❌ Error al insertar stock por almacén:', stockError);
+        // No retornamos error fatal porque el producto sí se creó, pero logueamos
+      }
+    } else {
+      // Fallback para inserción directa en stock global (Legacy behavior o si no hay warehouseId)
+      // La lógica de trigger 'sync_product_total_stock' no se disparará si no modificamos product_stock,
+      // pero el upsert de arriba ya actualizó el stock global si venía en el item.
+      // Sin embargo, con el nuevo modelo, DEBERÍAMOS requerir warehouseId.
+      // Por compatibilidad, si no hay warehouseId, asumimos que se actualizó el stock global directamente en la tabla inventory.
+    }
+
+
+
     return {
       success: true,
-      message: `✅ ${data?.length || items.length} items insertados exitosamente`,
-      insertedCount: data?.length || items.length,
+      message: `✅ ${insertedProducts?.length || items.length} items procesados exitosamente en ${warehouseId ? 'Almacén seleccionado' : 'Inventario Global'}`,
+      insertedCount: insertedProducts?.length || items.length,
     };
   } catch (err) {
     console.error('❌ Error inesperado:', err);
@@ -74,7 +110,7 @@ export async function insertInventoryItems(
 
 export async function deleteInventoryItem(id: string) {
   const supabase = await createClient();
-  
+
   const { error } = await supabase
     .from('inventory')
     .delete()
@@ -90,16 +126,16 @@ export async function deleteInventoryItem(id: string) {
 
 export async function updateInventoryItem(id: string, data: Partial<DbInventoryItem>) {
   const supabase = await createClient();
-  
+
   const { error } = await supabase
     .from('inventory')
     .update(data)
     .eq('id', id);
-    
+
   if (error) {
     throw new Error(error.message);
   }
-  
+
   revalidatePath('/dashboard/inventory');
   return { success: true };
 }

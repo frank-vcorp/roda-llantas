@@ -260,3 +260,19 @@
 > Refinamiento UX: Ocultada columna de costo en listado para seguridad. RESTAURADO el detalle de costos/márgenes en el Tooltip y Precios de Mayoreo en Móvil SOLO para usuarios ADMIN (Mane). Los vendedores ven solo precio público. (UX-20260207-PRICING-ROLES)
 
 > CIERRE DE SESIÓN: Dashboard pulido con features de UI/UX (Tooltip, Sidebar, Mobile Fix) y lógica de Cotización robustecida con precios dinámicos por volumen. El sistema está estable y desplegado. (DOC-20260204-SESSION-CLOSE)
+
+---
+## Micro-Sprint — Gestión Multi-Almacén (Completado)
+
+### Objetivo
+- [x] Implementar soporte para múltiples almacenes (A1, A2, A3) con importación y visualización segregada de stock.
+
+### Tareas Completadas
+- [x] [DB] Migración `multi_warehouse`: Tablas `warehouses` y `product_stock` + Trigger de Sincronización.
+- [x] [Backend] Actualización de `insertInventoryItems` para soportar `warehouseId`.
+- [x] [Backend] Actualización de `decrement_product_stock` (Smart Decrement: Descuenta del almacén con más stock).
+- [x] [UI] Selector de Almacén en herramienta de Importación.
+- [x] [UI] Tooltip de desglose de stock por almacén en Tabla de Inventario.
+
+> Sprint completado. El sistema ahora soporta inventario distribuido con sincronización automática del stock global. (DOC-20260217-MULTI-WAREHOUSE)
+
