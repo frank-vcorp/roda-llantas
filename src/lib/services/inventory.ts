@@ -49,6 +49,7 @@ async function enrichInventoryWithStock(items: InventoryItem[]) {
     if (itemStocks.length > 0) {
       item.warehouses = itemStocks.map(s => ({
         name: s.warehouses?.name || 'Desconocido',
+        code: s.warehouses?.code || '??',
         quantity: s.quantity
       }));
     }

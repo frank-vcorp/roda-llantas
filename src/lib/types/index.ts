@@ -30,7 +30,7 @@ export interface InventoryItem {
     margin_percentage?: number;
     volume_tiers?: { min_qty: number; price: number; margin: number }[];
   };
-  warehouses?: { name: string; quantity: number }[]; // Multi-warehouse breakdown
+  warehouses?: { name: string; code?: string; quantity: number }[]; // Multi-warehouse breakdown
 }
 
 export interface PricingRule {
