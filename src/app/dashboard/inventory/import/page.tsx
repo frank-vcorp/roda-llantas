@@ -240,9 +240,8 @@ export default function InventoryImportPage() {
             </div>
           </div>
 
-          {/* MASTER LIST TABLE (NEW) */}
           <div className="pt-8 border-t border-gray-200 mt-8">
-            <h2 className="text-xl font-bold mb-4 text-slate-800">Catálogo de Costos y Stock (Mane)</h2>
+            <h2 className="text-xl font-bold mb-4 text-slate-800">Catálogo de Costos y Stock</h2>
             <MasterPriceList />
           </div>
         </div>

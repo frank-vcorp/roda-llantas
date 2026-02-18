@@ -90,9 +90,9 @@ export function MasterPriceList() {
                                 <TableHead className="w-[100px]">SKU</TableHead>
                                 <TableHead>Descripción</TableHead>
                                 <TableHead className="w-[100px]">Medida</TableHead>
-                                <TableHead className="text-right w-[120px] bg-yellow-50/50">Costo (Mane)</TableHead>
+                                <TableHead className="text-right w-[120px] bg-yellow-50/50">Costo</TableHead>
                                 <TableHead className="text-center w-[100px]">Total</TableHead>
-                                <TableHead className="w-[250px]">Desglose Almacenes</TableHead>
+                                <TableHead className="w-[350px]">Desglose Almacenes</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -134,7 +134,7 @@ export function MasterPriceList() {
                                                 {item.stock_breakdown.map((w, i) => (
                                                     w.quantity > 0 && (
                                                         <div key={i} className="flex justify-between border-b border-dotted border-slate-200 pb-0.5 last:border-0">
-                                                            <span className="text-slate-500 truncate max-w-[180px]">{w.name}</span>
+                                                            <span className="text-slate-500 truncate max-w-[280px]">{w.name}</span>
                                                             <span className="font-mono font-bold text-slate-700">{w.quantity}</span>
                                                         </div>
                                                     )
