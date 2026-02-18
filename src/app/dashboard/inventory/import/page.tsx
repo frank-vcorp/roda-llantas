@@ -158,6 +158,56 @@ export default function InventoryImportPage() {
           </p>
         </div>
 
+        {/* Action Buttons Header */}
+        <div className="flex justify-end mb-6">
+          <Button
+            variant="outline"
+            onClick={async () => {
+              try {
+                // Importación dinámica para no romper SSR si fuera el caso, aunque es 'use client'
+                const { getInventoryForExport } = await import('@/app/dashboard/inventory/actions');
+                const res = await getInventoryForExport();
+
+                if (res.success && res.data) {
+                  // Generar CSV
+                  const headers = ['SKU', 'Descripcion', 'Marca', 'Modelo', 'Medida', 'Costo Original (Mane)', 'Stock Global'];
+                  const csvRows = [
+                    headers.join(','),
+                    ...res.data.map(item => [
+                      `"${item.sku || ''}"`,
+                      `"${item.description || ''}"`,
+                      `"${item.brand || ''}"`,
+                      `"${item.model || ''}"`,
+                      `"${item.medida_full || ''}"`,
+                      item.cost_price,
+                      item.stock
+                    ].join(','))
+                  ];
+
+                  const csvContent = csvRows.join('\n');
+                  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                  const url = URL.createObjectURL(blob);
+                  const link = document.createElement('a');
+                  link.href = url;
+                  link.setAttribute('download', `lista_precios_original_${new Date().toISOString().split('T')[0]}.csv`);
+                  document.body.appendChild(link);
+                  link.click();
+                  document.body.removeChild(link);
+                } else {
+                  alert('Error al descargar la lista: ' + (res.message || 'Desconocido'));
+                }
+              } catch (e) {
+                console.error(e);
+                alert('Error al generar la exportación');
+              }
+            }}
+            className="gap-2 bg-white text-slate-700 border-slate-300 hover:bg-slate-50"
+          >
+            <FileSpreadsheet className="w-4 h-4 text-green-600" />
+            Descargar Lista Original (CSV)
+          </Button>
+        </div>
+
         {/* Warehouse Selection */}
         {state.step === 'upload' && (
           <Card className="mb-6 p-6">

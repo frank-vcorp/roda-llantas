@@ -144,3 +144,35 @@ export async function updateInventoryItem(id: string, data: Partial<DbInventoryI
   revalidatePath('/dashboard/inventory');
   return { success: true };
 }
+
+export async function getInventoryForExport(): Promise<{
+  success: boolean;
+  data?: any[];
+  message?: string;
+}> {
+  try {
+    const supabase = await createClient();
+
+    // Solo admins deberían poder bajar esto, pero por ahora confiamos en RLS o UI hiding.
+    // Traemos costo, stock, marca, modelo, medida, descripcion, sku
+    const { data, error } = await supabase
+      .from('inventory')
+      .select('sku, description, brand, model, medida_full, cost_price, stock')
+      .order('brand', { ascending: true });
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    return {
+      success: true,
+      data: data || [],
+    };
+  } catch (error) {
+    console.error('Error fetching inventory for export:', error);
+    return {
+      success: false,
+      message: error instanceof Error ? error.message : 'Error desconocido',
+    };
+  }
+}
