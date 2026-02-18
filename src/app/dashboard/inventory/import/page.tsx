@@ -39,7 +39,7 @@ import { useEffect } from 'react';
  */
 
 interface UIState {
-  step: 'upload' | 'preview' | 'success';
+  step: 'upload' | 'preview' | 'saving' | 'success';
   isLoading: boolean;
   error: string | null;
   successMessage: string | null;
