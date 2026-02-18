@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { FileUploader } from '@/components/inventory/file-uploader';
 import { parseInventoryExcel, InventoryItem } from '@/lib/logic/excel-parser';
-import { insertInventoryItems } from '@/app/dashboard/inventory/actions';
+import { insertInventoryItems, clearWarehouseStock, clearAllInventory } from '@/app/dashboard/inventory/actions';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -57,12 +57,49 @@ export default function InventoryImportPage() {
   const [warehouses, setWarehouses] = useState<Warehouse[]>([]);
   const [selectedWarehouse, setSelectedWarehouse] = useState<string>("");
   const [updatePricesOnly, setUpdatePricesOnly] = useState<boolean>(false); // IMPL-20260218-PRICE-MODE
+  const [replaceStock, setReplaceStock] = useState<boolean>(false);
 
-  console.log("RENDER IMPORT PAGE", { updatePricesOnly });
+  console.log("RENDER IMPORT PAGE", { updatePricesOnly, replaceStock });
 
   useEffect(() => {
     getWarehouses().then(setWarehouses);
   }, []);
+
+  const handleClearWarehouse = async () => {
+    if (!selectedWarehouse) return;
+    setState(prev => ({ ...prev, isLoading: true }));
+    try {
+      const res = await clearWarehouseStock(selectedWarehouse);
+      if (res.success) {
+        alert(res.message);
+        // Force refresh logic or just reload page for now
+        window.location.reload();
+      } else {
+        alert("Error: " + res.message);
+      }
+    } catch (e) {
+      alert("Error al intentar vaciar");
+    } finally {
+      setState(prev => ({ ...prev, isLoading: false }));
+    }
+  };
+
+  const handleClearAll = async () => {
+    setState(prev => ({ ...prev, isLoading: true }));
+    try {
+      const res = await clearAllInventory();
+      if (res.success) {
+        alert(res.message);
+        window.location.reload();
+      } else {
+        alert("Error: " + res.message);
+      }
+    } catch (e) {
+      alert("Error crítico");
+    } finally {
+      setState(prev => ({ ...prev, isLoading: false }));
+    }
+  };
 
   const handleFileSelect = async (file: File) => {
     setState((prev) => ({
@@ -106,7 +143,7 @@ export default function InventoryImportPage() {
         return;
       }
 
-      const result = await insertInventoryItems(previewData, selectedWarehouse, updatePricesOnly);
+      const result = await insertInventoryItems(previewData, selectedWarehouse, updatePricesOnly, replaceStock);
 
       if (result.success) {
         setState((prev) => ({
@@ -242,6 +279,70 @@ export default function InventoryImportPage() {
                     </div>
                   </div>
                 </Card>
+
+                {/* REPLACE MODE TOGGLE */}
+                {!updatePricesOnly && (
+                  <div className="mt-4 flex items-start gap-3 bg-red-50 p-4 rounded-lg border border-red-200">
+                    <input
+                      type="checkbox"
+                      id="replaceStock"
+                      className="mt-1 h-4 w-4 text-red-600 rounded border-gray-300 focus:ring-red-500"
+                      checked={replaceStock}
+                      onChange={(e) => setReplaceStock(e.target.checked)}
+                    />
+                    <div>
+                      <label htmlFor="replaceStock" className="block text-sm font-medium text-red-900 cursor-pointer">
+                        Modo "Reemplazo Total de Stock"
+                      </label>
+                      <p className="text-xs text-red-800 mt-1">
+                        ⚠️ <strong>Peligro:</strong> Si activas esto, se <u>borrará todo el stock existente</u> en el almacén seleccionado antes de cargar el nuevo.
+                        Úsalo si quieres que el inventario sea <strong>exactamente igual</strong> al archivo.
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* DANGER ZONE */}
+            <div className="mt-8 pt-8 border-t border-gray-200">
+              <div className="bg-red-50 border border-red-200 rounded-lg p-6">
+                <h3 className="text-lg font-bold text-red-900 flex items-center gap-2">
+                  <AlertCircle className="w-5 h-5" /> Zona de Peligro
+                </h3>
+                <p className="text-sm text-red-700 mt-1 mb-4">
+                  Utiliza estas opciones para reiniciar o limpiar datos corruptos. Estas acciones no se pueden deshacer.
+                </p>
+
+                <div className="flex flex-wrap gap-4">
+                  <Button
+                    variant="destructive"
+                    className="bg-white hover:bg-red-100 text-red-700 border-red-300"
+                    onClick={() => {
+                      if (!selectedWarehouse) {
+                        alert("Selecciona un almacén primero");
+                        return;
+                      }
+                      if (confirm(`¿Estás SEGURO de vaciar TODO el stock del almacén seleccionado?`)) {
+                        handleClearWarehouse();
+                      }
+                    }}
+                  >
+                    Vaciar Almacén Seleccionado ({warehouses.find(w => w.id === selectedWarehouse)?.name || '...'})
+                  </Button>
+
+                  <Button
+                    variant="destructive"
+                    className="bg-red-600 hover:bg-red-700"
+                    onClick={() => {
+                      if (confirm(`🚨 PELIGRO EXTREMO 🚨\n\n¿Estás seguro de ELIMINAR TODO EL INVENTARIO Y CATÁLOGO?\n\nSe borrarán todos los productos, precios y stocks de TODOS los almacenes.`)) {
+                        handleClearAll();
+                      }
+                    }}
+                  >
+                    ☢️ ELIMINAR TODO EL SISTEMA
+                  </Button>
+                </div>
               </div>
             </div>
 
