@@ -248,64 +248,7 @@ export default function InventoryImportPage() {
         </div>
       )}
 
-      {/* Upload Step */}
-      {state.step === 'upload' && (
-        <div className="space-y-6">
-          <Card className="p-6 bg-blue-50 border-blue-200">
-            <div className="flex gap-4">
-              <Info className="w-6 h-6 text-blue-600 flex-shrink-0" />
-              <div>
-                <h3 className="font-semibold text-blue-900">Instrucciones de Formato</h3>
-                <p className="text-sm text-blue-800 mt-1 mb-3">
-                  El archivo Excel (.xlsx) o CSV debe contener las siguientes columnas (el orden no importa, pero los nombres deben coincidir):
-                </p>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                  <div>
-                    <span className="font-bold text-blue-900 block mb-1">Obligatorias:</span>
-                    <ul className="list-disc list-inside text-blue-800 space-y-1">
-                      <li><strong>Marca</strong> (ej: Michelin)</li>
-                      <li><strong>Medida</strong> (ej: 205/55R16)</li>
-                      <li><strong>Modelo</strong> (ej: Primacy 4)</li>
-                      <li><strong>Costo</strong> (ej: 1500.00)</li>
-                      <li><strong>Stock</strong> (ej: 4)</li>
-                    </ul>
-                  </div>
-                  <div>
-                    <span className="font-bold text-blue-900 block mb-1">Opcionales:</span>
-                    <ul className="list-disc list-inside text-blue-800 space-y-1">
-                      <li><strong>Índice</strong> (ej: 91V)</li>
-                      <li><strong>SKU</strong> (Código único)</li>
-                      <li><strong>Ubicación</strong> (ej: A-12)</li>
-                    </ul>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </Card>
 
-          <Card className="p-8">
-            <h3 className="text-lg font-medium mb-4">2. Carga el Archivo de Inventario</h3>
-            <FileUploader
-              onFileSelect={handleFileSelect}
-              isLoading={state.isLoading}
-              error={state.error || undefined}
-            />
-
-            <div className="mt-4 flex items-center space-x-2 bg-amber-50 p-3 rounded border border-amber-200">
-              <input
-                type="checkbox"
-                id="priceOnly"
-                className="h-4 w-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
-                checked={updatePricesOnly}
-                onChange={(e) => setUpdatePricesOnly(e.target.checked)}
-              />
-              <label htmlFor="priceOnly" className="text-sm font-medium text-amber-800 cursor-pointer select-none">
-                <strong>Modo "Lista de Precios" (Mane/Proveedor):</strong> Solo actualizar Costos y Detalles, <u>NO tocar Existencias/Stock</u>.
-              </label>
-            </div>
-          </Card>
-        </div>
-      )}
 
       {/* Preview Step */}
       {state.step === 'preview' && previewData.length > 0 && (
