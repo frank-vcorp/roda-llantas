@@ -146,12 +146,19 @@ export const columns: ColumnDef<InventoryItem>[] = [
                     <div className="mt-3 pt-2 border-t border-slate-700">
                       <p className="font-bold text-emerald-400 mb-1">Precios por Volumen</p>
                       <div className="space-y-1">
-                        {(item as any)._publicPrice.volume_tiers.map((tier: any, i: number) => (
-                          <div key={i} className="flex justify-between text-[11px]">
-                            <span>x{tier.min_qty} piezas:</span>
-                            <span className="font-mono text-emerald-300">{formatCurrency(tier.price)}</span>
-                          </div>
-                        ))}
+                        {(item as any)._publicPrice.volume_tiers.map((tier: any, i: number) => {
+                          let label = `x${tier.min_qty} piezas`;
+                          if (tier.min_qty === 3) label = "Promo 3 pzas";
+                          else if (tier.min_qty === 4) label = "Promo 4 pzas";
+                          else if (tier.min_qty >= 8) label = "Mayoreo (8+)";
+
+                          return (
+                            <div key={i} className="flex justify-between text-[11px]">
+                              <span>{label}:</span>
+                              <span className="font-mono text-emerald-300">{formatCurrency(tier.price)}</span>
+                            </div>
+                          );
+                        })}
                       </div>
                     </div>
                   )}

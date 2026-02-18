@@ -237,12 +237,19 @@ export function MobileSearch({ initialItems = [], userRole, showLoginButton = fa
                           Precios de Mayoreo
                         </p>
                         <div className="space-y-1">
-                          {(item as any)._publicPrice.volume_tiers.map((tier: any, i: number) => (
-                            <div key={i} className="flex justify-between items-center text-xs">
-                              <span className="text-slate-600 font-medium">Llevando {tier.min_qty}+ pz:</span>
-                              <span className="font-bold text-emerald-600">{formatCurrency(tier.price)}</span>
-                            </div>
-                          ))}
+                          {(item as any)._publicPrice.volume_tiers.map((tier: any, i: number) => {
+                            let label = `Llevando ${tier.min_qty}+ pz`;
+                            if (tier.min_qty === 3) label = "Promo 3 Pzas";
+                            else if (tier.min_qty === 4) label = "Promo 4 Pzas";
+                            else if (tier.min_qty >= 8) label = "Mayoreo (8+)";
+
+                            return (
+                              <div key={i} className="flex justify-between items-center text-xs">
+                                <span className="text-slate-600 font-medium">{label}:</span>
+                                <span className="font-bold text-emerald-600">{formatCurrency(tier.price)}</span>
+                              </div>
+                            );
+                          })}
                         </div>
                       </div>
                     )}
