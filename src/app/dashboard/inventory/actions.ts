@@ -40,7 +40,7 @@ export async function insertInventoryItems(
 
     const profile_id = user.id;
 
-    const profile_id = user.id;
+
 
     // --- BATCH PROCESSING START ---
     const BATCH_SIZE = 50;
