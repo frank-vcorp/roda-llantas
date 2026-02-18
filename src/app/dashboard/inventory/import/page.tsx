@@ -161,6 +161,7 @@ export default function InventoryImportPage() {
         }));
       }
     } catch (err) {
+      console.error("CLIENT SAVE ERROR:", err);
       setState((prev) => ({
         ...prev,
         isLoading: false,
@@ -370,6 +371,27 @@ export default function InventoryImportPage() {
               </Alert>
             )}
 
+            {/* Action Buttons (Moved to Top) */}
+            <div className="flex gap-3 justify-end mb-4">
+              <Button
+                variant="outline"
+                onClick={handleReset}
+                disabled={state.isLoading}
+              >
+                Cargar otro archivo
+              </Button>
+              <Button
+                onClick={handleSaveToDatabase}
+                disabled={state.isLoading}
+                className="gap-2"
+              >
+                {state.isLoading && (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                )}
+                Guardar en Base de Datos
+              </Button>
+            </div>
+
             <Card className="overflow-x-auto">
               <div className="p-6">
                 <h2 className="text-lg font-semibold text-gray-900 mb-4">
@@ -439,26 +461,6 @@ export default function InventoryImportPage() {
                 </div>
               </div>
             </Card>
-
-            <div className="flex gap-3 justify-end">
-              <Button
-                variant="outline"
-                onClick={handleReset}
-                disabled={state.isLoading}
-              >
-                Cargar otro archivo
-              </Button>
-              <Button
-                onClick={handleSaveToDatabase}
-                disabled={state.isLoading}
-                className="gap-2"
-              >
-                {state.isLoading && (
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                )}
-                Guardar en Base de Datos
-              </Button>
-            </div>
           </div>
         )
         }
