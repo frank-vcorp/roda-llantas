@@ -6,7 +6,7 @@ import { InventoryItem as DbInventoryItem } from '@/lib/types';
 import { revalidatePath } from 'next/cache';
 
 /**
- * @fileoverview Server Action - Insertar items de inventario en Supabase
+ * @fileoverview Server Action - Inventory Management
  * @author SOFIA - Builder
  * @id IMPL-20260129-SPRINT2
  */
@@ -24,7 +24,6 @@ export async function insertInventoryItems(
   try {
     const supabase = await createClient();
 
-    // Obtener user_id del contexto autenticado
     const {
       data: { user },
       error: userError,
@@ -39,8 +38,6 @@ export async function insertInventoryItems(
 
     const profile_id = user.id;
 
-    // Preparar items para insertar con profile_id
-    // Si updatePricesOnly es true, eliminamos 'stock' del objeto para que upsert no lo toque
     const itemsToInsert = items.map((item) => {
       const payload: any = {
         ...item,
@@ -49,14 +46,10 @@ export async function insertInventoryItems(
 
       if (updatePricesOnly) {
         delete payload.stock;
-        // También podríamos querer preservar el nombre/descripción si solo son precios, 
-        // pero usualmente la lista maestra trae todo. 
-        // Lo importante es NO tocar el stock.
       }
       return payload;
     });
 
-    // Insertar/Actualizar en Inventario base (productos)
     const { error: inventoryError, data: insertedProducts } = await supabase
       .from('inventory')
       .upsert(itemsToInsert, {
@@ -73,7 +66,6 @@ export async function insertInventoryItems(
       };
     }
 
-    // Si se seleccionó un almacén Y NO estamos en modo "Solo Precios", insertar el stock específico
     if (warehouseId && insertedProducts && !updatePricesOnly) {
       const stockItems = insertedProducts.map((product) => {
         const originalItem = items.find(i => i.sku === product.sku);
@@ -94,8 +86,6 @@ export async function insertInventoryItems(
       if (stockError) {
         console.error('❌ Error al insertar stock por almacén:', stockError);
       }
-    } else {
-      // Si estamos en updatePricesOnly, no tocamos product_stock.
     }
 
     return {
@@ -145,7 +135,7 @@ export async function updateInventoryItem(id: string, data: Partial<DbInventoryI
   return { success: true };
 }
 
-export async function getInventoryForExport(): Promise<{
+export async function getMasterInventory(): Promise<{
   success: boolean;
   data?: any[];
   message?: string;
@@ -153,23 +143,53 @@ export async function getInventoryForExport(): Promise<{
   try {
     const supabase = await createClient();
 
-    // Solo admins deberían poder bajar esto, pero por ahora confiamos en RLS o UI hiding.
-    // Traemos costo, stock, marca, modelo, medida, descripcion, sku
-    const { data, error } = await supabase
+    // 1. Fetch Inventory with Costs
+    const { data: inventory, error: invError } = await supabase
       .from('inventory')
-      .select('sku, description, brand, model, medida_full, cost_price, stock')
+      .select('id, sku, description, brand, model, medida_full, cost_price, stock')
       .order('brand', { ascending: true });
 
-    if (error) {
-      throw new Error(error.message);
-    }
+    if (invError) throw new Error(invError.message);
+
+    // 2. Fetch Warehouses
+    const { data: warehouses, error: whError } = await supabase
+      .from('warehouses')
+      .select('id, name');
+
+    if (whError) throw new Error(whError.message);
+
+    // 3. Fetch Product Stock (breakdown)
+    const { data: stocks, error: stockError } = await supabase
+      .from('product_stock')
+      .select('product_id, warehouse_id, quantity');
+
+    if (stockError) throw new Error(stockError.message);
+
+    // 4. Merge Data
+    const mergedData = inventory ? inventory.map(item => {
+      const itemStocks = stocks ? stocks.filter(s => s.product_id === item.id) : [];
+
+      // Map warehouse id to name/qty
+      const stockBreakdown = warehouses ? warehouses.map(w => {
+        const s = itemStocks.find(st => st.warehouse_id === w.id);
+        return {
+          name: w.name,
+          quantity: s ? s.quantity : 0
+        };
+      }) : [];
+
+      return {
+        ...item,
+        stock_breakdown: stockBreakdown
+      };
+    }) : [];
 
     return {
       success: true,
-      data: data || [],
+      data: mergedData,
     };
   } catch (error) {
-    console.error('Error fetching inventory for export:', error);
+    console.error('Error fetching master inventory:', error);
     return {
       success: false,
       message: error instanceof Error ? error.message : 'Error desconocido',
