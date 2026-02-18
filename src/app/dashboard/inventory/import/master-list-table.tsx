@@ -92,7 +92,7 @@ export function MasterPriceList() {
                                 <TableHead className="w-[100px]">Medida</TableHead>
                                 <TableHead className="text-right w-[120px] bg-yellow-50/50">Costo</TableHead>
                                 <TableHead className="text-center w-[100px]">Total</TableHead>
-                                <TableHead className="w-[350px]">Desglose Almacenes</TableHead>
+                                <TableHead className="min-w-[350px]">Desglose Almacenes</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -129,7 +129,7 @@ export function MasterPriceList() {
                                                 {item.stock}
                                             </Badge>
                                         </TableCell>
-                                        <TableCell>
+                                        <TableCell className="min-w-[350px]">
                                             <div className="flex flex-col gap-1 text-[10px]">
                                                 {item.stock_breakdown.map((w, i) => (
                                                     w.quantity > 0 && (
