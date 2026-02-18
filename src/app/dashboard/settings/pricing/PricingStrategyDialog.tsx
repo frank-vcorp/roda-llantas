@@ -166,7 +166,7 @@ export function PricingStrategyDialog({
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-[600px]">
+            <DialogContent className="w-full max-w-[95vw] sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                     <DialogTitle>
                         {rule ? "Editar Estrategia de Precios" : "Nueva Estrategia de Precios"}
@@ -398,8 +398,8 @@ export function PricingStrategyDialog({
                             <h4 className="font-semibold text-slate-700 flex items-center gap-2 mb-3">
                                 🧮 Cotizador de Reglas
                             </h4>
-                            <div className="flex gap-4 items-start">
-                                <div className="w-1/3">
+                            <div className="flex flex-col sm:flex-row gap-4 items-start">
+                                <div className="w-full sm:w-1/3">
                                     <FormLabel className="text-xs text-slate-500">Cantidad a Comprar</FormLabel>
                                     <Input
                                         type="number"
