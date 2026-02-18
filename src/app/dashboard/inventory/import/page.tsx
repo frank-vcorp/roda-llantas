@@ -55,6 +55,9 @@ export default function InventoryImportPage() {
   const [previewData, setPreviewData] = useState<InventoryItem[]>([]);
   const [warehouses, setWarehouses] = useState<Warehouse[]>([]);
   const [selectedWarehouse, setSelectedWarehouse] = useState<string>("");
+  const [updatePricesOnly, setUpdatePricesOnly] = useState<boolean>(false); // IMPL-20260218-PRICE-MODE
+
+  console.log("RENDER IMPORT PAGE", { updatePricesOnly });
 
   useEffect(() => {
     getWarehouses().then(setWarehouses);
@@ -92,7 +95,8 @@ export default function InventoryImportPage() {
     }));
 
     try {
-      if (!selectedWarehouse) {
+      // Si NO es solo precios, obligar almacén. Si ES solo precios, el almacén es opcional (pero recomendable para consistencia)
+      if (!selectedWarehouse && !updatePricesOnly) {
         setState((prev) => ({
           ...prev,
           isLoading: false,
@@ -101,7 +105,7 @@ export default function InventoryImportPage() {
         return;
       }
 
-      const result = await insertInventoryItems(previewData, selectedWarehouse);
+      const result = await insertInventoryItems(previewData, selectedWarehouse, updatePricesOnly);
 
       if (result.success) {
         setState((prev) => ({
@@ -149,9 +153,6 @@ export default function InventoryImportPage() {
           <h1 className="text-4xl font-bold text-gray-900">
             Importar Inventario
           </h1>
-          <p className="text-gray-600 mt-2">
-            Carga masiva de llantas desde Excel o CSV
-          </p>
           <p className="text-gray-600 mt-2">
             Carga masiva de llantas desde Excel o CSV
           </p>
@@ -227,6 +228,19 @@ export default function InventoryImportPage() {
                 isLoading={state.isLoading}
                 error={state.error || undefined}
               />
+
+              <div className="mt-4 flex items-center space-x-2 bg-amber-50 p-3 rounded border border-amber-200">
+                <input
+                  type="checkbox"
+                  id="priceOnly"
+                  className="h-4 w-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
+                  checked={updatePricesOnly}
+                  onChange={(e) => setUpdatePricesOnly(e.target.checked)}
+                />
+                <label htmlFor="priceOnly" className="text-sm font-medium text-amber-800 cursor-pointer select-none">
+                  <strong>Modo "Lista de Precios" (Mane/Proveedor):</strong> Solo actualizar Costos y Detalles, <u>NO tocar Existencias/Stock</u>.
+                </label>
+              </div>
             </Card>
           </div>
         )}

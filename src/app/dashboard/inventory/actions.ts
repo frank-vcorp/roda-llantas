@@ -13,7 +13,8 @@ import { revalidatePath } from 'next/cache';
 
 export async function insertInventoryItems(
   items: InventoryItem[],
-  warehouseId?: string
+  warehouseId?: string,
+  updatePricesOnly: boolean = false
 ): Promise<{
   success: boolean;
   message: string;
@@ -39,10 +40,21 @@ export async function insertInventoryItems(
     const profile_id = user.id;
 
     // Preparar items para insertar con profile_id
-    const itemsToInsert = items.map((item) => ({
-      ...item,
-      profile_id,
-    }));
+    // Si updatePricesOnly es true, eliminamos 'stock' del objeto para que upsert no lo toque
+    const itemsToInsert = items.map((item) => {
+      const payload: any = {
+        ...item,
+        profile_id,
+      };
+
+      if (updatePricesOnly) {
+        delete payload.stock;
+        // También podríamos querer preservar el nombre/descripción si solo son precios, 
+        // pero usualmente la lista maestra trae todo. 
+        // Lo importante es NO tocar el stock.
+      }
+      return payload;
+    });
 
     // Insertar/Actualizar en Inventario base (productos)
     const { error: inventoryError, data: insertedProducts } = await supabase
@@ -61,8 +73,8 @@ export async function insertInventoryItems(
       };
     }
 
-    // Si se seleccionó un almacén, insertar el stock específico
-    if (warehouseId && insertedProducts) {
+    // Si se seleccionó un almacén Y NO estamos en modo "Solo Precios", insertar el stock específico
+    if (warehouseId && insertedProducts && !updatePricesOnly) {
       const stockItems = insertedProducts.map((product) => {
         const originalItem = items.find(i => i.sku === product.sku);
         return {
@@ -81,21 +93,14 @@ export async function insertInventoryItems(
 
       if (stockError) {
         console.error('❌ Error al insertar stock por almacén:', stockError);
-        // No retornamos error fatal porque el producto sí se creó, pero logueamos
       }
     } else {
-      // Fallback para inserción directa en stock global (Legacy behavior o si no hay warehouseId)
-      // La lógica de trigger 'sync_product_total_stock' no se disparará si no modificamos product_stock,
-      // pero el upsert de arriba ya actualizó el stock global si venía en el item.
-      // Sin embargo, con el nuevo modelo, DEBERÍAMOS requerir warehouseId.
-      // Por compatibilidad, si no hay warehouseId, asumimos que se actualizó el stock global directamente en la tabla inventory.
+      // Si estamos en updatePricesOnly, no tocamos product_stock.
     }
-
-
 
     return {
       success: true,
-      message: `✅ ${insertedProducts?.length || items.length} items procesados exitosamente en ${warehouseId ? 'Almacén seleccionado' : 'Inventario Global'}`,
+      message: `✅ ${insertedProducts?.length || items.length} items procesados exitosamente ${updatePricesOnly ? '(Solo Precios Actualizados)' : ''}`,
       insertedCount: insertedProducts?.length || items.length,
     };
   } catch (err) {
