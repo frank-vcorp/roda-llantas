@@ -62,6 +62,7 @@ export function PricingStrategyDialog({
 }: PricingStrategyDialogProps) {
     const [isLoading, setIsLoading] = useState(false);
     const [testCost, setTestCost] = useState<number>(1000);
+    const [quoterQty, setQuoterQty] = useState<number>(1);
 
     const form = useForm<FormValues>({
         resolver: zodResolver(strategySchema),
@@ -388,6 +389,101 @@ export function PricingStrategyDialog({
                                     <p className="text-emerald-500/70 mt-1">
                                         +${Math.round((testCost * (1 + (form.watch("wholesale_margin") || 0) / 100)) - testCost)}
                                     </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* COTIZADOR DE LOGICA (QUOTER) - IMPL-20260218-QUOTER */}
+                        <div className="bg-slate-50 rounded-lg p-4 border border-slate-200">
+                            <h4 className="font-semibold text-slate-700 flex items-center gap-2 mb-3">
+                                🧮 Cotizador de Reglas
+                            </h4>
+                            <div className="flex gap-4 items-start">
+                                <div className="w-1/3">
+                                    <FormLabel className="text-xs text-slate-500">Cantidad a Comprar</FormLabel>
+                                    <Input
+                                        type="number"
+                                        className="mt-1 bg-white"
+                                        placeholder="Ej. 10"
+                                        onChange={(e) => {
+                                            const qty = parseInt(e.target.value) || 0;
+                                            // Logic to find applicable rule
+                                            const p3Qty = form.getValues("promo3_qty") || 3;
+                                            const p4Qty = form.getValues("promo4_qty") || 4;
+                                            const wsQty = form.getValues("wholesale_qty") || 8;
+
+                                            let applied = "Público";
+                                            let margin = form.getValues("public_margin");
+                                            let color = "text-slate-700";
+
+                                            if (qty >= wsQty) {
+                                                applied = "Mayoreo";
+                                                margin = form.getValues("wholesale_margin");
+                                                color = "text-slate-600 font-bold";
+                                            } else if (qty >= p4Qty) {
+                                                applied = "Escala 2";
+                                                margin = form.getValues("promo4_margin");
+                                                color = "text-blue-600 font-bold";
+                                            } else if (qty >= p3Qty) {
+                                                applied = "Escala 1";
+                                                margin = form.getValues("promo3_margin");
+                                                color = "text-emerald-600 font-bold";
+                                            }
+
+                                            // Update a visual element or state? 
+                                            // Since we are inside the render, we can't easily set state without re-render.
+                                            // Let's use a small local state for this widget or just render it based on a new state variable.
+                                            // Ideally we should use a state variable.
+                                            // But for this patch, I'll use a `quoterQty` state.
+                                            setQuoterQty(qty);
+                                        }}
+                                    />
+                                </div>
+                                <div className="flex-1 bg-white p-3 rounded border border-slate-200">
+                                    <p className="text-xs text-slate-400 mb-1">Regla Aplicada:</p>
+                                    {(() => {
+                                        const qty = quoterQty;
+                                        const p3Qty = form.watch("promo3_qty") || 3;
+                                        const p4Qty = form.watch("promo4_qty") || 4;
+                                        const wsQty = form.watch("wholesale_qty") || 8;
+
+                                        let applied = "Público";
+                                        let margin = form.watch("public_margin");
+                                        let color = "text-slate-700";
+                                        let bg = "bg-slate-100";
+
+                                        if (qty >= wsQty) {
+                                            applied = "Mayoreo (8+)";
+                                            margin = form.watch("wholesale_margin");
+                                            color = "text-slate-800";
+                                            bg = "bg-slate-200";
+                                        } else if (qty >= p4Qty) {
+                                            applied = "Escala 2 (Promo 4)";
+                                            margin = form.watch("promo4_margin");
+                                            color = "text-blue-700";
+                                            bg = "bg-blue-100";
+                                        } else if (qty >= p3Qty) {
+                                            applied = "Escala 1 (Promo 3)";
+                                            margin = form.watch("promo3_margin");
+                                            color = "text-emerald-700";
+                                            bg = "bg-emerald-100";
+                                        }
+
+                                        // Calculate Price
+                                        const price = Math.round(testCost * (1 + (margin || 0) / 100));
+
+                                        return (
+                                            <div className="flex justify-between items-center">
+                                                <div>
+                                                    <span className={`text-lg font-bold ${color}`}>{applied}</span>
+                                                    <p className="text-xs text-muted-foreground">Margen: {margin}%</p>
+                                                </div>
+                                                <div className={`text-right px-3 py-1 rounded ${bg}`}>
+                                                    <span className={`text-xl font-mono font-bold ${color}`}>${price}</span>
+                                                </div>
+                                            </div>
+                                        );
+                                    })()}
                                 </div>
                             </div>
                         </div>
