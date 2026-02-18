@@ -83,8 +83,8 @@ export function MasterPriceList() {
                 </div>
             </CardHeader>
             <CardContent className="p-0">
-                <div className="max-h-[600px] overflow-auto">
-                    <Table>
+                <div className="max-h-[600px] overflow-auto border rounded-md">
+                    <Table className="min-w-[1000px]">
                         <TableHeader className="bg-slate-50 sticky top-0 z-10">
                             <TableRow>
                                 <TableHead className="w-[100px]">SKU</TableHead>
