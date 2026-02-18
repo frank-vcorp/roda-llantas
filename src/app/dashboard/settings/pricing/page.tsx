@@ -1,9 +1,8 @@
 /**
- * Página de Configuración de Precios
+ * Página de Configuración de Precios (Simplificada - Grid)
  *
  * @author SOFIA - Builder
- * @id IMPL-20260129-PRICING-UI
- * @ref context/SPEC-PRICING-ENGINE.md
+ * @id IMPL-20260218-PRICING-GRID
  */
 
 "use client";
@@ -11,8 +10,8 @@
 import { useState, useEffect } from "react";
 import { PricingRule } from "@/lib/types";
 import { getPricingRules } from "./actions";
-import { PricingRulesList } from "./PricingRulesList";
-import { PricingRuleDialog } from "./PricingRuleDialog";
+import { PricingStrategyTable } from "./PricingStrategyTable"; // Nueva tabla grid
+import { PricingStrategyDialog } from "./PricingStrategyDialog"; // Nuevo dialog simple
 import { Button } from "@/components/ui/button";
 import { Plus, Loader2 } from "lucide-react";
 import { toast } from "sonner";
@@ -65,15 +64,15 @@ export default function PricingSettingsPage() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">
-            Configuración de Precios
+            Estrategias de Precios
           </h1>
           <p className="text-muted-foreground mt-2">
-            Administra las reglas de márgenes para calcular precios automáticos
+            Define tu grid de márgenes para Público, Promociones (3 y 4 llantas) y Mayoreo.
           </p>
         </div>
-        <Button onClick={handleNewRule} size="lg" className="gap-2">
+        <Button onClick={handleNewRule} size="lg" className="gap-2 bg-slate-900 text-white hover:bg-slate-800">
           <Plus className="w-4 h-4" />
-          Nueva Regla
+          Nueva Estrategia
         </Button>
       </div>
 
@@ -82,19 +81,19 @@ export default function PricingSettingsPage() {
         <div className="flex items-center justify-center p-12">
           <div className="flex flex-col items-center gap-2">
             <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
-            <p className="text-sm text-muted-foreground">Cargando reglas...</p>
+            <p className="text-sm text-muted-foreground">Cargando estrategias...</p>
           </div>
         </div>
       ) : (
-        <PricingRulesList
+        <PricingStrategyTable
           rules={rules}
           onEdit={handleEditRule}
           onDeleted={loadRules}
         />
       )}
 
-      {/* Dialog para crear/editar */}
-      <PricingRuleDialog
+      {/* Dialog para crear/editar (Grid Mode) */}
+      <PricingStrategyDialog
         open={dialogOpen}
         onOpenChange={handleDialogOpenChange}
         rule={selectedRule}
@@ -102,25 +101,14 @@ export default function PricingSettingsPage() {
       />
 
       {/* Info útil */}
-      <div className="rounded-lg border bg-muted/50 p-4 space-y-2">
-        <h3 className="font-semibold text-sm">Cómo funciona:</h3>
-        <ul className="text-sm text-muted-foreground space-y-1 list-disc list-inside">
-          <li>
-            Las reglas se ordenan por <strong>Prioridad</strong> (mayor número
-            = mayor prioridad)
-          </li>
-          <li>
-            El <strong>Patrón de Marca</strong> usa ILIKE (case-insensitive).
-            Usa % como comodín.
-          </li>
-          <li>
-            Si el patrón es vacío, la regla aplica a <strong>todas</strong> las
-            marcas
-          </li>
-          <li>
-            Los porcentajes se aplican al costo para calcular el precio de venta
-          </li>
-        </ul>
+      <div className="rounded-lg border bg-blue-50 p-4 text-blue-800 text-sm">
+        <p className="font-semibold mb-1">💡 Nota sobre la lógica:</p>
+        <p>
+          Si configuras una marca específica (ej. Michelin), el sistema usará esa estrategia primero.
+          Si no hay estrategia para la marca, usará la estrategia General.
+          <br />
+          El <strong>Precio Público</strong> se calcula como Costo + Margen Público.
+        </p>
       </div>
     </div>
   );

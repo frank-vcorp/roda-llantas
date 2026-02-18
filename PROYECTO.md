@@ -223,7 +223,12 @@
 - [x] [UI] Generar iconos adaptativos (192x192, 512x512, Apple Touch).
 - [x] [INFRA] Implementar Service Worker básico para instalabilidad.
 - [x] [QA] Certificación de PWA "Ready for Install".
+- [QA]- **Verification**: Verified on production (Desktop & Mobile) with visual evidence. Confirmed that stock breakdown appears correctly in tooltips (Desktop) and within product cards (Mobile).
 
+> **Note**: Mobile view required a specific update to `InventoryItem` type and `MobileSearch` component to handle warehouse codes, which has been implemented and merged.
+
+## [2026-02-17] Sprint Closing
+The Multi-Warehouse feature is now fully operational across all devices.
 > Micro-Sprint completado bajo la metodología INTEGRA v2.2. (DOC-20260131-08)
 
 ---
