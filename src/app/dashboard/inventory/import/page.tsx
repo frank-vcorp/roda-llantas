@@ -497,6 +497,8 @@ export default function InventoryImportPage() {
             </Alert>
           )
         }
-      </div >
-      );
+        }
+      </div>
+    </div>
+  );
 }
