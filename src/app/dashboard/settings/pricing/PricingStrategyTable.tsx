@@ -63,16 +63,27 @@ export function PricingStrategyTable({
     };
 
     // Helper para extraer márgenes de los JSON rules
-    const getMargin = (rule: PricingRule, qty: number) => {
-        if (!rule.volume_rules) return "-";
+    // Helper para extraer márgenes de los JSON rules con cantidad
+    const getMarginDisplay = (rule: PricingRule, index: number, defaultQty: number) => {
+        if (!rule.volume_rules) return <span className="text-slate-400">-</span>;
+
         let vRules: any[] = [];
         if (typeof rule.volume_rules === 'string') {
             try { vRules = JSON.parse(rule.volume_rules); } catch (e) { vRules = []; }
         } else if (Array.isArray(rule.volume_rules)) {
             vRules = rule.volume_rules;
         }
-        const found = vRules.find((r: any) => r.min_qty === qty);
-        return found ? `${found.margin_percentage}%` : "-";
+
+        // Asumimos orden por índice: 0->Escala1, 1->Escala2, 2->Mayoreo
+        const found = vRules[index];
+        if (!found) return <span className="text-slate-400">-</span>;
+
+        return (
+            <div className="flex flex-col leading-tight">
+                <span>{found.margin_percentage}%</span>
+                <span className="text-[10px] opacity-70 font-normal">x{found.min_qty || defaultQty}</span>
+            </div>
+        );
     };
 
     return (
@@ -83,9 +94,9 @@ export function PricingStrategyTable({
                         <TableRow>
                             <TableHead className="w-[200px]">Estrategia / Marca</TableHead>
                             <TableHead className="text-center bg-slate-50 text-slate-700 font-bold border-l">Público</TableHead>
-                            <TableHead className="text-center bg-emerald-50 text-emerald-700 font-bold border-l">Promo 3</TableHead>
-                            <TableHead className="text-center bg-blue-50 text-blue-700 font-bold border-l">Promo 4</TableHead>
-                            <TableHead className="text-center bg-slate-50 text-slate-700 font-bold border-l border-r">Mayoreo (8+)</TableHead>
+                            <TableHead className="text-center bg-emerald-50 text-emerald-700 font-bold border-l">Escala 1</TableHead>
+                            <TableHead className="text-center bg-blue-50 text-blue-700 font-bold border-l">Escala 2</TableHead>
+                            <TableHead className="text-center bg-slate-50 text-slate-700 font-bold border-l border-r">Mayoreo</TableHead>
                             <TableHead className="text-right">Acciones</TableHead>
                         </TableRow>
                     </TableHeader>
@@ -111,13 +122,13 @@ export function PricingStrategyTable({
                                         {rule.margin_percentage}%
                                     </TableCell>
                                     <TableCell className="text-center border-l text-lg font-mono font-bold text-emerald-600 bg-emerald-50/10">
-                                        {getMargin(rule, 3)}
+                                        {getMarginDisplay(rule, 0, 3)}
                                     </TableCell>
                                     <TableCell className="text-center border-l text-lg font-mono font-bold text-blue-600 bg-blue-50/10">
-                                        {getMargin(rule, 4)}
+                                        {getMarginDisplay(rule, 1, 4)}
                                     </TableCell>
                                     <TableCell className="text-center border-l border-r text-lg font-mono text-slate-500">
-                                        {getMargin(rule, 8)}
+                                        {getMarginDisplay(rule, 2, 8)}
                                     </TableCell>
                                     <TableCell className="text-right">
                                         <div className="flex justify-end gap-2">
