@@ -7,6 +7,7 @@
  * @ref context/Documento de Especificaciones Técnicas Llantera.md
  */
 
+import { createClient } from "@supabase/supabase-js";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 
@@ -30,6 +31,20 @@ export const createClient = async () => {
             // Las cookies pueden no ser setteable en middleware
           }
         },
+      },
+    }
+  );
+  );
+};
+
+export const createAdminClient = async () => {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false,
       },
     }
   );

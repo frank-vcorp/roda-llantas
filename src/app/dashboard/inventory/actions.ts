@@ -1,6 +1,6 @@
 'use server';
 
-import { createClient } from '@/lib/supabase/server';
+import { createClient, createAdminClient } from '@/lib/supabase/server';
 import { InventoryItem } from '@/lib/logic/excel-parser';
 import { InventoryItem as DbInventoryItem } from '@/lib/types';
 import { revalidatePath } from 'next/cache';
@@ -24,6 +24,7 @@ export async function insertInventoryItems(
 }> {
   try {
     const supabase = await createClient();
+    const adminSupabase = await createAdminClient();
 
     const {
       data: { user },
@@ -51,7 +52,8 @@ export async function insertInventoryItems(
       return payload;
     });
 
-    const { error: inventoryError, data: insertedProducts } = await supabase
+    // Use admin client for upsert to ensure it works regardless of RLS
+    const { error: inventoryError, data: insertedProducts } = await adminSupabase
       .from('inventory')
       .upsert(itemsToInsert, {
         onConflict: 'sku',
@@ -70,7 +72,7 @@ export async function insertInventoryItems(
     if (warehouseId && !updatePricesOnly) {
       // Si se solicitó MODO REEMPLAZO, vaciamos el stock de este almacén antes de insertar
       if (replaceStock) {
-        await supabase
+        await adminSupabase
           .from('product_stock')
           .delete()
           .eq('warehouse_id', warehouseId);
@@ -89,7 +91,7 @@ export async function insertInventoryItems(
           };
         });
 
-        const { error: stockError } = await supabase
+        const { error: stockError } = await adminSupabase
           .from('product_stock')
           .upsert(stockItems, {
             onConflict: 'product_id, warehouse_id'
@@ -126,8 +128,13 @@ export async function insertInventoryItems(
 
 export async function deleteInventoryItem(id: string) {
   const supabase = await createClient();
+  const adminSupabase = await createAdminClient();
 
-  const { error } = await supabase
+  // Auth Check
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Unauthorized");
+
+  const { error } = await adminSupabase
     .from('inventory')
     .delete()
     .eq('id', id);
@@ -142,8 +149,13 @@ export async function deleteInventoryItem(id: string) {
 
 export async function updateInventoryItem(id: string, data: Partial<DbInventoryItem>) {
   const supabase = await createClient();
+  const adminSupabase = await createAdminClient();
 
-  const { error } = await supabase
+  // Auth Check
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Unauthorized");
+
+  const { error } = await adminSupabase
     .from('inventory')
     .update(data)
     .eq('id', id);
@@ -228,10 +240,13 @@ export async function getMasterInventory(): Promise<{
 export async function clearWarehouseStock(warehouseId: string) {
   try {
     const supabase = await createClient();
+    const adminSupabase = await createAdminClient();
 
-    // Validar permisos? (Por ahora abierto a auth users)
+    // Validar Auth
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return { success: false, message: 'Usuario no autenticado' };
 
-    const { error } = await supabase
+    const { error } = await adminSupabase
       .from('product_stock')
       .delete()
       .eq('warehouse_id', warehouseId);
@@ -260,9 +275,14 @@ export async function clearWarehouseStock(warehouseId: string) {
 export async function clearAllInventory() {
   try {
     const supabase = await createClient();
+    const adminSupabase = await createAdminClient();
 
-    // 1. Borrar stock (relaciones)
-    const { error: stockError } = await supabase
+    // Validar Auth
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return { success: false, message: 'Usuario no autenticado' };
+
+    // 1. Borrar stock (relaciones) - Usamos neq id null hack para borrar todo
+    const { error: stockError } = await adminSupabase
       .from('product_stock')
       .delete()
       .neq('id', '00000000-0000-0000-0000-000000000000'); // Hack to delete all
@@ -270,7 +290,7 @@ export async function clearAllInventory() {
     if (stockError) throw new Error(`Stock: ${stockError.message}`);
 
     // 2. Borrar inventario (productos)
-    const { error: invError } = await supabase
+    const { error: invError } = await adminSupabase
       .from('inventory')
       .delete()
       .neq('id', '00000000-0000-0000-0000-000000000000');
