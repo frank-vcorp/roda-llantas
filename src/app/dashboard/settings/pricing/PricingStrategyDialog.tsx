@@ -58,6 +58,7 @@ export function PricingStrategyDialog({
     onSuccess,
 }: PricingStrategyDialogProps) {
     const [isLoading, setIsLoading] = useState(false);
+    const [testCost, setTestCost] = useState<number>(1000);
 
     const form = useForm<FormValues>({
         resolver: zodResolver(strategySchema),
@@ -268,6 +269,66 @@ export function PricingStrategyDialog({
                                         </FormItem>
                                     )}
                                 />
+                            </div>
+                        </div>
+
+                        {/* SIMULADOR DE PRECIOS (SANDBOX) - IMPL-20260218-SIMULATOR */}
+                        <div className="bg-slate-900 rounded-lg p-5 border border-slate-700 text-slate-200">
+                            <div className="flex items-center justify-between mb-4">
+                                <h4 className="font-semibold text-white flex items-center gap-2">
+                                    🧪 Simulador de Precios
+                                </h4>
+                                <div className="flex items-center gap-2">
+                                    <span className="text-xs text-slate-400">Costo de Prueba:</span>
+                                    <div className="relative w-24">
+                                        <span className="absolute left-2 top-1.5 text-slate-500">$</span>
+                                        <Input
+                                            type="number"
+                                            className="h-8 pl-5 bg-slate-800 border-slate-700 text-white text-right"
+                                            value={testCost}
+                                            onChange={(e) => setTestCost(Number(e.target.value))}
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-4 gap-4 text-center text-xs">
+                                <div className="p-2 bg-slate-800 rounded border border-slate-700">
+                                    <p className="text-slate-400 mb-1">Público</p>
+                                    <p className="text-lg font-bold text-white">
+                                        ${Math.round(testCost * (1 + (form.watch("public_margin") || 0) / 100))}
+                                    </p>
+                                    <p className="text-emerald-400 mt-1">
+                                        Contento: +${Math.round((testCost * (1 + (form.watch("public_margin") || 0) / 100)) - testCost)}
+                                    </p>
+                                </div>
+                                <div className="p-2 bg-slate-800/50 rounded border border-slate-700/50">
+                                    <p className="text-emerald-400 mb-1">Promo 3</p>
+                                    <p className="text-lg font-bold text-white">
+                                        ${Math.round(testCost * (1 + (form.watch("promo3_margin") || 0) / 100))}
+                                    </p>
+                                    <p className="text-emerald-500/70 mt-1">
+                                        +${Math.round((testCost * (1 + (form.watch("promo3_margin") || 0) / 100)) - testCost)}
+                                    </p>
+                                </div>
+                                <div className="p-2 bg-slate-800/50 rounded border border-slate-700/50">
+                                    <p className="text-blue-400 mb-1">Promo 4</p>
+                                    <p className="text-lg font-bold text-white">
+                                        ${Math.round(testCost * (1 + (form.watch("promo4_margin") || 0) / 100))}
+                                    </p>
+                                    <p className="text-emerald-500/70 mt-1">
+                                        +${Math.round((testCost * (1 + (form.watch("promo4_margin") || 0) / 100)) - testCost)}
+                                    </p>
+                                </div>
+                                <div className="p-2 bg-slate-800/50 rounded border border-slate-700/50">
+                                    <p className="text-slate-400 mb-1">Mayoreo</p>
+                                    <p className="text-lg font-bold text-white">
+                                        ${Math.round(testCost * (1 + (form.watch("wholesale_margin") || 0) / 100))}
+                                    </p>
+                                    <p className="text-emerald-500/70 mt-1">
+                                        +${Math.round((testCost * (1 + (form.watch("wholesale_margin") || 0) / 100)) - testCost)}
+                                    </p>
+                                </div>
                             </div>
                         </div>
 
