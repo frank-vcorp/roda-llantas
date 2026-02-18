@@ -40,80 +40,78 @@ export async function insertInventoryItems(
 
     const profile_id = user.id;
 
-    const itemsToInsert = items.map((item) => {
-      const payload: any = {
-        ...item,
-        profile_id,
-      };
+    const profile_id = user.id;
 
-      if (updatePricesOnly) {
-        delete payload.stock;
+    // --- BATCH PROCESSING START ---
+    const BATCH_SIZE = 50;
+    let totalInserted = 0;
+    const allInsertedProducts: { id: string; sku: string }[] = [];
+
+    // Pre-clean warehouse stock if replacing (do it once)
+    if (warehouseId && !updatePricesOnly && replaceStock) {
+      const { error: deleteError } = await adminSupabase
+        .from('product_stock')
+        .delete()
+        .eq('warehouse_id', warehouseId);
+
+      if (deleteError) {
+        throw new Error(`Error al limpiar stock para reemplazo: ${deleteError.message}`);
       }
-      return payload;
-    });
-
-    // Use admin client for upsert to ensure it works regardless of RLS
-    const { error: inventoryError, data: insertedProducts } = await adminSupabase
-      .from('inventory')
-      .upsert(itemsToInsert, {
-        onConflict: 'sku',
-        ignoreDuplicates: false
-      })
-      .select('id, sku');
-
-    if (inventoryError) {
-      console.error('❌ Error al insertar inventario base:', inventoryError);
-      return {
-        success: false,
-        message: `Error en la base de datos (Inventario): ${inventoryError.message}`,
-      };
     }
 
-    if (warehouseId && !updatePricesOnly) {
-      // Si se solicitó MODO REEMPLAZO, vaciamos el stock de este almacén antes de insertar
-      if (replaceStock) {
-        await adminSupabase
-          .from('product_stock')
-          .delete()
-          .eq('warehouse_id', warehouseId);
+    // Process in batches
+    for (let i = 0; i < items.length; i += BATCH_SIZE) {
+      const batchItems = items.slice(i, i + BATCH_SIZE);
+      const inventoryPayload = batchItems.map((item) => {
+        const payload: any = { ...item, profile_id };
+        if (updatePricesOnly) delete payload.stock;
+        return payload;
+      });
+
+      // 1. Upsert Inventory Batch
+      const { data: batchInserted, error: invError } = await adminSupabase
+        .from('inventory')
+        .upsert(inventoryPayload, { onConflict: 'sku', ignoreDuplicates: false })
+        .select('id, sku');
+
+      if (invError) {
+        console.error(`❌ Error en batch ${i}:`, invError);
+        throw new Error(`Error en el lote ${i / BATCH_SIZE + 1}: ${invError.message}`);
       }
 
-      // Procedemos a insertar/actualizar el stock
-      if (insertedProducts) {
+      if (batchInserted) {
+        allInsertedProducts.push(...batchInserted);
+        totalInserted += batchInserted.length;
 
-        const stockItems = insertedProducts.map((product) => {
-          const originalItem = items.find(i => i.sku === product.sku);
-          return {
-            product_id: product.id,
-            warehouse_id: warehouseId,
-            quantity: originalItem?.stock || 0,
-            updated_at: new Date().toISOString()
-          };
-        });
-
-        const { error: stockError } = await adminSupabase
-          .from('product_stock')
-          .upsert(stockItems, {
-            onConflict: 'product_id, warehouse_id'
+        // 2. Upsert Stock Batch (only if needed)
+        if (warehouseId && !updatePricesOnly) {
+          const stockPayload = batchInserted.map((product) => {
+            const originalItem = batchItems.find(item => item.sku === product.sku);
+            return {
+              product_id: product.id,
+              warehouse_id: warehouseId,
+              quantity: originalItem?.stock || 0,
+              updated_at: new Date().toISOString()
+            };
           });
 
-        if (stockError) {
-          console.error('❌ Error al insertar stock por almacén:', stockError);
+          const { error: stockError } = await adminSupabase
+            .from('product_stock')
+            .upsert(stockPayload, { onConflict: 'product_id, warehouse_id' });
+
+          if (stockError) {
+            console.error(`❌ Error stock batch ${i}:`, stockError);
+            // We continue? Or throw? Let's throw to be safe
+            throw new Error(`Error actualizando stock en lote ${i / BATCH_SIZE + 1}`);
+          }
         }
       }
-
-      return {
-        success: true,
-        message: `✅ ${insertedProducts?.length || items.length} items procesados exitosamente ${updatePricesOnly ? '(Solo Precios Actualizados)' : ''}`,
-        insertedCount: insertedProducts?.length || items.length,
-      };
     }
 
-    // Fallback success return if not entering the if block above
     return {
       success: true,
-      message: `✅ ${insertedProducts?.length || items.length} items procesados exitosamente`,
-      insertedCount: insertedProducts?.length || items.length,
+      message: `✅ Importación completada: ${totalInserted} productos procesados en lotes.`,
+      insertedCount: totalInserted,
     };
 
   } catch (err) {
