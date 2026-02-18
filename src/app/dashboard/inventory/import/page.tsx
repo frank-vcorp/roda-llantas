@@ -144,7 +144,7 @@ export default function InventoryImportPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-6xl mx-auto">
+      <div className="container mx-auto p-6 max-w-7xl pb-32">
         {/* Header */}
         <div className="mb-8">
           <Link href="/dashboard/inventory" className="inline-flex items-center text-sm text-gray-500 hover:text-gray-900 mb-4 transition-colors">
