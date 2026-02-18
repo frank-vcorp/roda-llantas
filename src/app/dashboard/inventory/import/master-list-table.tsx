@@ -31,6 +31,7 @@ interface MasterItem {
 
 export function MasterPriceList() {
     const [data, setData] = useState<MasterItem[]>([]);
+    const [warehouses, setWarehouses] = useState<{ id: string; name: string }[]>([]);
     const [loading, setLoading] = useState(false);
     const [search, setSearch] = useState("");
 
@@ -40,6 +41,9 @@ export function MasterPriceList() {
             const res = await getMasterInventory();
             if (res.success && res.data) {
                 setData(res.data);
+                if (res.warehouses) {
+                    setWarehouses(res.warehouses);
+                }
             }
         } catch (error) {
             console.error("Error loading master list", error);
@@ -92,13 +96,15 @@ export function MasterPriceList() {
                                 <TableHead className="w-[100px]">Medida</TableHead>
                                 <TableHead className="text-right w-[120px] bg-yellow-50/50">Costo</TableHead>
                                 <TableHead className="text-center w-[100px]">Total</TableHead>
-                                <TableHead className="min-w-[350px]">Desglose Almacenes</TableHead>
+                                {warehouses.map(w => (
+                                    <TableHead key={w.id} className="text-center w-[100px] bg-slate-50">{w.name}</TableHead>
+                                ))}
                             </TableRow>
                         </TableHeader>
                         <TableBody>
                             {loading && data.length === 0 ? (
                                 <TableRow>
-                                    <TableCell colSpan={6} className="h-24 text-center">
+                                    <TableCell colSpan={5 + warehouses.length} className="h-24 text-center">
                                         <div className="flex items-center justify-center gap-2 text-slate-500">
                                             <Loader2 className="h-5 w-5 animate-spin" /> Cargando lista maestra...
                                         </div>
@@ -106,7 +112,7 @@ export function MasterPriceList() {
                                 </TableRow>
                             ) : filteredData.length === 0 ? (
                                 <TableRow>
-                                    <TableCell colSpan={6} className="h-24 text-center text-slate-500">
+                                    <TableCell colSpan={5 + warehouses.length} className="h-24 text-center text-slate-500">
                                         No se encontraron resultados.
                                     </TableCell>
                                 </TableRow>
@@ -129,19 +135,16 @@ export function MasterPriceList() {
                                                 {item.stock}
                                             </Badge>
                                         </TableCell>
-                                        <TableCell className="min-w-[350px]">
-                                            <div className="flex flex-col gap-1 text-[10px]">
-                                                {item.stock_breakdown.map((w, i) => (
-                                                    w.quantity > 0 && (
-                                                        <div key={i} className="flex justify-between border-b border-dotted border-slate-200 pb-0.5 last:border-0">
-                                                            <span className="text-slate-500 truncate max-w-[280px]">{w.name}</span>
-                                                            <span className="font-mono font-bold text-slate-700">{w.quantity}</span>
-                                                        </div>
-                                                    )
-                                                ))}
-                                                {item.stock === 0 && <span className="text-slate-300">-</span>}
-                                            </div>
-                                        </TableCell>
+                                        {warehouses.map(w => {
+                                            const stock = item.stock_breakdown.find(sb => sb.name === w.name)?.quantity || 0;
+                                            return (
+                                                <TableCell key={w.id} className="text-center">
+                                                    <span className={`font-mono ${stock > 0 ? "text-slate-900 font-bold" : "text-slate-300"}`}>
+                                                        {stock > 0 ? stock : "-"}
+                                                    </span>
+                                                </TableCell>
+                                            );
+                                        })}
                                     </TableRow>
                                 ))
                             )}

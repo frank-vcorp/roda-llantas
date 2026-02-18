@@ -138,6 +138,7 @@ export async function updateInventoryItem(id: string, data: Partial<DbInventoryI
 export async function getMasterInventory(): Promise<{
   success: boolean;
   data?: any[];
+  warehouses?: { id: string; name: string }[];
   message?: string;
 }> {
   try {
@@ -187,6 +188,7 @@ export async function getMasterInventory(): Promise<{
     return {
       success: true,
       data: mergedData,
+      warehouses: warehouses || []
     };
   } catch (error) {
     console.error('Error fetching master inventory:', error);
