@@ -143,7 +143,15 @@ export default function InventoryImportPage() {
         return;
       }
 
+      console.log("🚀 STARTING IMPORT REQUEST", {
+        count: previewData.length,
+        warehouse: selectedWarehouse,
+        replace: replaceStock
+      });
+
       const result = await insertInventoryItems(previewData, selectedWarehouse, updatePricesOnly, replaceStock);
+
+      console.log("✅ IMPORT RESPONSE RECEIVED:", result);
 
       if (result.success) {
         setState((prev) => ({

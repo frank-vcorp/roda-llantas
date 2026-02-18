@@ -39,8 +39,7 @@ export async function insertInventoryItems(
     }
 
     const profile_id = user.id;
-
-
+    console.log(`SERVER: Starting import for ${items.length} items. Profile: ${profile_id}`);
 
     // --- BATCH PROCESSING START ---
     const BATCH_SIZE = 50;
@@ -62,6 +61,8 @@ export async function insertInventoryItems(
     // Process in batches
     for (let i = 0; i < items.length; i += BATCH_SIZE) {
       const batchItems = items.slice(i, i + BATCH_SIZE);
+      console.log(`SERVER: Processing batch ${i / BATCH_SIZE + 1} (${batchItems.length} items)`);
+
       const inventoryPayload = batchItems.map((item) => {
         const payload: any = { ...item, profile_id };
         if (updatePricesOnly) delete payload.stock;
