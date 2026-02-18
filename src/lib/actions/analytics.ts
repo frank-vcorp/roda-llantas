@@ -12,16 +12,7 @@
 
 'use server';
 
-import { createClient } from '@supabase/supabase-js';
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY;
-
-if (!supabaseUrl || !supabaseServiceKey) {
-  throw new Error('Missing Supabase credentials');
-}
-
-const supabase = createClient(supabaseUrl, supabaseServiceKey);
+import { createAdminClient } from '@/lib/supabase/server';
 
 /**
  * Tipos para respuestas de analytics
@@ -45,6 +36,8 @@ export interface LostSalesStats {
  */
 export async function getLostSalesStats(): Promise<LostSalesStats> {
   try {
+    const supabase = await createAdminClient();
+
     const { data, error } = await supabase
       .from('lost_sales_summary')
       .select('*')

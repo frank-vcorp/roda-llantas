@@ -13,17 +13,8 @@
 
 'use server';
 
-import { createClient } from '@supabase/supabase-js';
+import { createAdminClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY;
-
-if (!supabaseUrl || !supabaseServiceKey) {
-  throw new Error('Missing Supabase credentials');
-}
-
-const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
 /**
  * Tipo para respuesta de conversión
@@ -56,6 +47,8 @@ export async function convertQuotationToSale(
   userId?: string
 ): Promise<ConversionResult> {
   try {
+    const supabase = await createAdminClient();
+
     // Llamar a la función RPC que maneja TODA la transacción de forma atómica
     const { data, error } = await supabase.rpc('confirm_sale', {
       p_quotation_id: quotationId
