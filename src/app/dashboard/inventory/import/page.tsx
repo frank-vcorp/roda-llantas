@@ -7,7 +7,7 @@ import { insertInventoryItems, clearWarehouseStock, clearAllInventory } from '@/
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { AlertCircle, CheckCircle, Loader2, Info, FileSpreadsheet, ArrowLeft } from 'lucide-react';
+import { AlertCircle, CheckCircle, Loader2, Info, FileSpreadsheet, ArrowLeft, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 import { MasterPriceList } from './master-list-table';
 import {
@@ -496,7 +496,6 @@ export default function InventoryImportPage() {
               <AlertDescription>{state.error}</AlertDescription>
             </Alert>
           )
-        }
         }
       </div>
     </div>
