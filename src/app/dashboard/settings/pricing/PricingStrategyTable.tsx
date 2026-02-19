@@ -94,8 +94,7 @@ export function PricingStrategyTable({
                         <TableRow>
                             <TableHead className="w-[200px]">Estrategia / Marca</TableHead>
                             <TableHead className="text-center bg-slate-50 text-slate-700 font-bold border-l">Público</TableHead>
-                            <TableHead className="text-center bg-emerald-50 text-emerald-700 font-bold border-l">Escala 1</TableHead>
-                            <TableHead className="text-center bg-blue-50 text-blue-700 font-bold border-l">Escala 2</TableHead>
+                            <TableHead className="text-center bg-emerald-50 text-emerald-700 font-bold border-l">Promoción</TableHead>
                             <TableHead className="text-center bg-slate-50 text-slate-700 font-bold border-l border-r">Mayoreo</TableHead>
                             <TableHead className="text-right">Acciones</TableHead>
                         </TableRow>
@@ -122,13 +121,10 @@ export function PricingStrategyTable({
                                         {rule.margin_percentage}%
                                     </TableCell>
                                     <TableCell className="text-center border-l text-lg font-mono font-bold text-emerald-600 bg-emerald-50/10">
-                                        {getMarginDisplay(rule, 0, 3)}
-                                    </TableCell>
-                                    <TableCell className="text-center border-l text-lg font-mono font-bold text-blue-600 bg-blue-50/10">
-                                        {getMarginDisplay(rule, 1, 4)}
+                                        {getMarginDisplay(rule, 0, 4)}
                                     </TableCell>
                                     <TableCell className="text-center border-l border-r text-lg font-mono text-slate-500">
-                                        {getMarginDisplay(rule, 2, 8)}
+                                        {getMarginDisplay(rule, 1, 8)}
                                     </TableCell>
                                     <TableCell className="text-right">
                                         <div className="flex justify-end gap-2">

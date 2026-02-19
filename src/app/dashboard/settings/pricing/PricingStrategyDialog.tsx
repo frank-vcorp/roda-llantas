@@ -37,10 +37,8 @@ const strategySchema = z.object({
     name: z.string().min(3, "El nombre es obligatorio"),
     brand_pattern: z.string().nullable(),
     public_margin: z.number().min(0).max(100),
-    promo3_margin: z.number().min(0).max(100),
-    promo3_qty: z.number().min(2).max(100),
-    promo4_margin: z.number().min(0).max(100),
-    promo4_qty: z.number().min(2).max(100),
+    promo_margin: z.number().min(0).max(100),
+    promo_qty: z.number().min(2).max(100),
     wholesale_margin: z.number().min(0).max(100),
     wholesale_qty: z.number().min(2).max(100),
 });
@@ -70,10 +68,8 @@ export function PricingStrategyDialog({
             name: "",
             brand_pattern: null,
             public_margin: 35,
-            promo3_margin: 33,
-            promo3_qty: 3,
-            promo4_margin: 31,
-            promo4_qty: 4,
+            promo_margin: 33,
+            promo_qty: 4,
             wholesale_margin: 30,
             wholesale_qty: 8,
         },
@@ -89,22 +85,21 @@ export function PricingStrategyDialog({
                 vRules = rule.volume_rules;
             }
 
-            // Mapear reglas por índice o lógica (asumimos orden 3, 4, 8)
-            // Si vRules tiene items, tratamos de mapear.
-            const r1 = vRules[0];
-            const r2 = vRules[1];
-            const r3 = vRules[2]; // Mayoreo usualmente es el ultimo o el mayor qty
+            // Mapear reglas: 0->Promo, 1->Mayoreo (ignoring any extra legacy rules)
+            const r1 = vRules[0]; // Promo
+            const r2 = vRules[vRules.length - 1]; // Wholesale (usually the last/highest qty)
+
+            // If only 1 rule exists, map it to promo, leave wholesale default?
+            // Safer to map what we have.
 
             form.reset({
                 name: rule.name || "",
                 brand_pattern: rule.brand_pattern || null,
                 public_margin: rule.margin_percentage || 35,
-                promo3_margin: r1?.margin_percentage || 33,
-                promo3_qty: r1?.min_qty || 3,
-                promo4_margin: r2?.margin_percentage || 31,
-                promo4_qty: r2?.min_qty || 4,
-                wholesale_margin: r3?.margin_percentage || 30,
-                wholesale_qty: r3?.min_qty || 8,
+                promo_margin: r1?.margin_percentage || 33,
+                promo_qty: r1?.min_qty || 4,
+                wholesale_margin: r2?.margin_percentage || 30,
+                wholesale_qty: r2?.min_qty || 8,
             });
         } else {
             // Default values for new rule
@@ -112,10 +107,8 @@ export function PricingStrategyDialog({
                 name: "",
                 brand_pattern: null,
                 public_margin: 35,
-                promo3_margin: 33,
-                promo3_qty: 3,
-                promo4_margin: 31,
-                promo4_qty: 4,
+                promo_margin: 33,
+                promo_qty: 4,
                 wholesale_margin: 30,
                 wholesale_qty: 8,
             });
@@ -133,8 +126,7 @@ export function PricingStrategyDialog({
                 priority: values.brand_pattern ? 10 : 1, // Prioridad automática: Marca > General
                 is_active: true,
                 volume_rules: [
-                    { min_qty: values.promo3_qty, margin_percentage: values.promo3_margin },
-                    { min_qty: values.promo4_qty, margin_percentage: values.promo4_margin },
+                    { min_qty: values.promo_qty, margin_percentage: values.promo_margin },
                     { min_qty: values.wholesale_qty, margin_percentage: values.wholesale_margin },
                 ],
             };
@@ -215,13 +207,13 @@ export function PricingStrategyDialog({
 
                         <div className="bg-slate-50 p-4 rounded-lg border border-slate-200">
                             <h4 className="text-sm font-medium mb-4 text-slate-700">Grid de Márgenes (%)</h4>
-                            <div className="grid grid-cols-4 gap-4">
+                            <div className="grid grid-cols-3 gap-4">
                                 <FormField
                                     control={form.control}
                                     name="public_margin"
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel className="text-xs text-slate-500">Público (1-2)</FormLabel>
+                                            <FormLabel className="text-xs text-slate-500">Público (1 pza)</FormLabel>
                                             <FormControl>
                                                 <Input
                                                     type="number"
@@ -236,10 +228,10 @@ export function PricingStrategyDialog({
                                 />
                                 <div className="space-y-2">
                                     <FormLabel className="text-xs text-emerald-600 font-bold flex flex-col gap-1 items-center">
-                                        <span>Escala 1 (Qty)</span>
+                                        <span>Promoción (Qty)</span>
                                         <FormField
                                             control={form.control}
-                                            name="promo3_qty"
+                                            name="promo_qty"
                                             render={({ field }) => (
                                                 <Input
                                                     type="number"
@@ -252,45 +244,13 @@ export function PricingStrategyDialog({
                                     </FormLabel>
                                     <FormField
                                         control={form.control}
-                                        name="promo3_margin"
+                                        name="promo_margin"
                                         render={({ field }) => (
                                             <FormControl>
                                                 <Input
                                                     type="number"
                                                     step="0.1"
                                                     className="font-bold text-center border-emerald-200 bg-emerald-50/50"
-                                                    {...field}
-                                                    onChange={e => field.onChange(parseFloat(e.target.value))}
-                                                />
-                                            </FormControl>
-                                        )}
-                                    />
-                                </div>
-                                <div className="space-y-2">
-                                    <FormLabel className="text-xs text-blue-600 font-bold flex flex-col gap-1 items-center">
-                                        <span>Escala 2 (Qty)</span>
-                                        <FormField
-                                            control={form.control}
-                                            name="promo4_qty"
-                                            render={({ field }) => (
-                                                <Input
-                                                    type="number"
-                                                    className="h-6 w-12 text-center text-xs p-0 bg-white border-blue-200"
-                                                    {...field}
-                                                    onChange={e => field.onChange(parseInt(e.target.value))}
-                                                />
-                                            )}
-                                        />
-                                    </FormLabel>
-                                    <FormField
-                                        control={form.control}
-                                        name="promo4_margin"
-                                        render={({ field }) => (
-                                            <FormControl>
-                                                <Input
-                                                    type="number"
-                                                    step="0.1"
-                                                    className="font-bold text-center border-blue-200 bg-blue-50/50"
                                                     {...field}
                                                     onChange={e => field.onChange(parseFloat(e.target.value))}
                                                 />
@@ -333,7 +293,7 @@ export function PricingStrategyDialog({
                             </div>
                         </div>
 
-                        {/* SIMULADOR DE PRECIOS (SANDBOX) - IMPL-20260218-SIMULATOR */}
+                        {/* SIMULADOR DE PRECIOS (SANDBOX) */}
                         <div className="bg-slate-900 rounded-lg p-5 border border-slate-700 text-slate-200">
                             <div className="flex items-center justify-between mb-4">
                                 <h4 className="font-semibold text-white flex items-center gap-2">
@@ -353,7 +313,7 @@ export function PricingStrategyDialog({
                                 </div>
                             </div>
 
-                            <div className="grid grid-cols-4 gap-4 text-center text-xs">
+                            <div className="grid grid-cols-3 gap-4 text-center text-xs">
                                 <div className="p-2 bg-slate-800 rounded border border-slate-700">
                                     <p className="text-slate-400 mb-1">Público</p>
                                     <p className="text-lg font-bold text-white">
@@ -364,25 +324,16 @@ export function PricingStrategyDialog({
                                     </p>
                                 </div>
                                 <div className="p-2 bg-slate-800/50 rounded border border-slate-700/50">
-                                    <p className="text-emerald-400 mb-1">{form.watch("promo3_qty") || 3} Pzas</p>
+                                    <p className="text-emerald-400 mb-1">{form.watch("promo_qty") || 4} Pzas (Promo)</p>
                                     <p className="text-lg font-bold text-white">
-                                        ${Math.round(testCost * (1 + (form.watch("promo3_margin") || 0) / 100))}
+                                        ${Math.round(testCost * (1 + (form.watch("promo_margin") || 0) / 100))}
                                     </p>
                                     <p className="text-emerald-500/70 mt-1">
-                                        +${Math.round((testCost * (1 + (form.watch("promo3_margin") || 0) / 100)) - testCost)}
+                                        +${Math.round((testCost * (1 + (form.watch("promo_margin") || 0) / 100)) - testCost)}
                                     </p>
                                 </div>
                                 <div className="p-2 bg-slate-800/50 rounded border border-slate-700/50">
-                                    <p className="text-blue-400 mb-1">{form.watch("promo4_qty") || 4} Pzas</p>
-                                    <p className="text-lg font-bold text-white">
-                                        ${Math.round(testCost * (1 + (form.watch("promo4_margin") || 0) / 100))}
-                                    </p>
-                                    <p className="text-emerald-500/70 mt-1">
-                                        +${Math.round((testCost * (1 + (form.watch("promo4_margin") || 0) / 100)) - testCost)}
-                                    </p>
-                                </div>
-                                <div className="p-2 bg-slate-800/50 rounded border border-slate-700/50">
-                                    <p className="text-slate-400 mb-1">{form.watch("wholesale_qty") || 8}+ Pzas</p>
+                                    <p className="text-slate-400 mb-1">{form.watch("wholesale_qty") || 8}+ Pzas (Mayoreo)</p>
                                     <p className="text-lg font-bold text-white">
                                         ${Math.round(testCost * (1 + (form.watch("wholesale_margin") || 0) / 100))}
                                     </p>
@@ -393,7 +344,7 @@ export function PricingStrategyDialog({
                             </div>
                         </div>
 
-                        {/* COTIZADOR DE LOGICA (QUOTER) - IMPL-20260218-QUOTER */}
+                        {/* COTIZADOR DE LOGICA (QUOTER) */}
                         <div className="bg-slate-50 rounded-lg p-4 border border-slate-200">
                             <h4 className="font-semibold text-slate-700 flex items-center gap-2 mb-3">
                                 🧮 Cotizador de Reglas
@@ -406,36 +357,7 @@ export function PricingStrategyDialog({
                                         className="mt-1 bg-white"
                                         placeholder="Ej. 10"
                                         onChange={(e) => {
-                                            const qty = parseInt(e.target.value) || 0;
-                                            // Logic to find applicable rule
-                                            const p3Qty = form.getValues("promo3_qty") || 3;
-                                            const p4Qty = form.getValues("promo4_qty") || 4;
-                                            const wsQty = form.getValues("wholesale_qty") || 8;
-
-                                            let applied = "Público";
-                                            let margin = form.getValues("public_margin");
-                                            let color = "text-slate-700";
-
-                                            if (qty >= wsQty) {
-                                                applied = "Mayoreo";
-                                                margin = form.getValues("wholesale_margin");
-                                                color = "text-slate-600 font-bold";
-                                            } else if (qty >= p4Qty) {
-                                                applied = "Escala 2";
-                                                margin = form.getValues("promo4_margin");
-                                                color = "text-blue-600 font-bold";
-                                            } else if (qty >= p3Qty) {
-                                                applied = "Escala 1";
-                                                margin = form.getValues("promo3_margin");
-                                                color = "text-emerald-600 font-bold";
-                                            }
-
-                                            // Update a visual element or state? 
-                                            // Since we are inside the render, we can't easily set state without re-render.
-                                            // Let's use a small local state for this widget or just render it based on a new state variable.
-                                            // Ideally we should use a state variable.
-                                            // But for this patch, I'll use a `quoterQty` state.
-                                            setQuoterQty(qty);
+                                            setQuoterQty(parseInt(e.target.value) || 0);
                                         }}
                                     />
                                 </div>
@@ -443,8 +365,7 @@ export function PricingStrategyDialog({
                                     <p className="text-xs text-slate-400 mb-1">Regla Aplicada:</p>
                                     {(() => {
                                         const qty = quoterQty;
-                                        const p3Qty = form.watch("promo3_qty") || 3;
-                                        const p4Qty = form.watch("promo4_qty") || 4;
+                                        const pQty = form.watch("promo_qty") || 4;
                                         const wsQty = form.watch("wholesale_qty") || 8;
 
                                         let applied = "Público";
@@ -453,18 +374,13 @@ export function PricingStrategyDialog({
                                         let bg = "bg-slate-100";
 
                                         if (qty >= wsQty) {
-                                            applied = "Mayoreo (8+)";
+                                            applied = "Mayoreo";
                                             margin = form.watch("wholesale_margin");
                                             color = "text-slate-800";
                                             bg = "bg-slate-200";
-                                        } else if (qty >= p4Qty) {
-                                            applied = "Escala 2 (Promo 4)";
-                                            margin = form.watch("promo4_margin");
-                                            color = "text-blue-700";
-                                            bg = "bg-blue-100";
-                                        } else if (qty >= p3Qty) {
-                                            applied = "Escala 1 (Promo 3)";
-                                            margin = form.watch("promo3_margin");
+                                        } else if (qty >= pQty) {
+                                            applied = "Promoción";
+                                            margin = form.watch("promo_margin");
                                             color = "text-emerald-700";
                                             bg = "bg-emerald-100";
                                         }
