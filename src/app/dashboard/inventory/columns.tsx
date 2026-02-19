@@ -148,9 +148,16 @@ export const columns: ColumnDef<InventoryItem>[] = [
                       <div className="space-y-1">
                         {(item as any)._publicPrice.volume_tiers.map((tier: any, i: number) => {
                           let label = `x${tier.min_qty} piezas`;
-                          if (tier.min_qty === 3) label = "Promo 3 pzas";
-                          else if (tier.min_qty === 4) label = "Promo 4 pzas";
-                          else if (tier.min_qty >= 8) label = "Mayoreo (8+)";
+
+                          // Heurística simple basada en índice (ya que vienen ordenados por precio/qty)
+                          // El engine devuelve tiers ordenados por qty ascendente (3, 4, 8)
+                          // Pero en pricing-engine.ts, `computedTiers` se ordenaba asc?
+                          // Si es el primero (menor qty) -> Promo
+                          // Si es el ultimo (mayor qty) -> Mayoreo
+
+                          if (i === 0) label = `Promoción (x${tier.min_qty})`;
+                          else if (i === (item as any)._publicPrice.volume_tiers.length - 1) label = `Mayoreo (x${tier.min_qty})`;
+                          else label = `Escala (x${tier.min_qty})`;
 
                           return (
                             <div key={i} className="flex justify-between text-[11px]">

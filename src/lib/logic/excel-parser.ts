@@ -302,7 +302,7 @@ function normalizeRow(row: ParsedRow, rowIndex: number): InventoryItem {
 
     // Intento de extracción de Costo
     try {
-      costo = extractNumberField(row, ['Costo', 'Cost', 'COSTO', 'COST'], false);
+      costo = extractNumberField(row, ['Costo', 'Cost', 'COSTO', 'COST', 'PRECIO', 'PRICE', 'Precio'], false);
     } catch (e) {
       console.warn(`⚠️ Cost parsing failed for row ${rowIndex}: ${e instanceof Error ? e.message : String(e)}`);
       costo = 0;
@@ -573,16 +573,25 @@ function extractField(
     }
   }
 
-  // 2. Búsqueda Fuzzy (Trim + Case Insensitive)
-  // Útil para columnas " PRECIO " o "marca " que vienen sucias del Excel
+  // 2. Búsqueda Fuzzy (Trim + Case Insensitive + Partial Match)
+  // Útil para columnas " PRECIO " o "marca " o "Costo Unitario"
   const rowKeys = Object.keys(row);
   for (const targetKey of possibleKeys) {
     const normalizedTarget = targetKey.trim().toUpperCase();
 
-    // Buscar una key en el row que coincida normalizada
-    const foundKey = rowKeys.find(
+    // 2a. Coincidencia Exacta Normalizada
+    let foundKey = rowKeys.find(
       k => k.trim().toUpperCase() === normalizedTarget
     );
+
+    // 2b. Coincidencia Parcial (Contains)
+    // Si no encontramos exacto, buscamos si la columna contiene la palabra clave
+    // Ej: target="COSTO" machea columna="COSTO UNITARIO"
+    if (!foundKey) {
+      foundKey = rowKeys.find(
+        k => k.trim().toUpperCase().includes(normalizedTarget)
+      );
+    }
 
     if (foundKey) {
       const value = row[foundKey];
@@ -613,7 +622,12 @@ function extractNumberField(
   const field = extractField(row, possibleKeys, required);
   if (!field) return 0;
 
-  const num = parseFloat(field);
+  // FIX-20260219: Limpiar formato de moneda ($ 900.00, $1,200.50) antes de parsear
+  // 1. Remover todo lo que no sea dígito, punto o signo negativo
+  // 2. Cuidado con formatos europeos (1.200,50) - Asumimos formato US/MX (1,200.50) por ahora
+  const cleanField = field.replace(/[$,\s]/g, '');
+
+  const num = parseFloat(cleanField);
   if (isNaN(num)) {
     throw new Error(
       `Valor no numérico en ${possibleKeys[0]}: "${field}"`

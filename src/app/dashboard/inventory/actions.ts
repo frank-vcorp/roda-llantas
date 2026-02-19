@@ -65,7 +65,18 @@ export async function insertInventoryItems(
 
       const inventoryPayload = batchItems.map((item) => {
         const payload: any = { ...item, profile_id };
+
+        // FIX: Si updatePricesOnly es true, borramos stock para no tocarlo.
         if (updatePricesOnly) delete payload.stock;
+
+        // FIX-20260219: Si el costo es 0 (o no vino), NO lo mandamos en el payload
+        // para evitar sobrescribir un costo válido existente con 0.
+        // Solo sobrescribimos si el usuario explícitamente manda un costo > 0.
+        // Excepción: Si es un item nuevo, Postgres usará el default (0).
+        if (payload.cost_price === 0 || payload.cost_price === undefined) {
+          delete payload.cost_price;
+        }
+
         return payload;
       });
 

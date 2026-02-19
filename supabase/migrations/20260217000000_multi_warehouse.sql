@@ -14,9 +14,9 @@ CREATE TABLE IF NOT EXISTS warehouses (
 
 -- Seed initial warehouses
 INSERT INTO warehouses (name, code) VALUES 
-('Almacén 1 (Principal)', 'A1'),
-('Almacén 2 (Secundario)', 'A2'),
-('Almacén 3 (Bodega)', 'A3')
+('Almacen Queretaro', 'A1'),
+('Almacen Romerillal', 'A2'),
+('Rodallantas', 'A3')
 ON CONFLICT DO NOTHING;
 
 -- 2. Create product_stock table (1:N relationship)
