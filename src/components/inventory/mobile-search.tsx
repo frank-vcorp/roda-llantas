@@ -148,8 +148,8 @@ export function MobileSearch({ initialItems = [], userRole, showLoginButton = fa
             </div>
           )}
 
-          {/* Grid de tarjetas - Profesional */}
-          <div className="grid grid-cols-1 gap-3">
+          {/* Grid de tarjetas - Profesional y Responsivo */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {results.map((item: any) => {
               const hasStock = item.stock > 0;
               const publicPrice = item._publicPrice?.public_price || item.manual_price || 0;

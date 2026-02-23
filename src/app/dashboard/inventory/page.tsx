@@ -69,6 +69,11 @@ export default async function InventoryPage(props: InventoryPageProps) {
 
   const totalPages = Math.ceil(count / limit);
 
+  // FIX-20260223: Vista dual (Tarjetas como default, Tabla como secundaria)
+  // Leer preferencia de la URL
+  const viewType = (await props.searchParams)?.view === "table" ? "table" : "cards";
+  const toggleViewUrl = viewType === "table" ? "?view=cards" : "?view=table";
+
   return (
     <div className="space-y-6">
       {/* DESKTOP VERSION */}
@@ -81,19 +86,26 @@ export default async function InventoryPage(props: InventoryPageProps) {
               Mostrando {items.length} de {count} producto{count !== 1 ? "s" : ""}
             </p>
           </div>
-          <Link href="/dashboard/inventory/import">
-            <Button>
-              <Plus className="mr-2 h-4 w-4" />
-              Importar Excel
-            </Button>
-          </Link>
+          <div className="flex items-center gap-3">
+            <Link href={toggleViewUrl}>
+              <Button variant="outline" className="gap-2 bg-white">
+                {viewType === "table" ? "Ver como Tarjetas" : "Ver como Tabla (Técnica)"}
+              </Button>
+            </Link>
+            <Link href="/dashboard/inventory/import">
+              <Button>
+                <Plus className="mr-2 h-4 w-4" />
+                Importar Excel
+              </Button>
+            </Link>
+          </div>
         </div>
 
         <div className="flex items-center gap-4">
           <SearchBar placeholder="Buscar por marca, modelo o medida..." />
         </div>
 
-        {/* DataTable */}
+        {/* Content Area */}
         <div className="space-y-4">
           {hasSuggestions && (
             <Alert variant="default" className="bg-blue-50 border-blue-200">
@@ -104,7 +116,15 @@ export default async function InventoryPage(props: InventoryPageProps) {
               </AlertDescription>
             </Alert>
           )}
-          <DataTable columns={columns} data={itemsWithPrices} userRole={userRole} />
+
+          {viewType === "table" ? (
+            <DataTable columns={columns} data={itemsWithPrices} userRole={userRole} />
+          ) : (
+            <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+              <MobileSearch initialItems={itemsWithPrices} userRole={userRole} showLoginButton={false} />
+            </div>
+          )}
+
           {count > 0 && <CustomPagination totalPages={totalPages} />}
         </div>
       </div>

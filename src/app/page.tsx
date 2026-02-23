@@ -101,47 +101,7 @@ export default async function Home(props: HomeProps) {
         {/* Background */}
         <div className="min-h-screen bg-slate-50">
 
-          {/* DESKTOP VERSION */}
-          <div className="hidden md:block max-w-7xl mx-auto px-6 py-8 space-y-6">
-            {/* Header */}
-            <div className="flex items-center justify-between">
-              <div>
-                <div className="flex items-center gap-3 mb-2">
-                  <div className="h-10 w-10 bg-primary rounded-xl flex items-center justify-center shadow-md">
-                    <span className="text-primary-foreground font-black text-xl">R</span>
-                  </div>
-                  <h1 className="text-3xl font-black tracking-tight text-slate-900">Roda Llantas</h1>
-                </div>
-                <p className="text-sm text-slate-500">
-                  Catálogo Público • {count} resultados
-                </p>
-              </div>
-
-              <Link href="/login">
-                <Button className="gap-2 font-bold bg-slate-900 text-white hover:bg-slate-800">
-                  <LogIn className="h-4 w-4" />
-                  Acceso Admin
-                </Button>
-              </Link>
-            </div>
-
-            <div className="flex items-center gap-4 bg-white p-4 rounded-2xl shadow-sm border border-slate-100">
-              <SearchBar placeholder="Buscar por marca, modelo, medida (ej. 205/55R16)..." />
-            </div>
-
-            {/* DataTable */}
-            {/* Moved table logic to Client Component to avoid "columns.filter is not a function" error */}
-            <PublicInventoryTable
-              displayData={displayData}
-              hasSuggestions={hasSuggestions}
-            />
-
-            {count > 0 && <CustomPagination totalPages={totalPages} />}
-          </div>
-
-
-          {/* MOBILE VERSION */}
-          <div className="md:hidden h-screen bg-white">
+          <div className="max-w-7xl mx-auto md:py-8 h-screen md:h-[calc(100vh-64px)]">
             <MobileSearch
               initialItems={safeItemsWithPrices}
               userRole={null}
