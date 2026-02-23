@@ -198,6 +198,10 @@ export async function uploadBrandingLogo(formData: FormData): Promise<{ success:
       return { success: false, error: "No authenticated user" };
     }
 
+    // Convert file to ArrayBuffer to fix 400 Bad Request in Next.js Server Actions
+    const arrayBuffer = await file.arrayBuffer();
+    const buffer = new Uint8Array(arrayBuffer);
+
     // Generar nombre único para evitar colisiones
     const fileExt = file.name.split('.').pop();
     const fileName = `logo_${user.id}_${Date.now()}.${fileExt}`;
@@ -207,9 +211,10 @@ export async function uploadBrandingLogo(formData: FormData): Promise<{ success:
     const { error: uploadError } = await supabase
       .storage
       .from("branding")
-      .upload(filePath, file, {
+      .upload(filePath, buffer, {
         cacheControl: '3600',
-        upsert: true
+        upsert: true,
+        contentType: file.type // IMPORTANTE: Indicar el MIME type real
       });
 
     if (uploadError) {
