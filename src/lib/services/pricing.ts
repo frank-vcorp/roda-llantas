@@ -7,31 +7,19 @@
  * @ref context/SPEC-PRICING-ENGINE.md
  */
 
-import { createClient } from "@/lib/supabase/server";
+import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { InventoryItem, PricingRule } from "@/lib/types";
 
-/**
- * Resultado del cálculo de precio con desglose
- */
+// ...
 
-
-/**
- * Obtiene todas las reglas de precios activas del usuario
- * 
- * @returns Array de reglas de precios ordenadas por prioridad
- * @id FIX-20260129-04 - Defensivo ante columnas faltantes
- */
 export async function getPricingRules(): Promise<PricingRule[]> {
-  const supabase = await createClient();
+  // FIX: Usar admin client para que el portal público (anon) pueda leer las reglas
+  // y calcular precios correctamente.
+  const supabase = await createAdminClient();
 
-  // FIX-20260207: Manejo de acceso público
+  // FIX-20260223: Permitir lectura de reglas para usuarios anonimos (portal publico)
+  // de lo contrario, el precio devuelto caía en el fallback de costo = precio.
   const { data: { user } } = await supabase.auth.getUser();
-
-  if (!user) {
-    // Si no hay usuario, retornamos reglas vacías (o reglas públicas si existieran)
-    // para evitar fallos por RLS o acceso no autorizado.
-    return [];
-  }
 
   // Consulta defensiva: si las columnas is_active/priority no existen,
   // la consulta falla. En ese caso, hacemos fallback a consulta básica.
@@ -66,7 +54,7 @@ export async function getPricingRules(): Promise<PricingRule[]> {
  * Usado cuando las columnas aún no existen en la DB
  */
 async function getPricingRulesFallback(): Promise<PricingRule[]> {
-  const supabase = await createClient();
+  const supabase = await createAdminClient();
 
   const { data, error } = await supabase
     .from("pricing_rules")

@@ -79,21 +79,22 @@ export default async function Home(props: HomeProps) {
     console.log("[Home] Enriching items with prices...");
     const itemsWithPrices = enrichInventoryWithPrices(items, rules);
 
-    // ... rest of logic ...
+    // FIX-20260223: Sanitize items to avoid leaking cost_price and raw rules to the public internet
+    const sanitizeItems = (arr: any[]) => arr.map(item => {
+      const { cost_price, stock_breakdown, ...safeItem } = item;
+      return safeItem;
+    });
+
+    const safeItemsWithPrices = sanitizeItems(itemsWithPrices);
+    const safeSuggestionsWithPrices = sanitizeItems(enrichInventoryWithPrices(suggestions || [], rules));
 
     // Move result calculation here to be safe
     const hasSuggestions = items.length === 0 && (suggestions?.length || 0) > 0;
+    const displayData = hasSuggestions ? safeSuggestionsWithPrices : safeItemsWithPrices;
 
     console.log("[Home] Ready to render JSX");
 
-    // ... rest of the component
-
-    // Need to reconstruct the return because I can't just replace the top block easily with this tool's constraints if I don't include the rest.
-    // I will return the original logic but with logs.
-
-    // Re-declaring variables from original code that follow this block
     const totalPages = Math.ceil(count / limit);
-
 
     return (
       <QuoteProvider>
@@ -131,9 +132,8 @@ export default async function Home(props: HomeProps) {
             {/* DataTable */}
             {/* Moved table logic to Client Component to avoid "columns.filter is not a function" error */}
             <PublicInventoryTable
-              items={items}
-              suggestions={suggestions || []}
-              rules={rules}
+              displayData={displayData}
+              hasSuggestions={hasSuggestions}
             />
 
             {count > 0 && <CustomPagination totalPages={totalPages} />}
@@ -143,7 +143,7 @@ export default async function Home(props: HomeProps) {
           {/* MOBILE VERSION */}
           <div className="md:hidden h-screen bg-white">
             <MobileSearch
-              initialItems={itemsWithPrices}
+              initialItems={safeItemsWithPrices}
               userRole={null}
               showLoginButton={true}
             />

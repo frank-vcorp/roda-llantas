@@ -8,23 +8,13 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Info } from "lucide-react";
 
 interface PublicInventoryTableProps {
-    items: InventoryItem[];
-    suggestions: InventoryItem[];
-    rules: PricingRule[];
+    displayData: any[];
+    hasSuggestions: boolean;
 }
 
-export function PublicInventoryTable({ items, suggestions, rules }: PublicInventoryTableProps) {
-    // Pre-calcular precios públicos
-    const itemsWithPrices = enrichInventoryWithPrices(items, rules);
-
-    const hasSuggestions = items.length === 0 && (suggestions?.length || 0) > 0;
-
+export function PublicInventoryTable({ displayData, hasSuggestions }: PublicInventoryTableProps) {
     // Filter out actions column for public view
     const publicColumns = columns.filter((col) => col.id !== "actions");
-
-    const displayData = hasSuggestions
-        ? enrichInventoryWithPrices(suggestions || [], rules)
-        : itemsWithPrices;
 
     return (
         <div className="space-y-4">
