@@ -11,6 +11,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getInventoryItems } from "@/lib/services/inventory";
 import { getPricingRules } from "@/lib/services/pricing";
+import { getPublicOrganizationSettings } from "@/lib/actions/settings";
 import { enrichInventoryWithPrices } from "@/lib/logic/pricing-engine";
 import { MobileSearch } from "@/components/inventory/mobile-search";
 import { QuoteProvider } from "@/lib/contexts/quote-context";
@@ -63,14 +64,15 @@ export default async function Home(props: HomeProps) {
 
   console.log("[Home] Fetching inventory and rules...");
   try {
-    // Obtener items e invocar getPricingRules en paralelo
-    const [{ data: items, count, suggestions }, rules] = await Promise.all([
+    // Fetch settings and rules
+    const [{ data: items, count, suggestions }, rules, settings] = await Promise.all([
       getInventoryItems({
         search: query,
         page: pageIndex,
         limit,
       }),
       getPricingRules(),
+      getPublicOrganizationSettings()
     ]);
 
     console.log(`[Home] Data fetched. Items: ${items?.length}, Rules: ${rules?.length}`);
@@ -106,6 +108,7 @@ export default async function Home(props: HomeProps) {
               initialItems={safeItemsWithPrices}
               userRole={null}
               showLoginButton={true}
+              settings={settings}
             />
           </div>
 

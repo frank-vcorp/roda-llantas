@@ -26,6 +26,7 @@ interface InventoryPageProps {
   searchParams: Promise<{
     query?: string;
     page?: string;
+    view?: string; // FIX: Add view param for UI toggle
   }>;
 }
 

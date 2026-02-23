@@ -30,12 +30,13 @@ interface MobileSearchProps {
   initialItems?: InventoryItem[];
   userRole?: string | null;
   showLoginButton?: boolean;
+  settings?: any; // FIX-20260223: Recibir settings para logo/nombre custom
 }
 
 import Link from "next/link";
 import { LogIn } from "lucide-react";
 
-export function MobileSearch({ initialItems = [], userRole, showLoginButton = false }: MobileSearchProps) {
+export function MobileSearch({ initialItems = [], userRole, showLoginButton = false, settings }: MobileSearchProps) {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<InventoryItem[]>(initialItems);
   const [loading, setLoading] = useState(false);
@@ -96,7 +97,12 @@ export function MobileSearch({ initialItems = [], userRole, showLoginButton = fa
       {/* Header - Fixed height to prevent layout shift */}
       <div className="shrink-0 px-4 py-4 bg-white border-b border-slate-200 sticky top-0 z-10">
         <div className="flex justify-between items-center mb-4">
-          <h1 className="text-2xl font-bold text-slate-900">Buscar Llantas</h1>
+          <div className="flex items-center gap-3">
+            {settings?.logo_url ? (
+              <img src={settings.logo_url} alt={settings?.name || "Logo"} className="h-8 w-auto object-contain" />
+            ) : null}
+            <h1 className="text-2xl font-bold text-slate-900">{settings?.name || "Buscar Llantas"}</h1>
+          </div>
           {showLoginButton && (
             <Link href="/login">
               <Button variant="ghost" size="sm" className="text-emerald-600 font-bold gap-2 hover:bg-emerald-50 hover:text-emerald-700">

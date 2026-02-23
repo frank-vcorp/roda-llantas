@@ -63,6 +63,43 @@ export async function getOrganizationSettings(): Promise<OrganizationSettings | 
 }
 
 /**
+ * Obtiene los settings de organización para acceso público (sin requerir auth)
+ * @returns OrganizationSettings o null si no existe
+ */
+export async function getPublicOrganizationSettings(): Promise<OrganizationSettings | null> {
+  try {
+    const supabase = await createClient();
+
+    const { data, error } = await supabase
+      .from("organization_settings")
+      .select("*")
+      .limit(1)
+      .single();
+
+    if (error) {
+      console.warn("[getPublicOrganizationSettings] Error:", error);
+      return {
+        id: "",
+        profile_id: "",
+        name: "Roda Llantas",
+        address: null,
+        phone: null,
+        website: null,
+        logo_url: null,
+        ticket_footer_message: "¡Gracias por su compra!",
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      };
+    }
+
+    return data as OrganizationSettings;
+  } catch (error) {
+    console.error("[getPublicOrganizationSettings] Unexpected error:", error);
+    return null;
+  }
+}
+
+/**
  * Actualiza los settings de organización
  * @param updates - Campos a actualizar
  * @returns Objeto con success/error
