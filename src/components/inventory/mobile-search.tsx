@@ -238,10 +238,10 @@ export function MobileSearch({ initialItems = [], userRole, showLoginButton = fa
                         </p>
                         <div className="space-y-1">
                           {(item as any)._publicPrice.volume_tiers.map((tier: any, i: number) => {
-                            let label = `Llevando ${tier.min_qty}+ pz`;
-                            if (tier.min_qty === 3) label = "Promo 3 Pzas";
-                            else if (tier.min_qty === 4) label = "Promo 4 Pzas";
-                            else if (tier.min_qty >= 8) label = "Mayoreo (8+)";
+                            // FIX-20260223: Eliminar texto harcodeado y usar los valores dinámicos
+                            let label = i === 0
+                              ? `Promoción (${tier.min_qty} Pzas)`
+                              : `Mayoreo (${tier.min_qty}+)`;
 
                             return (
                               <div key={i} className="flex justify-between items-center text-xs">
