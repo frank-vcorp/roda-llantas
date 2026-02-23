@@ -178,3 +178,58 @@ export async function updateOrganizationSettings(
     };
   }
 }
+
+/**
+ * Sube un logo al storage de Supabase
+ * @param formData FormData con el archivo 'file'
+ * @returns Objeto con success/error y url pública
+ */
+export async function uploadBrandingLogo(formData: FormData): Promise<{ success: boolean; error?: string; url?: string }> {
+  try {
+    const file = formData.get("file") as File;
+    if (!file) {
+      return { success: false, error: "No file provided" };
+    }
+
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+      return { success: false, error: "No authenticated user" };
+    }
+
+    // Generar nombre único para evitar colisiones
+    const fileExt = file.name.split('.').pop();
+    const fileName = `logo_${user.id}_${Date.now()}.${fileExt}`;
+    const filePath = `logos/${fileName}`;
+
+    // Subir al bucket 'branding'
+    const { error: uploadError } = await supabase
+      .storage
+      .from("branding")
+      .upload(filePath, file, {
+        cacheControl: '3600',
+        upsert: true
+      });
+
+    if (uploadError) {
+      console.error("[uploadBrandingLogo] Upload error:", uploadError);
+      return { success: false, error: uploadError.message };
+    }
+
+    // Obtener URL pública
+    const { data: publicUrlData } = supabase
+      .storage
+      .from("branding")
+      .getPublicUrl(filePath);
+
+    return { success: true, url: publicUrlData.publicUrl };
+
+  } catch (error) {
+    console.error("[uploadBrandingLogo] Unexpected error:", error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Unknown error",
+    };
+  }
+}

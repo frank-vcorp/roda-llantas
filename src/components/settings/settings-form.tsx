@@ -14,7 +14,7 @@ import { useState } from "react";
 import Image from "next/image";
 import { useForm } from "react-hook-form";
 import { OrganizationSettings } from "@/lib/types";
-import { updateOrganizationSettings } from "@/lib/actions/settings";
+import { updateOrganizationSettings, uploadBrandingLogo } from "@/lib/actions/settings";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
@@ -28,6 +28,7 @@ export function SettingsForm({ initialData }: SettingsFormProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [logoUrl, setLogoUrl] = useState(initialData?.logo_url || "");
   const [logoPreview, setLogoPreview] = useState(initialData?.logo_url || "");
+  const [logoFile, setLogoFile] = useState<File | null>(null);
 
   const {
     register,
@@ -49,6 +50,8 @@ export function SettingsForm({ initialData }: SettingsFormProps) {
   // Manejar cambio de URL de logo
   const handleLogoUrlChange = (url: string) => {
     setLogoUrl(url);
+    setLogoFile(null); // Si cambia URL manual, limpiamos el archivo
+
     // Validar que sea una URL válida
     try {
       new URL(url);
@@ -58,19 +61,24 @@ export function SettingsForm({ initialData }: SettingsFormProps) {
     }
   };
 
-  // Manejar subida de logo (por ahora solo URL)
+  // Manejar subida de logo
   const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+
+    if (file.size > 2 * 1024 * 1024) { // 2MB limit
+      toast.error("La imagen es muy pesada. Máximo 2MB.");
+      return;
+    }
+
+    setLogoFile(file);
+    setLogoUrl(""); // Limpiamos URL manual si selecciona archivo
 
     // Crear preview local
     const reader = new FileReader();
     reader.onload = (event) => {
       const dataUrl = event.target?.result as string;
       setLogoPreview(dataUrl);
-      // Por ahora solo guardamos la preview local
-      // En una versión futura, subiríamos a Supabase Storage
-      toast("Nota: Subida de archivo en Supabase Storage disponible en próxima versión. Usa URL por ahora.");
     };
     reader.readAsDataURL(file);
   };
@@ -78,10 +86,28 @@ export function SettingsForm({ initialData }: SettingsFormProps) {
   // Manejar envío del formulario
   const onSubmit = async (data: Partial<OrganizationSettings>) => {
     setIsLoading(true);
+    let finalLogoUrl = logoUrl;
+
     try {
+      // Si hay un archivo seleccionado, subirlo a Supabase Storage primero
+      if (logoFile) {
+        toast("Subiendo imagen al servidor...");
+        const formData = new FormData();
+        formData.append("file", logoFile);
+
+        const uploadResult = await uploadBrandingLogo(formData);
+
+        if (!uploadResult.success || !uploadResult.url) {
+          throw new Error(uploadResult.error || "Error al subir la imagen.");
+        }
+
+        finalLogoUrl = uploadResult.url;
+        setLogoUrl(finalLogoUrl); // Update state with the new URL
+      }
+
       const result = await updateOrganizationSettings({
         ...data,
-        logo_url: logoUrl || undefined,
+        logo_url: finalLogoUrl || undefined,
       });
 
       if (result.success) {
