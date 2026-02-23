@@ -100,19 +100,12 @@ export default async function Home(props: HomeProps) {
 
     return (
       <QuoteProvider>
-        {/* Background */}
-        <div className="min-h-screen bg-slate-50">
-
-          <div className="max-w-7xl mx-auto md:py-8 h-screen md:h-[calc(100vh-64px)]">
-            <MobileSearch
-              initialItems={safeItemsWithPrices}
-              userRole={null}
-              showLoginButton={true}
-              settings={settings}
-            />
-          </div>
-
-        </div>
+        <MobileSearch
+          initialItems={safeItemsWithPrices}
+          userRole={null}
+          showLoginButton={true}
+          settings={settings}
+        />
       </QuoteProvider>
     );
 

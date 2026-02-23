@@ -62,11 +62,14 @@ export async function getOrganizationSettings(): Promise<OrganizationSettings | 
   }
 }
 
+import { unstable_noStore as noStore } from 'next/cache';
+
 /**
  * Obtiene los settings de organización para acceso público (sin requerir auth)
  * @returns OrganizationSettings o null si no existe
  */
 export async function getPublicOrganizationSettings(): Promise<OrganizationSettings | null> {
+  noStore(); // FIX-20260223: Prevenir cache estricto de Next.js
   try {
     const supabase = await createClient();
 

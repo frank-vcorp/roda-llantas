@@ -93,43 +93,45 @@ export function MobileSearch({ initialItems = [], userRole, showLoginButton = fa
   };
 
   return (
-    <div className="flex flex-col h-full bg-slate-50">
-      {/* Header - Fixed height to prevent layout shift */}
-      <div className="shrink-0 px-4 py-4 bg-white border-b border-slate-200 sticky top-0 z-10">
-        <div className="flex justify-between items-center mb-4">
-          <div className="flex items-center gap-3">
-            {settings?.logo_url ? (
-              <img src={settings.logo_url} alt={settings?.name || "Logo"} className="h-8 w-auto object-contain" />
-            ) : null}
-            <h1 className="text-2xl font-bold text-slate-900">{settings?.name || "Buscar Llantas"}</h1>
+    <div className="flex flex-col min-h-screen w-full bg-slate-50">
+      {/* Header - Sticky Full Width */}
+      <div className="shrink-0 bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
+        <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <div className="flex justify-between items-center mb-4">
+            <div className="flex items-center gap-3">
+              {settings?.logo_url ? (
+                <img src={settings.logo_url} alt={settings?.name || "Logo"} className="h-8 w-auto object-contain" />
+              ) : null}
+              <h1 className="text-2xl font-bold text-slate-900">{settings?.name || "Buscar Llantas"}</h1>
+            </div>
+            {showLoginButton && (
+              <Link href="/login">
+                <Button variant="ghost" size="sm" className="text-emerald-600 font-bold gap-2 hover:bg-emerald-50 hover:text-emerald-700">
+                  <LogIn className="h-4 w-4" />
+                  <span className="hidden xs:inline">Entrar</span>
+                </Button>
+              </Link>
+            )}
           </div>
-          {showLoginButton && (
-            <Link href="/login">
-              <Button variant="ghost" size="sm" className="text-emerald-600 font-bold gap-2 hover:bg-emerald-50 hover:text-emerald-700">
-                <LogIn className="h-4 w-4" />
-                <span className="hidden xs:inline">Entrar</span>
-              </Button>
-            </Link>
-          )}
-        </div>
 
-        {/* Search Bar - Premium */}
-        <div className="relative">
-          <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 h-5 w-5" />
-          <Input
-            type="text"
-            placeholder="Ej. 205 55 16, MICHELIN, TORNEL..."
-            value={query}
-            onChange={(e) => handleSearch(e.target.value)}
-            autoFocus
-            className="h-12 pl-10 py-3 text-base border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
-          />
+          {/* Search Bar - Premium */}
+          <div className="relative">
+            <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 h-5 w-5" />
+            <Input
+              type="text"
+              placeholder="Ej. 205 55 16, MICHELIN, TORNEL..."
+              value={query}
+              onChange={(e) => handleSearch(e.target.value)}
+              autoFocus
+              className="h-12 pl-10 py-3 text-base border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+            />
+          </div>
         </div>
       </div>
 
-      {/* Resultados - Scrollable container */}
-      <div className="flex flex-col flex-1 overflow-hidden">
-        <div className="flex-1 overflow-y-auto px-3 py-4 space-y-3">
+      {/* Resultados - Native scroll */}
+      <div className="flex-1">
+        <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-4">
           {loading && (
             <div className="flex items-center justify-center py-12">
               <div className="text-center">
@@ -143,7 +145,7 @@ export function MobileSearch({ initialItems = [], userRole, showLoginButton = fa
             <div className="text-center py-12">
               <SearchIcon className="h-12 w-12 mx-auto text-slate-300 mb-3" />
               <p className="text-slate-600 font-medium">No se encontraron resultados</p>
-              <p className="text-sm text-slate-500 mt-1">"{query}"</p>
+              <p className="text-sm text-slate-500 mt-1">&quot;{query}&quot;</p>
             </div>
           )}
 
@@ -155,7 +157,7 @@ export function MobileSearch({ initialItems = [], userRole, showLoginButton = fa
           )}
 
           {/* Grid de tarjetas - Profesional y Responsivo */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4 sm:gap-6">
             {results.map((item: any) => {
               const hasStock = item.stock > 0;
               const publicPrice = item._publicPrice?.public_price || item.manual_price || 0;
