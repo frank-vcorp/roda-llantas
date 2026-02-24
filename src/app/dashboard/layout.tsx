@@ -58,7 +58,7 @@ export default async function DashboardLayout({
 
         {/* Main Content Area */}
         <div className="flex-1 flex flex-col min-w-0 overflow-y-auto relative">
-          <main className="flex-1 px-4 sm:px-8 py-8 md:py-12 max-w-6xl mx-auto w-full pb-32 md:pb-12">
+          <main className="flex-1 px-4 sm:px-8 py-8 md:py-12 w-full pb-32 md:pb-12">
             {children}
           </main>
           <StickyQuoteFooter />
