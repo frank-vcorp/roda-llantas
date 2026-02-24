@@ -202,8 +202,16 @@ export async function uploadBrandingLogo(formData: FormData): Promise<{ success:
     const arrayBuffer = await file.arrayBuffer();
     const buffer = new Uint8Array(arrayBuffer);
 
-    // Generar nombre único para evitar colisiones
-    const fileExt = file.name.split('.').pop();
+    // FIX-20260224: Derive extension from MIME type, NOT from filename
+    // This ensures PNG files with transparency are never converted to JPEG
+    const mimeToExt: Record<string, string> = {
+      'image/png': 'png',
+      'image/jpeg': 'jpg',
+      'image/gif': 'gif',
+      'image/webp': 'webp',
+      'image/svg+xml': 'svg',
+    };
+    const fileExt = mimeToExt[file.type] || file.name.split('.').pop() || 'png';
     const fileName = `logo_${user.id}_${Date.now()}.${fileExt}`;
     const filePath = `logos/${fileName}`;
 
