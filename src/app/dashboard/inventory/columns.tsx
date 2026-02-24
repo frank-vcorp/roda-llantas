@@ -131,28 +131,6 @@ export const columns: ColumnDef<InventoryItem>[] = [
                   <p><strong>Modelo:</strong> {item.model}</p>
                   <p><strong>Medida:</strong> {item.medida_full}</p>
                   <p><strong>Rin:</strong> {item.rim}"</p>
-
-                  {(item as any)._publicPrice?.volume_tiers?.length > 0 && (
-                    <div className="mt-3 pt-2 border-t border-slate-700">
-                      <p className="font-bold text-emerald-400 mb-1">Precios Especiales</p>
-                      <div className="space-y-1">
-                        {(item as any)._publicPrice.volume_tiers.map((tier: any, i: number) => {
-                          let label = `x${tier.min_qty} piezas`;
-
-                          if (i === 0) label = `Promoción (x${tier.min_qty})`;
-                          else if (i === (item as any)._publicPrice.volume_tiers.length - 1) label = `Especial (x${tier.min_qty})`;
-                          else label = `Escala (x${tier.min_qty})`;
-
-                          return (
-                            <div key={i} className="flex justify-between text-[11px]">
-                              <span>{label}:</span>
-                              <span className="font-mono text-emerald-300">{formatCurrency(tier.price)}</span>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  )}
                 </div>
               </TooltipContent>
             </Tooltip>
@@ -198,11 +176,11 @@ export const columns: ColumnDef<InventoryItem>[] = [
             <TooltipTrigger asChild>
               <div className="flex items-center gap-2 cursor-help">
                 {priceData.is_manual && (
-                  <Badge className="bg-amber-500 hover:bg-amber-600 text-xs">
+                  <Badge className="bg-amber-500 hover:bg-amber-600 text-xs shrink-0">
                     OFERTA
                   </Badge>
                 )}
-                <span className={`font-semibold ${priceData.is_manual
+                <span className={`font-semibold whitespace-nowrap ${priceData.is_manual
                   ? "text-amber-600"
                   : "text-green-600"
                   }`}>
@@ -240,6 +218,32 @@ export const columns: ColumnDef<InventoryItem>[] = [
         </TooltipProvider>
       );
     },
+  },
+  {
+    id: "special_prices",
+    header: "Precios Especiales",
+    cell: ({ row }) => {
+      const item = row.original as any;
+      const tiers = item._publicPrice?.volume_tiers || [];
+
+      if (tiers.length === 0) {
+        return <span className="text-gray-400 text-xs">-</span>;
+      }
+
+      return (
+        <div className="flex flex-col gap-1">
+          {tiers.map((tier: any, i: number) => {
+            let label = i === 0 ? `Promoción` : `Especial`;
+            return (
+              <div key={i} className="flex items-center justify-between text-[11px] gap-2">
+                <span className="text-slate-500 font-medium">{label} (x{tier.min_qty}):</span>
+                <span className="font-bold text-emerald-600 whitespace-nowrap">{formatCurrency(tier.price)}</span>
+              </div>
+            );
+          })}
+        </div>
+      );
+    }
   },
   {
     id: "actions",

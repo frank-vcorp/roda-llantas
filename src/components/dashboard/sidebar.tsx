@@ -36,6 +36,20 @@ export function Sidebar({ userRole, userEmail }: SidebarProps) {
         setIsHydrated(true);
     }, []);
 
+    // Auto-collapse after 4 seconds
+    useEffect(() => {
+        let timeout: NodeJS.Timeout;
+        if (!isCollapsed && isHydrated) {
+            timeout = setTimeout(() => {
+                setIsCollapsed(true);
+                localStorage.setItem("sidebar_collapsed", JSON.stringify(true));
+            }, 4000);
+        }
+        return () => {
+            if (timeout) clearTimeout(timeout);
+        };
+    }, [isCollapsed, isHydrated]);
+
     const toggleSidebar = () => {
         const newState = !isCollapsed;
         setIsCollapsed(newState);
