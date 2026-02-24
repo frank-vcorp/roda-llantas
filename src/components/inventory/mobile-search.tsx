@@ -100,9 +100,9 @@ export function MobileSearch({ initialItems = [], userRole, showLoginButton = fa
           <div className="flex justify-between items-center mb-4">
             <div className="flex items-center gap-3">
               {settings?.logo_url ? (
-                <img src={settings.logo_url} alt={settings?.name || "Logo"} className="h-8 w-auto object-contain" />
+                <img src={settings.logo_url} alt={settings?.name || "Logo"} className="h-12 w-auto object-contain" />
               ) : null}
-              <h1 className="text-2xl font-bold text-slate-900">{settings?.name || "Buscar Llantas"}</h1>
+              <h1 className="text-xl font-black text-slate-900 tracking-tight">{settings?.name || "Buscar Llantas"}</h1>
             </div>
             {showLoginButton && (
               <Link href="/login">

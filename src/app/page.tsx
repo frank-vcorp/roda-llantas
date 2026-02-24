@@ -109,7 +109,7 @@ export default async function Home(props: HomeProps) {
             <div className="flex justify-between items-center bg-white p-4 rounded-2xl shadow-sm border border-slate-200">
               <div className="flex items-center gap-4">
                 {settings?.logo_url && (
-                  <img src={settings.logo_url} alt={settings?.name || "Logo"} className="h-10 w-auto object-contain" />
+                  <img src={settings.logo_url} alt={settings?.name || "Logo"} className="h-14 w-auto object-contain" />
                 )}
                 <h1 className="text-3xl font-black tracking-tight text-slate-900">
                   {settings?.name || "Roda Llantas"}
