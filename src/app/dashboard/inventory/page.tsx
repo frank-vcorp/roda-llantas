@@ -70,10 +70,7 @@ export default async function InventoryPage(props: InventoryPageProps) {
 
   const totalPages = Math.ceil(count / limit);
 
-  // FIX-20260223: Vista dual (Tabla como default para Admin, Tarjetas como secundaria)
-  // Leer preferencia de la URL
-  const viewType = (await props.searchParams)?.view === "cards" ? "cards" : "table";
-  const toggleViewUrl = viewType === "table" ? "?view=cards" : "?view=table";
+  const viewType = "table";
 
   return (
     <div className="space-y-6">
@@ -89,11 +86,6 @@ export default async function InventoryPage(props: InventoryPageProps) {
               </p>
             </div>
             <div className="flex items-center gap-3">
-              <Link href={toggleViewUrl}>
-                <Button variant="outline" className="gap-2 bg-white">
-                  {viewType === "table" ? "Ver como Tarjetas" : "Ver como Tabla (Técnica)"}
-                </Button>
-              </Link>
               <Link href="/dashboard/inventory/import">
                 <Button>
                   <Plus className="mr-2 h-4 w-4" />
