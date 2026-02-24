@@ -79,43 +79,47 @@ export default async function InventoryPage(props: InventoryPageProps) {
     <div className="space-y-6">
       {/* DESKTOP VERSION */}
       <div className="hidden md:block space-y-6">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight">Mi Inventario</h1>
-            <p className="text-sm text-gray-500 mt-1">
-              Mostrando {items.length} de {count} producto{count !== 1 ? "s" : ""}
-            </p>
+        {/* Header and Search - Padded */}
+        <div className="px-4 md:px-8 space-y-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold tracking-tight">Mi Inventario</h1>
+              <p className="text-sm text-gray-500 mt-1">
+                Mostrando {items.length} de {count} producto{count !== 1 ? "s" : ""}
+              </p>
+            </div>
+            <div className="flex items-center gap-3">
+              <Link href={toggleViewUrl}>
+                <Button variant="outline" className="gap-2 bg-white">
+                  {viewType === "table" ? "Ver como Tarjetas" : "Ver como Tabla (Técnica)"}
+                </Button>
+              </Link>
+              <Link href="/dashboard/inventory/import">
+                <Button>
+                  <Plus className="mr-2 h-4 w-4" />
+                  Importar Excel
+                </Button>
+              </Link>
+            </div>
           </div>
-          <div className="flex items-center gap-3">
-            <Link href={toggleViewUrl}>
-              <Button variant="outline" className="gap-2 bg-white">
-                {viewType === "table" ? "Ver como Tarjetas" : "Ver como Tabla (Técnica)"}
-              </Button>
-            </Link>
-            <Link href="/dashboard/inventory/import">
-              <Button>
-                <Plus className="mr-2 h-4 w-4" />
-                Importar Excel
-              </Button>
-            </Link>
+
+          <div className="flex items-center gap-4">
+            <SearchBar placeholder="Buscar por marca, modelo o medida..." />
           </div>
         </div>
 
-        <div className="flex items-center gap-4">
-          <SearchBar placeholder="Buscar por marca, modelo o medida..." />
-        </div>
-
-        {/* Content Area */}
+        {/* Content Area - Full Width */}
         <div className="space-y-4">
           {hasSuggestions && (
-            <Alert variant="default" className="bg-blue-50 border-blue-200">
-              <Info className="h-4 w-4 text-blue-600" />
-              <AlertTitle className="text-blue-800">No encontramos resultados exactos</AlertTitle>
-              <AlertDescription className="text-blue-700">
-                Pero encontramos estas opciones disponibles en el mismo Rin.
-              </AlertDescription>
-            </Alert>
+            <div className="px-4 md:px-8">
+              <Alert variant="default" className="bg-blue-50 border-blue-200">
+                <Info className="h-4 w-4 text-blue-600" />
+                <AlertTitle className="text-blue-800">No encontramos resultados exactos</AlertTitle>
+                <AlertDescription className="text-blue-700">
+                  Pero encontramos estas opciones disponibles en el mismo Rin.
+                </AlertDescription>
+              </Alert>
+            </div>
           )}
 
           {viewType === "table" ? (
@@ -123,12 +127,16 @@ export default async function InventoryPage(props: InventoryPageProps) {
               <DataTable columns={columns} data={itemsWithPrices} userRole={userRole} />
             </div>
           ) : (
-            <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+            <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden mx-4 md:mx-8">
               <MobileSearch initialItems={itemsWithPrices} userRole={userRole} showLoginButton={false} />
             </div>
           )}
 
-          {count > 0 && <CustomPagination totalPages={totalPages} />}
+          {count > 0 && (
+            <div className="px-4 md:px-8">
+              <CustomPagination totalPages={totalPages} />
+            </div>
+          )}
         </div>
       </div>
 
