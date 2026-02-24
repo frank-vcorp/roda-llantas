@@ -54,10 +54,10 @@ const StockBadge = ({ row }: { row: any }) => {
   if (warehouses.length === 0) return badge;
 
   return (
-    <div className="flex flex-wrap gap-1.5 items-center">
+    <div className="flex flex-nowrap gap-1.5 items-center whitespace-nowrap">
       {badge}
       {warehouses.map((w, i) => (
-        <Badge key={i} variant="outline" className="text-[10px] px-1.5 h-5 bg-white font-mono text-slate-600 border-slate-200">
+        <Badge key={i} variant="outline" className="text-[10px] px-1.5 h-5 bg-white font-mono text-slate-600 border-slate-200 shrink-0">
           {w.code || w.name.substring(0, 2)}: {w.quantity}
         </Badge>
       ))}
