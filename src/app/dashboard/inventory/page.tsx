@@ -119,7 +119,9 @@ export default async function InventoryPage(props: InventoryPageProps) {
           )}
 
           {viewType === "table" ? (
-            <DataTable columns={columns} data={itemsWithPrices} userRole={userRole} />
+            <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-x-auto">
+              <DataTable columns={columns} data={itemsWithPrices} userRole={userRole} />
+            </div>
           ) : (
             <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
               <MobileSearch initialItems={itemsWithPrices} userRole={userRole} showLoginButton={false} />
