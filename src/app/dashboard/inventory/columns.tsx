@@ -115,18 +115,21 @@ export const columns: ColumnDef<InventoryItem>[] = [
       const item = row.original;
       // Si no existe description (DB vieja), construir una
       const displayText = item.description || `${item.brand} ${item.model} ${item.medida_full}`;
+      const isTruncated = displayText.length > 35;
+      const truncatedText = isTruncated ? displayText.substring(0, 35) + "..." : displayText;
 
       return (
         <div className="flex items-center gap-2">
-          <span className="font-medium text-sm">{displayText}</span>
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
-                <Info className="h-4 w-4 text-gray-400 hover:text-blue-500 cursor-help" />
+                <span className="font-medium text-sm cursor-help underline decoration-dashed decoration-slate-300 underline-offset-4">
+                  {truncatedText}
+                </span>
               </TooltipTrigger>
-              <TooltipContent className="bg-slate-900 text-white p-3 max-w-xs">
-                <div className="text-xs space-y-1">
-                  <p className="font-bold border-b pb-1 mb-1">Datos Estructurados</p>
+              <TooltipContent className="bg-slate-900 text-white p-3 max-w-sm">
+                <div className="text-xs space-y-2">
+                  <p className="font-bold border-b pb-1 mb-1">{displayText}</p>
                   <p><strong>Marca:</strong> {item.brand}</p>
                   <p><strong>Modelo:</strong> {item.model}</p>
                   <p><strong>Medida:</strong> {item.medida_full}</p>

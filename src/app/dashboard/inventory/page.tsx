@@ -123,7 +123,7 @@ export default async function InventoryPage(props: InventoryPageProps) {
           )}
 
           {viewType === "table" ? (
-            <div className="bg-white overflow-auto max-h-[75vh] w-full border-y border-slate-200">
+            <div className="bg-white overflow-auto max-h-[75vh] mx-[5px] border-y border-slate-200">
               <DataTable columns={columns} data={itemsWithPrices} userRole={userRole} />
             </div>
           ) : (
