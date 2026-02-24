@@ -70,9 +70,9 @@ export default async function InventoryPage(props: InventoryPageProps) {
 
   const totalPages = Math.ceil(count / limit);
 
-  // FIX-20260223: Vista dual (Tarjetas como default, Tabla como secundaria)
+  // FIX-20260223: Vista dual (Tabla como default para Admin, Tarjetas como secundaria)
   // Leer preferencia de la URL
-  const viewType = (await props.searchParams)?.view === "table" ? "table" : "cards";
+  const viewType = (await props.searchParams)?.view === "cards" ? "cards" : "table";
   const toggleViewUrl = viewType === "table" ? "?view=cards" : "?view=table";
 
   return (
