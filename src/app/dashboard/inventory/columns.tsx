@@ -54,24 +54,14 @@ const StockBadge = ({ row }: { row: any }) => {
   if (warehouses.length === 0) return badge;
 
   return (
-    <TooltipProvider>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <div className="cursor-help">{badge}</div>
-        </TooltipTrigger>
-        <TooltipContent className="bg-slate-900 text-white p-2">
-          <div className="text-xs font-mono space-y-1">
-            <p className="font-bold border-b border-slate-700 pb-1 mb-1">Ubicación</p>
-            {warehouses.map((w, i) => (
-              <div key={i} className="flex justify-between gap-4">
-                <span>{w.name}:</span>
-                <span className="text-green-400">{w.quantity}</span>
-              </div>
-            ))}
-          </div>
-        </TooltipContent>
-      </Tooltip>
-    </TooltipProvider>
+    <div className="flex flex-wrap gap-1.5 items-center">
+      {badge}
+      {warehouses.map((w, i) => (
+        <Badge key={i} variant="outline" className="text-[10px] px-1.5 h-5 bg-white font-mono text-slate-600 border-slate-200">
+          {w.code || w.name.substring(0, 2)}: {w.quantity}
+        </Badge>
+      ))}
+    </div>
   );
 };
 
@@ -144,19 +134,13 @@ export const columns: ColumnDef<InventoryItem>[] = [
 
                   {(item as any)._publicPrice?.volume_tiers?.length > 0 && (
                     <div className="mt-3 pt-2 border-t border-slate-700">
-                      <p className="font-bold text-emerald-400 mb-1">Precios por Volumen</p>
+                      <p className="font-bold text-emerald-400 mb-1">Precios Especiales</p>
                       <div className="space-y-1">
                         {(item as any)._publicPrice.volume_tiers.map((tier: any, i: number) => {
                           let label = `x${tier.min_qty} piezas`;
 
-                          // Heurística simple basada en índice (ya que vienen ordenados por precio/qty)
-                          // El engine devuelve tiers ordenados por qty ascendente (3, 4, 8)
-                          // Pero en pricing-engine.ts, `computedTiers` se ordenaba asc?
-                          // Si es el primero (menor qty) -> Promo
-                          // Si es el ultimo (mayor qty) -> Mayoreo
-
                           if (i === 0) label = `Promoción (x${tier.min_qty})`;
-                          else if (i === (item as any)._publicPrice.volume_tiers.length - 1) label = `Mayoreo (x${tier.min_qty})`;
+                          else if (i === (item as any)._publicPrice.volume_tiers.length - 1) label = `Especial (x${tier.min_qty})`;
                           else label = `Escala (x${tier.min_qty})`;
 
                           return (

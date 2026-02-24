@@ -242,7 +242,7 @@ export function MobileSearch({ initialItems = [], userRole, showLoginButton = fa
                       <div className="mb-3 bg-emerald-50/50 rounded-lg p-2 border border-emerald-100/50">
                         <p className="text-[10px] font-bold text-emerald-700 uppercase tracking-wider mb-1 flex items-center gap-1">
                           <span className="inline-block w-1 h-1 rounded-full bg-emerald-500"></span>
-                          Precios de Mayoreo
+                          Precios Especiales
                         </p>
                         <div className="space-y-1">
                           {(item as any)._publicPrice.volume_tiers.map((tier: any, i: number) => {
@@ -267,7 +267,7 @@ export function MobileSearch({ initialItems = [], userRole, showLoginButton = fa
                       {/* Precio - Verde y Grande */}
                       <div className="flex-1">
                         <p className="text-xs text-slate-500 font-medium mb-0.5">
-                          Precio unitario
+                          Precio Público
                         </p>
                         <p className="text-lg font-bold text-emerald-600">
                           {priceDisplay}

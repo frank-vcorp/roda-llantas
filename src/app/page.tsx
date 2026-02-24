@@ -100,12 +100,55 @@ export default async function Home(props: HomeProps) {
 
     return (
       <QuoteProvider>
-        <MobileSearch
-          initialItems={safeItemsWithPrices}
-          userRole={null}
-          showLoginButton={true}
-          settings={settings}
-        />
+        <div className="min-h-screen bg-slate-50">
+
+          {/* DESKTOP VERSION (Table) */}
+          <div className="hidden md:block max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+
+            {/* Header Desktop */}
+            <div className="flex justify-between items-center bg-white p-4 rounded-2xl shadow-sm border border-slate-200">
+              <div className="flex items-center gap-4">
+                {settings?.logo_url && (
+                  <img src={settings.logo_url} alt={settings?.name || "Logo"} className="h-10 w-auto object-contain" />
+                )}
+                <h1 className="text-3xl font-black tracking-tight text-slate-900">
+                  {settings?.name || "Roda Llantas"}
+                </h1>
+              </div>
+
+              <Link href="/login">
+                <Button variant="outline" className="border-emerald-200 text-emerald-700 hover:bg-emerald-50 gap-2">
+                  <LogIn className="h-4 w-4" />
+                  Acceso Especial
+                </Button>
+              </Link>
+            </div>
+
+            {/* Buscador Desktop */}
+            <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-200">
+              <SearchBar placeholder="Buscar por marca, modelo, medida (ej. 205/55R16)..." />
+            </div>
+
+            {/* MasterList Table */}
+            <PublicInventoryTable
+              displayData={displayData}
+              hasSuggestions={hasSuggestions}
+            />
+
+            {count > 0 && <CustomPagination totalPages={totalPages} />}
+          </div>
+
+          {/* MOBILE VERSION (Cards) */}
+          <div className="md:hidden">
+            <MobileSearch
+              initialItems={safeItemsWithPrices}
+              userRole={null}
+              showLoginButton={true}
+              settings={settings}
+            />
+          </div>
+
+        </div>
       </QuoteProvider>
     );
 
