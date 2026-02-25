@@ -35,6 +35,7 @@ export async function getOrganizationSettings(): Promise<OrganizationSettings | 
       .from("organization_settings")
       .select("*")
       // .eq("profile_id", user.id) // DEBY FIX: Allow reading global settings not just own
+      .order("updated_at", { ascending: false })
       .limit(1)
       .single();
 
