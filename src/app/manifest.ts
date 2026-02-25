@@ -1,31 +1,51 @@
 import { MetadataRoute } from 'next'
+import { getPublicOrganizationSettings } from '@/lib/actions/settings'
 
-export default function manifest(): MetadataRoute.Manifest {
+export default async function manifest(): Promise<MetadataRoute.Manifest> {
+    const settings = await getPublicOrganizationSettings();
+    const appName = settings?.name || 'Roda Llantas Pro';
+    const logoUrl = settings?.logo_url;
+
+    // Default icons if no logo is provided
+    const defaultIcons = [
+        {
+            src: '/icon-192x192.png',
+            sizes: '192x192',
+            type: 'image/png',
+        },
+        {
+            src: '/icon-512x512.png',
+            sizes: '512x512',
+            type: 'image/png',
+        },
+        {
+            src: '/icon-512x512.png',
+            sizes: '512x512',
+            type: 'image/png',
+            purpose: 'maskable',
+        },
+    ];
+
+    // If we have a custom logo, use it as the main icon
+    // Note: We keep the default icons as fallback if logoUrl fails
+    const icons = logoUrl ? [
+        {
+            src: logoUrl,
+            sizes: 'any',
+            type: logoUrl.toLowerCase().endsWith('.png') ? 'image/png' : 'image/jpeg',
+            purpose: 'any',
+        },
+        ...defaultIcons
+    ] : defaultIcons;
+
     return {
-        name: 'Roda Llantas Pro',
-        short_name: 'Roda Llantas',
+        name: appName,
+        short_name: settings?.name || 'Roda Llantas',
         description: 'Sistema de Gestión y Cotización de Neumáticos',
         start_url: '/',
         display: 'standalone',
         background_color: '#ffffff',
         theme_color: '#000000',
-        icons: [
-            {
-                src: '/icon-192x192.png',
-                sizes: '192x192',
-                type: 'image/png',
-            },
-            {
-                src: '/icon-512x512.png',
-                sizes: '512x512',
-                type: 'image/png',
-            },
-            {
-                src: '/icon-512x512.png',
-                sizes: '512x512',
-                type: 'image/png',
-                purpose: 'maskable',
-            },
-        ],
+        icons: icons as any,
     }
 }
