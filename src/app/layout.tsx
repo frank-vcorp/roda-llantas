@@ -18,6 +18,8 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+import { getPublicOrganizationSettings } from "@/lib/actions/settings";
+
 export const viewport: Viewport = {
   themeColor: "#000000",
   width: "device-width",
@@ -26,19 +28,30 @@ export const viewport: Viewport = {
   userScalable: false,
 };
 
-export const metadata: Metadata = {
-  title: "RodaMAx",
-  description: "Sistema de gestión y cotización de neumáticos",
-  manifest: "/manifest.webmanifest", // Next.js generates this from manifest.ts
-  appleWebApp: {
-    capable: true,
-    statusBarStyle: "default",
-    title: "RodaMAx",
-  },
-  formatDetection: {
-    telephone: false,
-  },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const settings = await getPublicOrganizationSettings();
+  const logoUrl = settings?.logo_url;
+  const name = settings?.name || "RodaMAx";
+
+  return {
+    title: name,
+    description: "Llantas, suspensiones y frenos en Querétaro",
+    manifest: "/manifest.webmanifest",
+    appleWebApp: {
+      capable: true,
+      statusBarStyle: "default",
+      title: name,
+    },
+    formatDetection: { telephone: false },
+    ...(logoUrl && {
+      icons: {
+        icon: [{ url: logoUrl }],
+        apple: [{ url: logoUrl }],
+        shortcut: [{ url: logoUrl }],
+      },
+    }),
+  };
+}
 
 export default function RootLayout({
   children,
