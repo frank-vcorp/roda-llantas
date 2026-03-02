@@ -266,10 +266,6 @@ export default async function Home(props: HomeProps) {
                         src={photo.src}
                         alt={photo.alt}
                         className="w-full h-72 object-cover group-hover:scale-105 transition-transform duration-500"
-                        onError={(e) => {
-                          // Fallback si la foto no está disponible aún
-                          (e.target as HTMLImageElement).style.display = "none";
-                        }}
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
                       <p className="absolute bottom-4 left-4 text-white font-semibold text-sm">
