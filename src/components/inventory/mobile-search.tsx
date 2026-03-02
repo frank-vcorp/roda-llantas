@@ -31,7 +31,7 @@ const STORE_PHOTOS = [
   {
     src: "https://xcprrxhituqnrzsjxrof.supabase.co/storage/v1/object/public/branding/store/exterior.jpg",
     alt: "Fachada RodaMAx",
-    caption: "Tu llantería de confianza",
+    caption: "Tu llantera de confianza",
   },
   {
     src: "https://xcprrxhituqnrzsjxrof.supabase.co/storage/v1/object/public/branding/store/bodega.jpg",
@@ -334,7 +334,7 @@ export function MobileSearch({ initialItems = [], userRole, showLoginButton = fa
       {!hasQuery && (
         <section id="nosotros" className="px-5 py-12 bg-white">
           <h2 className="text-2xl font-black text-slate-900 mb-2">
-            Tu llantería de confianza
+            Tu llantera de confianza
           </h2>
           <p className="text-sm text-slate-500 mb-6">
             Cientos de medidas en existencia al mejor precio.

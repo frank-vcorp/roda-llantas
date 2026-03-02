@@ -31,7 +31,7 @@ const STORE_PHOTOS = [
   {
     src: "https://xcprrxhituqnrzsjxrof.supabase.co/storage/v1/object/public/branding/store/exterior.jpg",
     alt: "Fachada RodaMAx - Llantas, Suspensiones y Frenos",
-    caption: "Tu llantería de confianza en Querétaro",
+    caption: "Tu llantera de confianza en Querétaro",
   },
   {
     src: "https://xcprrxhituqnrzsjxrof.supabase.co/storage/v1/object/public/branding/store/bodega.jpg",
@@ -251,7 +251,7 @@ export default async function Home(props: HomeProps) {
               <div className="max-w-6xl mx-auto">
                 <div className="text-center mb-12">
                   <h2 className="text-4xl font-black text-slate-900 mb-3">
-                    Tu llantería de confianza
+                    Tu llantera de confianza
                   </h2>
                   <p className="text-lg text-slate-500 max-w-2xl mx-auto">
                     En <strong>{settings?.name || "RodaMAx"}</strong> contamos con cientos de medidas en existencia
