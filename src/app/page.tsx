@@ -20,6 +20,7 @@ import { PublicInventoryTable } from "@/components/inventory/public-inventory-ta
 import { CustomPagination } from "@/components/inventory/pagination";
 import { SearchBar } from "@/components/inventory/search-bar";
 import { StorePhotos } from "@/components/landing/store-photos";
+import { ScrollToSection } from "@/components/landing/scroll-to-section";
 import { LogIn, MapPin, Phone, ChevronDown } from "lucide-react";
 
 export const dynamic = "force-dynamic";
@@ -194,13 +195,7 @@ export default async function Home(props: HomeProps) {
                   </p>
 
                   {/* Scroll hint */}
-                  <a
-                    href="#nosotros"
-                    className="mt-16 flex flex-col items-center gap-1 text-slate-400 hover:text-slate-600 transition-colors animate-bounce"
-                  >
-                    <span className="text-xs">Ver más</span>
-                    <ChevronDown className="h-5 w-5" />
-                  </a>
+                  <ScrollToSection targetId="nosotros" />
                 </div>
               </section>
             )}
