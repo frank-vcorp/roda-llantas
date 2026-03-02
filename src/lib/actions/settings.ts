@@ -254,3 +254,56 @@ export async function uploadBrandingLogo(formData: FormData): Promise<{ success:
     };
   }
 }
+/**
+ * Sube una foto del local (exterior/bodega) al storage de Supabase
+ * con un nombre de archivo fijo para que la landing page siempre apunte a la URL correcta.
+ * @param formData FormData con 'file' y 'slot' (exterior | bodega)
+ */
+export async function uploadStorePhoto(formData: FormData): Promise<{ success: boolean; error?: string; url?: string }> {
+  try {
+    const file = formData.get("file") as File;
+    const slot = formData.get("slot") as string; // "exterior" | "bodega"
+
+    if (!file) return { success: false, error: "No file provided" };
+    if (!["exterior", "bodega"].includes(slot)) return { success: false, error: "Invalid slot" };
+
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return { success: false, error: "No authenticated user" };
+
+    const arrayBuffer = await file.arrayBuffer();
+    const buffer = new Uint8Array(arrayBuffer);
+
+    const mimeToExt: Record<string, string> = {
+      'image/png': 'png',
+      'image/jpeg': 'jpg',
+      'image/gif': 'gif',
+      'image/webp': 'webp',
+    };
+    const ext = mimeToExt[file.type] || 'jpg';
+    // Usamos nombre fijo para que la URL de la landing page sea siempre la misma
+    const filePath = `store/${slot}.${ext}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from("branding")
+      .upload(filePath, buffer, {
+        cacheControl: '3600',
+        upsert: true,
+        contentType: file.type,
+      });
+
+    if (uploadError) {
+      console.error("[uploadStorePhoto] Upload error:", uploadError);
+      return { success: false, error: uploadError.message };
+    }
+
+    const { data: publicUrlData } = supabase.storage
+      .from("branding")
+      .getPublicUrl(filePath);
+
+    return { success: true, url: publicUrlData.publicUrl };
+  } catch (error) {
+    console.error("[uploadStorePhoto] Unexpected error:", error);
+    return { success: false, error: error instanceof Error ? error.message : "Unknown error" };
+  }
+}

@@ -14,7 +14,7 @@ import { useState } from "react";
 import Image from "next/image";
 import { useForm } from "react-hook-form";
 import { OrganizationSettings } from "@/lib/types";
-import { updateOrganizationSettings, uploadBrandingLogo } from "@/lib/actions/settings";
+import { updateOrganizationSettings, uploadBrandingLogo, uploadStorePhoto } from "@/lib/actions/settings";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
@@ -29,6 +29,7 @@ export function SettingsForm({ initialData }: SettingsFormProps) {
   const [logoUrl, setLogoUrl] = useState(initialData?.logo_url || "");
   const [logoPreview, setLogoPreview] = useState(initialData?.logo_url || "");
   const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [storePhotoUploading, setStorePhotoUploading] = useState<'exterior' | 'bodega' | null>(null);
 
   const {
     register,
@@ -263,6 +264,59 @@ export function SettingsForm({ initialData }: SettingsFormProps) {
               Ingresa una URL pública de tu logo. Se mostrará en las cotizaciones.
             </p>
           </div>
+        </CardContent>
+      </Card>
+
+      {/* Sección: Fotos del Local */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg">Fotos del Local</CardTitle>
+          <p className="text-sm text-muted-foreground">
+            Estas fotos aparecen en la página pública. Sube una foto por slot.
+          </p>
+        </CardHeader>
+        <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          {([
+            { slot: 'exterior' as const, label: 'Fachada / Exterior', hint: 'Foto de la entrada del local' },
+            { slot: 'bodega' as const, label: 'Bodega / Interior', hint: 'Foto de las llantas en almacén' },
+          ]).map(({ slot, label, hint }) => (
+            <div key={slot} className="space-y-2">
+              <label className="block text-sm font-medium text-foreground">{label}</label>
+              <p className="text-xs text-muted-foreground">{hint}</p>
+              <div className="flex items-center gap-2">
+                <input
+                  type="file"
+                  accept="image/*"
+                  disabled={storePhotoUploading !== null}
+                  onChange={async (e) => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+                    setStorePhotoUploading(slot);
+                    try {
+                      const fd = new FormData();
+                      fd.append('file', file);
+                      fd.append('slot', slot);
+                      const result = await uploadStorePhoto(fd);
+                      if (result.success) {
+                        toast.success(`Foto "${label}" subida correctamente ✅`);
+                      } else {
+                        toast.error(result.error || 'Error al subir la foto');
+                      }
+                    } catch {
+                      toast.error('Error inesperado al subir la foto');
+                    } finally {
+                      setStorePhotoUploading(null);
+                      e.target.value = '';
+                    }
+                  }}
+                  className="block w-full text-sm text-muted-foreground file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-primary-foreground hover:file:bg-primary/90 disabled:opacity-50"
+                />
+                {storePhotoUploading === slot && (
+                  <Loader2 className="h-4 w-4 animate-spin text-muted-foreground shrink-0" />
+                )}
+              </div>
+            </div>
+          ))}
         </CardContent>
       </Card>
 
