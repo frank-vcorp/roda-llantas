@@ -19,7 +19,8 @@ import { QuoteProvider } from "@/lib/contexts/quote-context";
 import { PublicInventoryTable } from "@/components/inventory/public-inventory-table";
 import { CustomPagination } from "@/components/inventory/pagination";
 import { SearchBar } from "@/components/inventory/search-bar";
-import { LogIn, MapPin, Phone, MessageCircle, Search, ChevronDown } from "lucide-react";
+import { StorePhotos } from "@/components/landing/store-photos";
+import { LogIn, MapPin, Phone, ChevronDown } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -29,12 +30,12 @@ const WHATSAPP_BASE_URL = `https://wa.me/${WHATSAPP_NUMBER}`;
 const STORE_PHOTOS = [
   {
     src: "https://xcprrxhituqnrzsjxrof.supabase.co/storage/v1/object/public/branding/store/exterior.jpg",
-    alt: "Fachada RodaMAx - Suspensiones, Frenos y Llantas",
+    alt: "Fachada RodaMAx - Llantas, Suspensiones y Frenos",
     caption: "Tu llantería de confianza en Querétaro",
   },
   {
     src: "https://xcprrxhituqnrzsjxrof.supabase.co/storage/v1/object/public/branding/store/bodega.jpg",
-    alt: "Bodega de Llantas RodaMAx - Michelin, GoodYear, Pirelli",
+    alt: "Bodega de Llantas RodaMAx",
     caption: "Más de 500 medidas en existencia",
   },
 ];
@@ -253,27 +254,13 @@ export default async function Home(props: HomeProps) {
                     Tu llantería de confianza
                   </h2>
                   <p className="text-lg text-slate-500 max-w-2xl mx-auto">
-                    En <strong>{settings?.name || "RodaMAx"}</strong> tenemos más de 500 medidas en existencia.
-                    Michelin, Goodyear, Pirelli, Tornel y más marcas al mejor precio.
+                    En <strong>{settings?.name || "RodaMAx"}</strong> contamos con cientos de medidas en existencia
+                    al mejor precio de Querétaro.
                   </p>
                 </div>
 
-                {/* Fotos del local */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
-                  {STORE_PHOTOS.map((photo, i) => (
-                    <div key={i} className="relative group overflow-hidden rounded-2xl shadow-lg">
-                      <img
-                        src={photo.src}
-                        alt={photo.alt}
-                        className="w-full h-72 object-cover group-hover:scale-105 transition-transform duration-500"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-                      <p className="absolute bottom-4 left-4 text-white font-semibold text-sm">
-                        {photo.caption}
-                      </p>
-                    </div>
-                  ))}
-                </div>
+                {/* Fotos del local - Client Component para manejar onError */}
+                <StorePhotos photos={STORE_PHOTOS} />
 
                 {/* Stats */}
                 <div className="grid grid-cols-3 gap-6 text-center">

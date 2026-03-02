@@ -172,7 +172,7 @@ export function MobileSearch({ initialItems = [], userRole, showLoginButton = fa
                 className="h-14 pl-11 text-base rounded-2xl border-2 border-slate-200 focus:border-emerald-400 focus:ring-0 shadow-sm bg-white"
               />
             </div>
-            <p className="text-xs text-slate-400">Ej: 205/55R16 · Michelin · Tornel · P215</p>
+            <p className="text-xs text-slate-400">Ej: 205/55R16 · P215 75R15 · Rin 16</p>
 
             {/* Scroll hint */}
             <a
@@ -337,7 +337,7 @@ export function MobileSearch({ initialItems = [], userRole, showLoginButton = fa
             Tu llantería de confianza
           </h2>
           <p className="text-sm text-slate-500 mb-6">
-            Más de 500 medidas · Michelin, Goodyear, Pirelli, Tornel y más.
+            Cientos de medidas en existencia al mejor precio.
           </p>
 
           <div className="flex flex-col gap-4">
