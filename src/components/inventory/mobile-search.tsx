@@ -148,7 +148,7 @@ export function MobileSearch({ initialItems = [], userRole, showLoginButton = fa
               <img
                 src={settings.logo_url}
                 alt={settings?.name || "Logo"}
-                className="h-20 w-auto object-contain drop-shadow-md"
+                className="h-28 w-auto object-contain drop-shadow-md"
               />
             )}
             <div>

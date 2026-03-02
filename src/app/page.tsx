@@ -170,7 +170,7 @@ export default async function Home(props: HomeProps) {
                     <img
                       src={settings.logo_url}
                       alt={settings?.name || "Logo"}
-                      className="h-24 w-auto object-contain drop-shadow-md"
+                      className="h-36 w-auto object-contain drop-shadow-md"
                     />
                   )}
                   <div>
