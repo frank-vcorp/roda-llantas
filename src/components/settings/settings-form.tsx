@@ -38,7 +38,7 @@ export function SettingsForm({ initialData }: SettingsFormProps) {
     reset,
   } = useForm<Partial<OrganizationSettings>>({
     defaultValues: {
-      name: initialData?.name || "Roda Llantas",
+      name: initialData?.name || "RodaMAx",
       address: initialData?.address || "",
       phone: initialData?.phone || "",
       website: initialData?.website || "",
@@ -159,7 +159,7 @@ export function SettingsForm({ initialData }: SettingsFormProps) {
                 minLength: { value: 2, message: "Mínimo 2 caracteres" },
               })}
               type="text"
-              placeholder="Ej. Roda Llantas"
+              placeholder="Ej. RodaMAx"
               className="w-full px-3 py-2 border border-input rounded-lg bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
             />
             {errors.name && (

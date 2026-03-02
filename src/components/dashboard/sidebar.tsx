@@ -90,7 +90,7 @@ export function Sidebar({ userRole, userEmail }: SidebarProps) {
 
                 {!isCollapsed && (
                     <div className="overflow-hidden whitespace-nowrap fade-in animate-in duration-300">
-                        <h1 className="text-lg font-black tracking-tight leading-none">Roda Llantas</h1>
+                        <h1 className="text-lg font-black tracking-tight leading-none">RodaMAx</h1>
                         <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Admin Panel</span>
                     </div>
                 )}

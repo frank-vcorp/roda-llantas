@@ -3,7 +3,7 @@ import { getPublicOrganizationSettings } from '@/lib/actions/settings'
 
 export default async function manifest(): Promise<MetadataRoute.Manifest> {
     const settings = await getPublicOrganizationSettings();
-    const appName = settings?.name || 'Roda Llantas Pro';
+    const appName = settings?.name || 'RodaMAx';
     const logoUrl = settings?.logo_url;
 
     // Default icons if no logo is provided
@@ -40,7 +40,7 @@ export default async function manifest(): Promise<MetadataRoute.Manifest> {
 
     return {
         name: appName,
-        short_name: settings?.name || 'Roda Llantas',
+        short_name: settings?.name || 'RodaMAx',
         description: 'Sistema de Gestión y Cotización de Neumáticos',
         start_url: '/',
         display: 'standalone',

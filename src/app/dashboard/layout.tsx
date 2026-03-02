@@ -51,7 +51,7 @@ export default async function DashboardLayout({
             <div className="h-8 w-8 bg-primary rounded-xl flex items-center justify-center shadow-md">
               <span className="text-primary-foreground font-black text-xs">R</span>
             </div>
-            <h1 className="text-md font-black tracking-tight">Roda Llantas</h1>
+            <h1 className="text-md font-black tracking-tight">RodaMAx</h1>
           </div>
           <UserNav email={userEmail} role={userRole} />
         </header>

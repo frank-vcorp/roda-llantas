@@ -143,7 +143,7 @@ export default async function QuotationViewPage({ params }: PageProps) {
 
   // Settings por defecto si no existen
   const settings = settingsResult || {
-    name: "Roda Llantas",
+    name: "RodaMAx",
     address: null,
     phone: null,
     website: null,

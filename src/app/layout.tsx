@@ -27,13 +27,13 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: "Roda Llantas Pro",
+  title: "RodaMAx",
   description: "Sistema de gestión y cotización de neumáticos",
   manifest: "/manifest.webmanifest", // Next.js generates this from manifest.ts
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "Roda Llantas",
+    title: "RodaMAx",
   },
   formatDetection: {
     telephone: false,

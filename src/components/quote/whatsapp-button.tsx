@@ -64,7 +64,7 @@ export function buildWhatsAppMessage(
   totalAmount: number
 ): string {
   const lines: string[] = [
-    `Hola ${customerName}, envío cotización *${folio}* de Roda Llantas.`,
+    `Hola ${customerName}, envío cotización *${folio}* de RodaMAx.`,
     "",
   ];
 

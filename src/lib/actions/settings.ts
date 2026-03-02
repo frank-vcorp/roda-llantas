@@ -45,7 +45,7 @@ export async function getOrganizationSettings(): Promise<OrganizationSettings | 
       return {
         id: "",
         profile_id: user.id,
-        name: "Roda Llantas",
+        name: "RodaMAx",
         address: null,
         phone: null,
         website: null,
@@ -86,7 +86,7 @@ export async function getPublicOrganizationSettings(): Promise<OrganizationSetti
       return {
         id: "",
         profile_id: "",
-        name: "Roda Llantas",
+        name: "RodaMAx",
         address: null,
         phone: null,
         website: null,
