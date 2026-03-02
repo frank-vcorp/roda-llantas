@@ -332,7 +332,7 @@ export function MobileSearch({ initialItems = [], userRole, showLoginButton = fa
 
       {/* ── SECCIÓN NOSOTROS + FOTOS (solo landing) ── */}
       {!hasQuery && (
-        <section id="nosotros" className="px-5 py-12 bg-white">
+        <section className="px-5 py-12 bg-white">
           <h2 className="text-2xl font-black text-slate-900 mb-2">
             Tu llantera de confianza
           </h2>
@@ -373,7 +373,7 @@ export function MobileSearch({ initialItems = [], userRole, showLoginButton = fa
 
       {/* ── SECCIÓN UBICACIÓN (solo landing) ── */}
       {!hasQuery && (
-        <section id="ubicacion" className="px-5 py-10 bg-slate-50">
+        <section className="px-5 py-10 bg-slate-50">
           <h2 className="text-2xl font-black text-slate-900 mb-6">¿Dónde estamos?</h2>
 
           {/* Mapa */}
