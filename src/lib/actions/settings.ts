@@ -129,16 +129,22 @@ export async function updateOrganizationSettings(
     }
 
     // Intentar actualizar
+    // FIX-20260302: Only include logo_url in update if explicitly provided.
+    // This prevents saving text fields (name/phone etc.) from wiping the stored logo.
+    const updatePayload: Record<string, any> = {
+      name: updates.name,
+      address: updates.address || null,
+      phone: updates.phone || null,
+      website: updates.website || null,
+      ticket_footer_message: updates.ticket_footer_message,
+    };
+    if ('logo_url' in updates) {
+      updatePayload.logo_url = updates.logo_url || null;
+    }
+
     const { data, error } = await supabase
       .from("organization_settings")
-      .update({
-        name: updates.name,
-        address: updates.address || null,
-        phone: updates.phone || null,
-        website: updates.website || null,
-        logo_url: updates.logo_url || null,
-        ticket_footer_message: updates.ticket_footer_message,
-      })
+      .update(updatePayload)
       .eq("profile_id", user.id)
       .select()
       .single();

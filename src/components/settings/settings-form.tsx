@@ -41,7 +41,8 @@ export function SettingsForm({ initialData }: SettingsFormProps) {
       address: initialData?.address || "",
       phone: initialData?.phone || "",
       website: initialData?.website || "",
-      logo_url: initialData?.logo_url || "",
+      // FIX-20260302: logo_url is managed by logoUrl state, NOT by react-hook-form
+      // to prevent stale JPEG URL from overwriting new PNG uploads
       ticket_footer_message:
         initialData?.ticket_footer_message || "¡Gracias por su compra!",
     },
@@ -86,7 +87,8 @@ export function SettingsForm({ initialData }: SettingsFormProps) {
   // Manejar envío del formulario
   const onSubmit = async (data: Partial<OrganizationSettings>) => {
     setIsLoading(true);
-    let finalLogoUrl = logoUrl;
+    // FIX-20260302: Track if logo changed in this session
+    let newLogoUrl: string | undefined = undefined;
 
     try {
       // Si hay un archivo seleccionado, subirlo a Supabase Storage primero
@@ -101,18 +103,28 @@ export function SettingsForm({ initialData }: SettingsFormProps) {
           throw new Error(uploadResult.error || "Error al subir la imagen.");
         }
 
-        finalLogoUrl = uploadResult.url;
-        setLogoUrl(finalLogoUrl); // Update state with the new URL
+        newLogoUrl = uploadResult.url;
+        setLogoUrl(newLogoUrl); // Update state with the new URL
+        setLogoFile(null);      // Reset file input
       }
 
-      const result = await updateOrganizationSettings({
-        ...data,
-        logo_url: finalLogoUrl || undefined,
-      });
+      // FIX-20260302: Exclude logo_url from data spread.
+      // Only include logo_url if the user uploaded a NEW file this session.
+      // If no file was selected, omit logo_url to keep the existing value in DB unchanged.
+      const { logo_url: _ignored, ...textData } = data as any;
+      const updatePayload: Partial<OrganizationSettings> = {
+        ...textData,
+        ...(newLogoUrl ? { logo_url: newLogoUrl } : {}),
+      };
+
+      const result = await updateOrganizationSettings(updatePayload);
 
       if (result.success) {
         toast.success("Configuración actualizada correctamente");
-        reset(result.data);
+        // Reset only the text fields, keep logoUrl state
+        const { logo_url, ...resetData } = result.data as any;
+        reset(resetData);
+        if (logo_url) setLogoUrl(logo_url);
       } else {
         toast.error(result.error || "Error al actualizar configuración");
       }
