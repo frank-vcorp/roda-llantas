@@ -123,4 +123,13 @@
   body {
     @apply bg-background text-foreground;
   }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  /* Compensar el alto del nav fijo (64px) en los anchor links */
+  section[id] {
+    scroll-margin-top: 72px;
+  }
 }
