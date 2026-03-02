@@ -29,12 +29,12 @@ const WHATSAPP_BASE_URL = `https://wa.me/${WHATSAPP_NUMBER}`;
 
 const STORE_PHOTOS = [
   {
-    src: "https://xcprrxhituqnrzsjxrof.supabase.co/storage/v1/object/public/branding/store/exterior.jpg",
-    alt: "Fachada RodaMAx - Llantas, Suspensiones y Frenos",
+    src: "https://xcprrxhituqnrzsjxrof.supabase.co/storage/v1/object/public/branding/store/taller.jpeg",
+    alt: "Taller RodaMAx - Llantas, Suspensiones y Frenos",
     caption: "Tu llantera de confianza en Querétaro",
   },
   {
-    src: "https://xcprrxhituqnrzsjxrof.supabase.co/storage/v1/object/public/branding/store/bodega.jpg",
+    src: "https://xcprrxhituqnrzsjxrof.supabase.co/storage/v1/object/public/branding/store/bodega.jpeg",
     alt: "Bodega de Llantas RodaMAx",
     caption: "Más de 500 medidas en existencia",
   },

@@ -29,12 +29,12 @@ const WHATSAPP_NUMBER = "5214427725036";
 const WHATSAPP_GENERAL = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent("Hola RodaMAx, necesito información sobre llantas 👋")}`;
 const STORE_PHOTOS = [
   {
-    src: "https://xcprrxhituqnrzsjxrof.supabase.co/storage/v1/object/public/branding/store/exterior.jpg",
-    alt: "Fachada RodaMAx",
+    src: "https://xcprrxhituqnrzsjxrof.supabase.co/storage/v1/object/public/branding/store/taller.jpeg",
+    alt: "Taller RodaMAx",
     caption: "Tu llantera de confianza",
   },
   {
-    src: "https://xcprrxhituqnrzsjxrof.supabase.co/storage/v1/object/public/branding/store/bodega.jpg",
+    src: "https://xcprrxhituqnrzsjxrof.supabase.co/storage/v1/object/public/branding/store/bodega.jpeg",
     alt: "Bodega de Llantas",
     caption: "Más de 500 medidas en existencia",
   },
