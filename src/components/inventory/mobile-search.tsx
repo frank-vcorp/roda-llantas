@@ -167,8 +167,8 @@ export function MobileSearch({ initialItems = [], userRole, showLoginButton = fa
   };
 
   /**
-   * Renderiza servicios en mobile sin alterar la UI existente de productos.
-   * @id FIX-20260604-07
+   * Aplica la presentacion comercial aprobada para servicios en mobile.
+   * @id FIX-20260604-08
    * @respaldo /workspaces/roda-llantas/context/clientes/DEAC-ARCH-20260604-01.md
    */
   const getServiceTierLabel = (tierCode: string) => {
@@ -177,8 +177,22 @@ export function MobileSearch({ initialItems = [], userRole, showLoginButton = fa
     return "Basica";
   };
 
+  const getVisibleServiceName = (title: string, tierCode: string) => {
+    const normalizedTier = tierCode.toUpperCase();
+    const match = title.match(/^(.*?)(?:\s+)(AAA|AA|A)\s*$/i);
+
+    if (!match) {
+      return title;
+    }
+
+    return match[2].toUpperCase() === normalizedTier ? match[1].trimEnd() : title;
+  };
+
+  const getVisibleServiceTierLabel = (tierCode: string) => `Gama ${getServiceTierLabel(tierCode)}`;
+
   const makeServiceWhatsAppLink = (service: MobileServiceResult) => {
-    const msg = `Hola RodaMAx, me interesa el servicio *${service.title}* (${getServiceTierLabel(service.tierCode)}). ¿Me comparten disponibilidad y detalles?`;
+    const visibleName = getVisibleServiceName(service.title, service.tierCode);
+    const msg = `Hola RodaMAx, me interesa el servicio *${visibleName}* (${getVisibleServiceTierLabel(service.tierCode)}). ¿Me comparten disponibilidad y detalles?`;
     return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`;
   };
 
@@ -426,11 +440,11 @@ export function MobileSearch({ initialItems = [], userRole, showLoginButton = fa
                           <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-emerald-700">
                             {service.category || "Servicio"}
                           </p>
-                          <h3 className="text-lg font-extrabold text-slate-900 leading-tight">{service.title}</h3>
+                          <h3 className="text-lg font-extrabold text-slate-900 leading-tight">{getVisibleServiceName(service.title, service.tierCode)}</h3>
                           <p className="text-xs text-slate-500 mt-1">{service.subtitle}</p>
                         </div>
                         <span className="rounded-full bg-white px-3 py-1 text-[11px] font-bold text-emerald-700 border border-emerald-200">
-                          {getServiceTierLabel(service.tierCode)}
+                          {getVisibleServiceTierLabel(service.tierCode)}
                         </span>
                       </div>
 
