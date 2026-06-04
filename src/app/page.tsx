@@ -3,25 +3,26 @@
  * Diseño "Google Style": solo buscador al inicio, resultados al buscar.
  * Incluye: fotos del local, mapa de ubicación y botón WhatsApp flotante.
  *
+ * @id IMPL-20260604-01
  * @id IMPL-20260302-LANDING
  * @author SOFIA - Builder
+ * @ref context/SPECs/SPEC-ARCH-20260604-01-CATALOGO-SERVICIOS.md
  */
 
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { getInventoryItems } from "@/lib/services/inventory";
+import { searchCatalog, type CatalogServiceResult } from "@/lib/services/catalog-search";
 import { getPricingRules } from "@/lib/services/pricing";
 import { getPublicOrganizationSettings } from "@/lib/actions/settings";
 import { enrichInventoryWithPrices } from "@/lib/logic/pricing-engine";
 import { MobileSearch } from "@/components/inventory/mobile-search";
 import { QuoteProvider } from "@/lib/contexts/quote-context";
 import { PublicInventoryTable } from "@/components/inventory/public-inventory-table";
-import { CustomPagination } from "@/components/inventory/pagination";
 import { SearchBar } from "@/components/inventory/search-bar";
 import { StorePhotos } from "@/components/landing/store-photos";
 import { ScrollToSection } from "@/components/landing/scroll-to-section";
-import { LogIn, MapPin, Phone, ChevronDown } from "lucide-react";
+import { LogIn, MapPin, Phone } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -48,6 +49,63 @@ interface HomeProps {
   }>;
 }
 
+function formatPrice(value: number): string {
+  return new Intl.NumberFormat("es-MX", {
+    style: "currency",
+    currency: "MXN",
+    maximumFractionDigits: 2,
+  }).format(value);
+}
+
+function ServiceSearchResults({ services }: { services: CatalogServiceResult[] }) {
+  if (!services.length) {
+    return null;
+  }
+
+  return (
+    <section className="space-y-4">
+      <div>
+        <h2 className="text-xl font-black text-slate-900">Servicios</h2>
+        <p className="text-sm text-slate-500">
+          Los servicios son solo buscables en esta vista y no se agregan a cotización.
+        </p>
+      </div>
+
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+        {services.map((service) => (
+          <article
+            key={service.id}
+            className="rounded-2xl border border-amber-200 bg-gradient-to-br from-amber-50 via-white to-orange-50 p-5 shadow-sm"
+          >
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-amber-700">
+                  Servicio
+                </p>
+                <h3 className="mt-1 text-lg font-black text-slate-900">{service.displayName}</h3>
+                <p className="mt-1 text-sm text-slate-600">{service.category}</p>
+              </div>
+              <span className="rounded-full bg-white px-3 py-1 text-xs font-bold text-slate-700 ring-1 ring-slate-200">
+                Tier {service.tierCode}
+              </span>
+            </div>
+
+            <div className="mt-4 flex items-end justify-between gap-4 border-t border-amber-100 pt-4">
+              <div>
+                <p className="text-xs uppercase tracking-[0.16em] text-slate-400">Precio visible</p>
+                <p className="text-2xl font-black text-slate-900">{formatPrice(service.price)}</p>
+              </div>
+              <p className="max-w-[12rem] text-right text-xs font-medium text-slate-500">
+                Consulta disponibilidad y agenda por WhatsApp o en sucursal.
+              </p>
+            </div>
+          </article>
+        ))}
+      </div>
+    </section>
+  );
+}
+
 export default async function Home(props: HomeProps) {
   const searchParams = await props.searchParams;
   const query = searchParams?.query || "";
@@ -62,23 +120,20 @@ export default async function Home(props: HomeProps) {
   const pageIndex = Math.max(0, currentPage - 1);
 
   try {
-    const [{ data: items, count, suggestions }, rules, settings] = await Promise.all([
+    const [catalogResults, rules, settings] = await Promise.all([
       hasQuery
-        ? getInventoryItems({ search: query, page: pageIndex, limit })
-        : { data: [], count: 0, suggestions: [] },
+        ? searchCatalog({ search: query, page: pageIndex, limit })
+        : { products: [], services: [], count: 0 },
       getPricingRules(),
       getPublicOrganizationSettings(),
     ]);
 
+    const { products, services, count } = catalogResults;
     const sanitize = (arr: any[]) =>
       arr.map(({ cost_price, stock_breakdown, ...safe }) => safe);
 
-    const itemsWithPrices = sanitize(enrichInventoryWithPrices(items, rules));
-    const suggestionsWithPrices = sanitize(enrichInventoryWithPrices(suggestions || [], rules));
-
-    const hasSuggestions = items.length === 0 && (suggestions?.length || 0) > 0;
-    const displayData = hasSuggestions ? suggestionsWithPrices : itemsWithPrices;
-    const totalPages = Math.ceil((count || 0) / limit);
+    const itemsWithPrices = sanitize(enrichInventoryWithPrices(products, rules));
+    const hasResults = itemsWithPrices.length > 0 || services.length > 0;
 
     const whatsappGeneral = `${WHATSAPP_BASE_URL}?text=${encodeURIComponent("Hola RodaMAx, necesito información sobre llantas 👋")}`;
 
@@ -101,12 +156,32 @@ export default async function Home(props: HomeProps) {
 
           {/* ─── MOBILE VERSION ─── */}
           <div className="md:hidden">
-            <MobileSearch
-              initialItems={[]}
-              userRole={null}
-              showLoginButton={true}
-              settings={settings}
-            />
+            {hasQuery ? (
+              <div className="min-h-screen bg-white px-4 pb-8 pt-20 space-y-4">
+                <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+                  <SearchBar placeholder="Busca llantas o servicios... ej. 205/55R16, alineación AA" />
+                </div>
+
+                <ServiceSearchResults services={services} />
+
+                {itemsWithPrices.length > 0 && (
+                  <PublicInventoryTable displayData={itemsWithPrices} hasSuggestions={false} />
+                )}
+
+                {!hasResults && (
+                  <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-6 text-center text-sm text-slate-500">
+                    No encontramos llantas ni servicios con esa búsqueda.
+                  </div>
+                )}
+              </div>
+            ) : (
+              <MobileSearch
+                initialItems={[]}
+                userRole={null}
+                showLoginButton={true}
+                settings={settings}
+              />
+            )}
           </div>
 
           {/* ─── DESKTOP VERSION ─── */}
@@ -229,15 +304,29 @@ export default async function Home(props: HomeProps) {
                 </div>
 
                 <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-200">
-                  <SearchBar placeholder="Buscar por marca, modelo, medida (ej. 205/55R16)..." />
+                  <SearchBar placeholder="Buscar llantas o servicios (ej. 205/55R16, balatas AA)..." />
                 </div>
 
-                <PublicInventoryTable
-                  displayData={displayData}
-                  hasSuggestions={hasSuggestions}
-                />
+                <ServiceSearchResults services={services} />
 
-                {(count || 0) > 0 && <CustomPagination totalPages={totalPages} />}
+                {itemsWithPrices.length > 0 && (
+                  <PublicInventoryTable
+                    displayData={itemsWithPrices}
+                    hasSuggestions={false}
+                  />
+                )}
+
+                {!hasResults && (
+                  <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-8 text-center text-sm text-slate-500">
+                    No encontramos llantas ni servicios con esa búsqueda.
+                  </div>
+                )}
+
+                {count > limit && (
+                  <p className="text-xs text-slate-400">
+                    La búsqueda está limitada a los primeros {limit} resultados del catálogo mixto.
+                  </p>
+                )}
               </div>
             )}
 
