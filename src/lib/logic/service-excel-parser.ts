@@ -4,6 +4,8 @@
  * @author SOFIA - Builder
  * @id IMPL-20260604-01
  * @ref context/SPECs/SPEC-ARCH-20260604-01-CATALOGO-SERVICIOS.md
+ * @fix FIX-20260604-01
+ * @backup context/clientes/DEAC-ARCH-20260604-01.md
  */
 
 import * as XLSX from "xlsx";
@@ -131,10 +133,15 @@ export function parseServiceExcel(fileBuffer: Buffer | ArrayBuffer): ParsedServi
     throw new Error("No se pudieron resolver las columnas requeridas del Excel de servicios.");
   }
 
+  const skuHeader = headerMap.sku;
+  const nameHeader = headerMap.name;
+  const categoryHeader = headerMap.category;
+  const priceHeader = headerMap.price;
+
   return rows.map((row, index) => {
-    const rawSku = String(row[headerMap.sku] ?? "").trim();
-    const rawDisplayName = String(row[headerMap.name] ?? "").trim();
-    const rawCategory = String(row[headerMap.category] ?? "").trim();
+    const rawSku = String(row[skuHeader] ?? "").trim();
+    const rawDisplayName = String(row[nameHeader] ?? "").trim();
+    const rawCategory = String(row[categoryHeader] ?? "").trim();
 
     if (!rawSku || !rawDisplayName || !rawCategory) {
       throw new Error(`Fila ${index + 2}: faltan datos obligatorios para importar servicios.`);
@@ -148,7 +155,7 @@ export function parseServiceExcel(fileBuffer: Buffer | ArrayBuffer): ParsedServi
       displayName: rawDisplayName,
       baseName,
       tierCode,
-      basePrice: parsePrice(row[headerMap.price]),
+      basePrice: parsePrice(row[priceHeader]),
       alias: baseName,
       aliasNormalized: normalizeAlias(baseName),
       metadata: {
