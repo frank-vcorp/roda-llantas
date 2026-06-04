@@ -7,7 +7,7 @@
  * - Mapa y contacto
  * - WhatsApp flotante
  *
- * @id FIX-20260604-05
+ * @id FIX-20260604-07
  * @respaldo /workspaces/roda-llantas/context/clientes/DEAC-ARCH-20260604-01.md
  * @author SOFIA - Builder
  */
@@ -19,12 +19,11 @@ import { SearchIcon, ShoppingCart, X, MapPin, Phone, ChevronDown } from "lucide-
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { InventoryItem } from "@/lib/types";
-import { searchInventoryAction } from "@/lib/actions/inventory";
+import { searchInventoryAction, searchPublicMobileCatalogAction } from "@/lib/actions/inventory";
 import { useQuote } from "@/lib/contexts/quote-context";
 import { toast } from "sonner";
 import { formatCurrency } from "@/lib/utils";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { LogIn } from "lucide-react";
 
 const WHATSAPP_NUMBER = "5214427725036";
@@ -55,6 +54,15 @@ interface MobileSearchProps {
   settings?: any;
 }
 
+interface MobileServiceResult {
+  id: string;
+  title: string;
+  subtitle: string;
+  price: number;
+  category: string;
+  tierCode: string;
+}
+
 /**
  * @id FIX-20260604-06
  * @respaldo /workspaces/roda-llantas/context/clientes/DEAC-ARCH-20260604-01.md
@@ -71,9 +79,9 @@ function shouldTriggerPublicSearch(term: string) {
 }
 
 export function MobileSearch({ initialItems = [], userRole, showLoginButton = false, settings }: MobileSearchProps) {
-  const router = useRouter();
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<InventoryItem[]>([]);
+  const [serviceResults, setServiceResults] = useState<MobileServiceResult[]>([]);
   const [loading, setLoading] = useState(false);
   const [selectedItem, setSelectedItem] = useState<InventoryItem | null>(null);
   const [quantity, setQuantity] = useState(1);
@@ -93,6 +101,7 @@ export function MobileSearch({ initialItems = [], userRole, showLoginButton = fa
         setLoading(false);
       }
       setResults([]);
+      setServiceResults([]);
       return;
     }
 
@@ -100,11 +109,22 @@ export function MobileSearch({ initialItems = [], userRole, showLoginButton = fa
       if (!shouldTriggerPublicSearch(trimmedSearchQuery)) {
         setLoading(false);
         setResults([]);
+        setServiceResults([]);
         return;
       }
 
       setLoading(true);
-      setResults([]);
+      try {
+        const response = await searchPublicMobileCatalogAction(trimmedSearchQuery, 50);
+        setResults(response.products || []);
+        setServiceResults(response.services || []);
+      } catch (error) {
+        console.error("[MobileSearch] Error:", error);
+        setResults([]);
+        setServiceResults([]);
+      } finally {
+        setLoading(false);
+      }
       return;
     }
 
@@ -112,35 +132,15 @@ export function MobileSearch({ initialItems = [], userRole, showLoginButton = fa
     try {
       const response = await searchInventoryAction(searchQuery, 50);
       setResults(response || []);
+      setServiceResults([]);
     } catch (error) {
       console.error("[MobileSearch] Error:", error);
       setResults([]);
+      setServiceResults([]);
     } finally {
       setLoading(false);
     }
   }, [isPublicLandingSearch]);
-
-  useEffect(() => {
-    if (!isPublicLandingSearch) {
-      return;
-    }
-
-    const timeoutId = window.setTimeout(() => {
-      if (!trimmedQuery) {
-        router.replace("/");
-        return;
-      }
-
-      if (!shouldTriggerPublicSearch(trimmedQuery)) {
-        router.replace("/");
-        return;
-      }
-
-      router.replace(`/?query=${encodeURIComponent(trimmedQuery)}`);
-    }, 250);
-
-    return () => window.clearTimeout(timeoutId);
-  }, [isPublicLandingSearch, query, router]);
 
   const handleAddToCart = (item: InventoryItem) => {
     setSelectedItem(item);
@@ -165,6 +165,24 @@ export function MobileSearch({ initialItems = [], userRole, showLoginButton = fa
     const msg = `Hola RodaMAx, me interesa la llanta *${item.brand} ${item.model}* medida *${item.medida_full}*. ¿Tienen disponibilidad?`;
     return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`;
   };
+
+  /**
+   * Renderiza servicios en mobile sin alterar la UI existente de productos.
+   * @id FIX-20260604-07
+   * @respaldo /workspaces/roda-llantas/context/clientes/DEAC-ARCH-20260604-01.md
+   */
+  const getServiceTierLabel = (tierCode: string) => {
+    if (tierCode === "AAA") return "Premium";
+    if (tierCode === "AA") return "Media";
+    return "Basica";
+  };
+
+  const makeServiceWhatsAppLink = (service: MobileServiceResult) => {
+    const msg = `Hola RodaMAx, me interesa el servicio *${service.title}* (${getServiceTierLabel(service.tierCode)}). ¿Me comparten disponibilidad y detalles?`;
+    return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`;
+  };
+
+  const hasAnyResults = results.length > 0 || serviceResults.length > 0;
 
   return (
     <div className="flex flex-col min-h-screen w-full bg-white relative">
@@ -265,7 +283,7 @@ export function MobileSearch({ initialItems = [], userRole, showLoginButton = fa
               />
             </div>
             <button
-              onClick={() => { setQuery(""); setResults([]); }}
+              onClick={() => { setQuery(""); setResults([]); setServiceResults([]); }}
               className="p-2 rounded-full hover:bg-slate-100 transition-colors text-slate-400"
             >
               <X className="h-4 w-4" />
@@ -281,12 +299,12 @@ export function MobileSearch({ initialItems = [], userRole, showLoginButton = fa
             <div className="flex items-center justify-center py-12">
               <div className="text-center">
                 <div className="animate-spin h-8 w-8 border-2 border-emerald-500 border-t-transparent rounded-full mx-auto mb-2" />
-                <p className="text-sm text-slate-500">{isPublicLandingSearch ? "Abriendo resultados..." : "Buscando..."}</p>
+                <p className="text-sm text-slate-500">Buscando...</p>
               </div>
             </div>
           )}
 
-          {!loading && results.length === 0 && (
+          {!loading && !hasAnyResults && (
             <div className="text-center py-12">
               <SearchIcon className="h-12 w-12 mx-auto text-slate-200 mb-3" />
               <p className="text-slate-500 font-medium">No encontramos resultados</p>
@@ -388,6 +406,55 @@ export function MobileSearch({ initialItems = [], userRole, showLoginButton = fa
               );
             })}
           </div>
+
+          {serviceResults.length > 0 && (
+            <div className="space-y-3 pt-2">
+              <div className="flex items-center justify-between px-1">
+                <div>
+                  <p className="text-xs font-bold uppercase tracking-[0.18em] text-emerald-600">Servicios</p>
+                  <h3 className="text-lg font-black text-slate-900">Coincidencias en taller</h3>
+                </div>
+                <span className="text-xs font-semibold text-slate-400">Solo informativo</span>
+              </div>
+
+              <div className="grid grid-cols-1 gap-3">
+                {serviceResults.map((service) => (
+                  <div key={service.id} className="rounded-2xl border border-emerald-100 bg-emerald-50/60 shadow-sm overflow-hidden">
+                    <div className="p-4 space-y-3">
+                      <div className="flex items-start justify-between gap-3">
+                        <div>
+                          <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-emerald-700">
+                            {service.category || "Servicio"}
+                          </p>
+                          <h3 className="text-lg font-extrabold text-slate-900 leading-tight">{service.title}</h3>
+                          <p className="text-xs text-slate-500 mt-1">{service.subtitle}</p>
+                        </div>
+                        <span className="rounded-full bg-white px-3 py-1 text-[11px] font-bold text-emerald-700 border border-emerald-200">
+                          {getServiceTierLabel(service.tierCode)}
+                        </span>
+                      </div>
+
+                      <div className="flex items-end justify-between gap-3 pt-3 border-t border-emerald-100">
+                        <div>
+                          <p className="text-[10px] text-slate-400 uppercase font-semibold">Precio desde</p>
+                          <p className="text-2xl font-black text-emerald-700">{formatPrice(service.price)}</p>
+                        </div>
+                        <a
+                          href={makeServiceWhatsAppLink(service)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 border border-emerald-200 shadow-sm"
+                        >
+                          <span className="h-4 w-4 text-[#25D366]"><WhatsAppIcon /></span>
+                          Pedir informacion
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
           <div className="h-24" />
         </div>
       )}

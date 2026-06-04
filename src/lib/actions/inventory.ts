@@ -13,6 +13,19 @@
 
 import { getInventoryItems } from "@/lib/services/inventory";
 import { InventoryItem } from "@/lib/types";
+import { searchCatalog } from "@/lib/services/catalog-search";
+
+export interface PublicMobileCatalogResult {
+  products: InventoryItem[];
+  services: {
+    id: string;
+    title: string;
+    subtitle: string;
+    price: number;
+    category: string;
+    tierCode: string;
+  }[];
+}
 
 /**
  * Busca items de inventario por término
@@ -54,5 +67,52 @@ export async function searchInventoryAction(
   } catch (error) {
     console.error("[searchInventoryAction] Error:", error);
     return [];
+  }
+}
+
+/**
+ * Busca el catalogo publico unificado para MobileSearch sin redirigir a la home.
+ * @id FIX-20260604-07
+ * @respaldo /workspaces/roda-llantas/context/clientes/DEAC-ARCH-20260604-01.md
+ */
+export async function searchPublicMobileCatalogAction(
+  query: string,
+  limit: number = 50
+): Promise<PublicMobileCatalogResult> {
+  if (!query.trim()) {
+    return {
+      products: [],
+      services: [],
+    };
+  }
+
+  try {
+    const result = await searchCatalog({
+      search: query.trim(),
+      page: 0,
+      limit,
+    });
+
+    const { getPricingRules } = await import("@/lib/services/pricing");
+    const { enrichInventoryWithPrices } = await import("@/lib/logic/pricing-engine");
+    const rules = await getPricingRules();
+
+    return {
+      products: enrichInventoryWithPrices(result.products || [], rules),
+      services: (result.services || []).map((service) => ({
+        id: service.id,
+        title: service.title,
+        subtitle: service.subtitle,
+        price: service.price,
+        category: service.category,
+        tierCode: service.tierCode,
+      })),
+    };
+  } catch (error) {
+    console.error("[searchPublicMobileCatalogAction] Error:", error);
+    return {
+      products: [],
+      services: [],
+    };
   }
 }
