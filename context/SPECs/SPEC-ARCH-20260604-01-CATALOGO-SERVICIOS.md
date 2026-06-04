@@ -93,9 +93,11 @@ La funcion debe unir:
 - Restriccion contractual: el sistema no puede inventar categorias, nombres, precios ni sinonimos que no existan en el archivo o que no hayan sido capturados manualmente despues.
 - La deteccion heuristica de headers sigue permitida como fallback, pero el parser debe priorizar exactamente esos encabezados.
 - Si `Nombre del producto` termina en sufijo `A`, `AA` o `AAA`, ese sufijo se separa del nombre base y se guarda como `tier_code`.
+- Si `Nombre del producto` no termina en `A`, `AA` o `AAA`, el registro se debe importar con `tier_code = 'A'`.
 - El nombre completo original se preserva en `display_name`.
-- El nombre base se obtiene removiendo el sufijo final y espacios sobrantes.
+- El nombre base se obtiene removiendo el sufijo final y espacios sobrantes cuando exista. Si no existe sufijo, `base_name = display_name`.
 - Ejemplo: `Cambio de Balatas delantera AA` -> `base_name = Cambio de Balatas delantera`, `tier_code = AA`, `display_name = Cambio de Balatas delantera AA`.
+- Ejemplo sin clasificacion: `Vulcanizado` -> `base_name = Vulcanizado`, `tier_code = A`, `display_name = Vulcanizado`.
 - El parser debe tolerar mayusculas/minusculas y espacios duplicados al final del nombre.
 - El precio del Excel se normaliza eliminando simbolo `$` y separadores de miles antes de convertirlo a `numeric(10,2)`.
 - Si no existe columna de sinonimos en el Excel, no se inventan sinonimos automaticamente; solo se crea un alias base identico a `base_name` normalizado.

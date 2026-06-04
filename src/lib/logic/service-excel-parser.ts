@@ -4,7 +4,7 @@
  * @author SOFIA - Builder
  * @id IMPL-20260604-01
  * @ref context/SPECs/SPEC-ARCH-20260604-01-CATALOGO-SERVICIOS.md
- * @fix FIX-20260604-01
+ * @fix FIX-20260604-03
  * @backup context/clientes/DEAC-ARCH-20260604-01.md
  */
 
@@ -100,7 +100,10 @@ function splitDisplayName(displayName: string): { baseName: string; tierCode: Se
   const match = trimmedName.match(/^(.*?)(?:\s+)(AAA|AA|A)\s*$/i);
 
   if (!match) {
-    throw new Error(`No se detecto tier A/AA/AAA en "${displayName}".`);
+    return {
+      baseName: trimmedName,
+      tierCode: "A",
+    };
   }
 
   return {
