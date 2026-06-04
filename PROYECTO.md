@@ -172,6 +172,7 @@
 - [✓] Implementar lógica de sugerencias (Rin equivalente) en buscador/catálogo. (IMPL-20260130-V2-FEATURES, DOC-20260130-01, CHK_20260130_V2_FEATURES_QA, CHK_20260130_V2_FEATURES_CLOSE)
 - [✓] Lógica de expiración de cotizaciones (marcado de vencidas y reglas de negocio asociadas). (IMPL-20260130-V2-FEATURES, DOC-20260130-01, CHK_20260130_V2_FEATURES_QA, CHK_20260130_V2_FEATURES_CLOSE)
 - [ ] Micro-Sprint: Catálogo de Servicios Buscable — Servicios visibles en buscador principal, carga inicial desde Excel, tiers A/AA/AAA con política por porcentaje y monto, y soporte de sinónimos. (ARCH-20260604-01)
+- [ ] Slice 2 — Dashboard de Servicios: link en navegación, listado administrativo, importación masiva y alta individual básica. (ARCH-20260604-02)
 - [ ] Riesgo QA — Catálogo de Servicios: definir paginación o límite visible para resultados de servicios en home pública. (QA-VAL-20260604-01)
 - [ ] Riesgo QA — Catálogo de Servicios: hacer tolerante el parser de Excel por fila inválida sin abortar toda la importación. (QA-VAL-20260604-01)
 - [ ] Riesgo QA — Catálogo de Servicios: monitorear rendimiento de la RPC `search_catalog` al crecer el catálogo. (QA-VAL-20260604-01)

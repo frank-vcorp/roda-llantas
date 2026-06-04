@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { LayoutDashboard, Settings, Package, FileText, Users, TrendingDown, DollarSign } from "lucide-react";
+import { LayoutDashboard, Settings, Package, FileText, Users, TrendingDown, Wrench } from "lucide-react";
 
 interface NavLink {
   href: string;
@@ -24,8 +24,9 @@ interface NavLink {
  * - Configuración de Precios (Admin)
  *
  * @author SOFIA - Builder
- * @id IMPL-20260129-CRM-03, IMPL-20260129-ROLES-MOBILE
- * @ref context/SPEC-CRM-LITE.md, context/SPEC-ROLES-MOBILE.md
+ * @id IMPL-20260129-CRM-03, IMPL-20260129-ROLES-MOBILE, IMPL-20260604-02
+ * @ref context/SPEC-CRM-LITE.md, context/SPEC-ROLES-MOBILE.md, context/SPECs/SPEC-ARCH-20260604-02-SLICE2-SERVICIOS-DASHBOARD.md
+ * @backup context/clientes/DEAC-ARCH-20260604-01.md
  */
 
 import {
@@ -65,6 +66,11 @@ export function DashboardNav({ userRole = null, className, variant = "sidebar", 
       href: "/dashboard/customers",
       label: "Clientes",
       icon: Users,
+    },
+    {
+      href: "/dashboard/services",
+      label: "Servicios",
+      icon: Wrench,
     },
     {
       href: "/dashboard/analytics/lost-sales",
