@@ -7,13 +7,14 @@
  * - Mapa y contacto
  * - WhatsApp flotante
  *
- * @id IMPL-20260302-MOBILE-LANDING
+ * @id FIX-20260604-05
+ * @respaldo /workspaces/roda-llantas/context/clientes/DEAC-ARCH-20260604-01.md
  * @author SOFIA - Builder
  */
 
 "use client";
 
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import { SearchIcon, ShoppingCart, X, MapPin, Phone, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -23,6 +24,7 @@ import { useQuote } from "@/lib/contexts/quote-context";
 import { toast } from "sonner";
 import { formatCurrency } from "@/lib/utils";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { LogIn } from "lucide-react";
 
 const WHATSAPP_NUMBER = "5214427725036";
@@ -54,6 +56,7 @@ interface MobileSearchProps {
 }
 
 export function MobileSearch({ initialItems = [], userRole, showLoginButton = false, settings }: MobileSearchProps) {
+  const router = useRouter();
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<InventoryItem[]>([]);
   const [loading, setLoading] = useState(false);
@@ -62,14 +65,25 @@ export function MobileSearch({ initialItems = [], userRole, showLoginButton = fa
   const [showQuantityModal, setShowQuantityModal] = useState(false);
   const { addItem } = useQuote();
   const isAdmin = userRole === "admin";
+  const isPublicLandingSearch = showLoginButton;
   const hasQuery = query.trim().length > 0;
 
   const handleSearch = useCallback(async (searchQuery: string) => {
     setQuery(searchQuery);
     if (!searchQuery.trim()) {
+      if (isPublicLandingSearch) {
+        setLoading(false);
+      }
       setResults([]);
       return;
     }
+
+    if (isPublicLandingSearch) {
+      setLoading(true);
+      setResults([]);
+      return;
+    }
+
     setLoading(true);
     try {
       const response = await searchInventoryAction(searchQuery, 50);
@@ -80,7 +94,25 @@ export function MobileSearch({ initialItems = [], userRole, showLoginButton = fa
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [isPublicLandingSearch]);
+
+  useEffect(() => {
+    if (!isPublicLandingSearch) {
+      return;
+    }
+
+    const trimmedQuery = query.trim();
+    const timeoutId = window.setTimeout(() => {
+      if (!trimmedQuery) {
+        router.replace("/");
+        return;
+      }
+
+      router.replace(`/?query=${encodeURIComponent(trimmedQuery)}`);
+    }, 250);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [isPublicLandingSearch, query, router]);
 
   const handleAddToCart = (item: InventoryItem) => {
     setSelectedItem(item);
@@ -156,7 +188,7 @@ export function MobileSearch({ initialItems = [], userRole, showLoginButton = fa
                 {settings?.name || "RodaMAx"}
               </h1>
               <p className="text-slate-500 text-sm mt-1 font-medium">
-                Encuentra tu llanta en segundos
+                {isPublicLandingSearch ? "Encuentra tu llanta o servicio en segundos" : "Encuentra tu llanta en segundos"}
               </p>
             </div>
 
@@ -165,14 +197,16 @@ export function MobileSearch({ initialItems = [], userRole, showLoginButton = fa
               <SearchIcon className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 h-5 w-5" />
               <Input
                 type="text"
-                placeholder="Medida, marca o modelo..."
+                placeholder={isPublicLandingSearch ? "Llanta o servicio..." : "Medida, marca o modelo..."}
                 value={query}
                 onChange={(e) => handleSearch(e.target.value)}
                 autoFocus
                 className="h-14 pl-11 text-base rounded-2xl border-2 border-slate-200 focus:border-emerald-400 focus:ring-0 shadow-sm bg-white"
               />
             </div>
-            <p className="text-xs text-slate-400">Ej: 205/55R16 · P215 75R15 · Rin 16</p>
+            <p className="text-xs text-slate-400">
+              {isPublicLandingSearch ? "Ej: 205/55R16 · alineacion · cambio de aceite" : "Ej: 205/55R16 · P215 75R15 · Rin 16"}
+            </p>
 
             {/* Scroll hint */}
             <a
@@ -196,7 +230,7 @@ export function MobileSearch({ initialItems = [], userRole, showLoginButton = fa
               <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 h-4 w-4" />
               <Input
                 type="text"
-                placeholder="Buscar llanta..."
+                placeholder={isPublicLandingSearch ? "Buscar llanta o servicio..." : "Buscar llanta..."}
                 value={query}
                 onChange={(e) => handleSearch(e.target.value)}
                 className="h-10 pl-9 text-sm rounded-xl border-slate-200 focus:border-emerald-400 focus:ring-0"
@@ -219,7 +253,7 @@ export function MobileSearch({ initialItems = [], userRole, showLoginButton = fa
             <div className="flex items-center justify-center py-12">
               <div className="text-center">
                 <div className="animate-spin h-8 w-8 border-2 border-emerald-500 border-t-transparent rounded-full mx-auto mb-2" />
-                <p className="text-sm text-slate-500">Buscando...</p>
+                <p className="text-sm text-slate-500">{isPublicLandingSearch ? "Abriendo resultados..." : "Buscando..."}</p>
               </div>
             </div>
           )}
