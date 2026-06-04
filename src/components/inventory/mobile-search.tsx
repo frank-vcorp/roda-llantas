@@ -55,6 +55,21 @@ interface MobileSearchProps {
   settings?: any;
 }
 
+/**
+ * @id FIX-20260604-06
+ * @respaldo /workspaces/roda-llantas/context/clientes/DEAC-ARCH-20260604-01.md
+ */
+function shouldTriggerPublicSearch(term: string) {
+  const cleanTerm = term.replace(/[^a-z0-9]/gi, "");
+
+  if (!cleanTerm) {
+    return false;
+  }
+
+  const minimumLength = /\d/.test(cleanTerm) ? 2 : 3;
+  return cleanTerm.length >= minimumLength;
+}
+
 export function MobileSearch({ initialItems = [], userRole, showLoginButton = false, settings }: MobileSearchProps) {
   const router = useRouter();
   const [query, setQuery] = useState("");
@@ -66,11 +81,14 @@ export function MobileSearch({ initialItems = [], userRole, showLoginButton = fa
   const { addItem } = useQuote();
   const isAdmin = userRole === "admin";
   const isPublicLandingSearch = showLoginButton;
-  const hasQuery = query.trim().length > 0;
+  const trimmedQuery = query.trim();
+  const hasQuery = isPublicLandingSearch ? shouldTriggerPublicSearch(trimmedQuery) : trimmedQuery.length > 0;
 
   const handleSearch = useCallback(async (searchQuery: string) => {
     setQuery(searchQuery);
-    if (!searchQuery.trim()) {
+    const trimmedSearchQuery = searchQuery.trim();
+
+    if (!trimmedSearchQuery) {
       if (isPublicLandingSearch) {
         setLoading(false);
       }
@@ -79,6 +97,12 @@ export function MobileSearch({ initialItems = [], userRole, showLoginButton = fa
     }
 
     if (isPublicLandingSearch) {
+      if (!shouldTriggerPublicSearch(trimmedSearchQuery)) {
+        setLoading(false);
+        setResults([]);
+        return;
+      }
+
       setLoading(true);
       setResults([]);
       return;
@@ -101,9 +125,13 @@ export function MobileSearch({ initialItems = [], userRole, showLoginButton = fa
       return;
     }
 
-    const trimmedQuery = query.trim();
     const timeoutId = window.setTimeout(() => {
       if (!trimmedQuery) {
+        router.replace("/");
+        return;
+      }
+
+      if (!shouldTriggerPublicSearch(trimmedQuery)) {
         router.replace("/");
         return;
       }
