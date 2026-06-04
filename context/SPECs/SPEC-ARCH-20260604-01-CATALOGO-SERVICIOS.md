@@ -116,6 +116,17 @@ Reglas:
 - `adjustment_percent` y `adjustment_amount` son acumulativos.
 - Si no existe politica para un tier, ambos ajustes se consideran cero.
 
+## 6.1 Regla de Presentacion Comercial
+- En la UI, el nombre visible del servicio debe salir de `base_name`, no de `display_name`.
+- `display_name` queda solo como respaldo interno para trazabilidad e importacion.
+- El campo visible ya no debe mostrar los sufijos `A`, `AA` o `AAA` como parte del nombre.
+- El atributo comercial visible deja de llamarse `Tier`; en UI debe llamarse `Gama`.
+- Mapeo obligatorio de presentacion:
+  - `A` -> `Basica`
+  - `AA` -> `Media`
+  - `AAA` -> `Premium`
+- En formularios y listados, solo deben mostrarse las opciones `Basica`, `Media` y `Premium`.
+
 ## 7. Logica de Busqueda
 
 ### 7.1 Matching

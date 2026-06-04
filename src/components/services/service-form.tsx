@@ -5,6 +5,7 @@
  *
  * @author SOFIA - Builder
  * @id IMPL-20260604-02
+ * @fix FIX-20260604-04
  * @ref context/SPECs/SPEC-ARCH-20260604-02-SLICE2-SERVICIOS-DASHBOARD.md
  * @backup context/clientes/DEAC-ARCH-20260604-01.md
  */
@@ -31,6 +32,15 @@ const DEFAULT_FORM: {
   basePrice: "",
   manualPrice: "",
 };
+
+const COMMERCIAL_TIER_OPTIONS: Array<{
+  label: string;
+  value: CreateServiceInput["tierCode"];
+}> = [
+  { value: "A", label: "Basica" },
+  { value: "AA", label: "Media" },
+  { value: "AAA", label: "Premium" },
+];
 
 export function ServiceForm() {
   const router = useRouter();
@@ -89,7 +99,7 @@ export function ServiceForm() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="tierCode">Tier</Label>
+            <Label htmlFor="tierCode">Gama</Label>
             <select
               id="tierCode"
               name="tierCode"
@@ -98,25 +108,27 @@ export function ServiceForm() {
               disabled={isPending}
               className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background"
             >
-              <option value="A">A</option>
-              <option value="AA">AA</option>
-              <option value="AAA">AAA</option>
+              {COMMERCIAL_TIER_OPTIONS.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
             </select>
           </div>
 
           <div className="space-y-2 md:col-span-2">
-            <Label htmlFor="displayName">Display name</Label>
+            <Label htmlFor="displayName">Nombre del servicio</Label>
             <Input
               id="displayName"
               name="displayName"
               value={form.displayName}
               onChange={handleChange}
-              placeholder="Ej. Cambio de balatas delanteras AA"
+              placeholder="Ej. Cambio de balatas delanteras"
               disabled={isPending}
               required
             />
             <p className="text-xs text-muted-foreground">
-              El nombre se conserva tal cual. Solo se retira el sufijo final A, AA o AAA para derivar el base_name si existe.
+              Captura el nombre comercial sin sufijos. La gama se selecciona por separado y el nombre visible se conserva limpio.
             </p>
           </div>
 

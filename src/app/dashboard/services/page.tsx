@@ -3,6 +3,7 @@
  *
  * @author SOFIA - Builder
  * @id IMPL-20260604-02
+ * @fix FIX-20260604-04
  * @ref context/SPECs/SPEC-ARCH-20260604-02-SLICE2-SERVICIOS-DASHBOARD.md
  * @backup context/clientes/DEAC-ARCH-20260604-01.md
  */
@@ -16,6 +17,12 @@ import { getServicesAdminList } from "./actions";
 
 export const dynamic = "force-dynamic";
 
+const COMMERCIAL_TIER_LABELS = {
+  A: "Basica",
+  AA: "Media",
+  AAA: "Premium",
+} as const;
+
 interface ServicesPageProps {
   searchParams: Promise<{
     query?: string;
@@ -28,6 +35,10 @@ function formatCurrency(value: number): string {
     currency: "MXN",
     minimumFractionDigits: 2,
   }).format(value);
+}
+
+function getCommercialTierLabel(tierCode: keyof typeof COMMERCIAL_TIER_LABELS): string {
+  return COMMERCIAL_TIER_LABELS[tierCode];
 }
 
 export default async function ServicesPage(props: ServicesPageProps) {
@@ -75,7 +86,7 @@ export default async function ServicesPage(props: ServicesPageProps) {
           <Input
             name="query"
             defaultValue={query}
-            placeholder="Buscar por nombre, categoria o tier"
+            placeholder="Buscar por servicio, categoria o gama"
             className="md:max-w-md"
           />
           <div className="flex gap-3">
@@ -114,7 +125,7 @@ export default async function ServicesPage(props: ServicesPageProps) {
                   <tr>
                     <th className="px-5 py-3 font-medium">Servicio</th>
                     <th className="px-5 py-3 font-medium">Categoria</th>
-                    <th className="px-5 py-3 font-medium">Tier</th>
+                    <th className="px-5 py-3 font-medium">Gama</th>
                     <th className="px-5 py-3 font-medium">Precio base</th>
                     <th className="px-5 py-3 font-medium">Precio manual</th>
                     <th className="px-5 py-3 font-medium">Precio final</th>
@@ -124,11 +135,10 @@ export default async function ServicesPage(props: ServicesPageProps) {
                   {items.map((item) => (
                     <tr key={item.tierId} className="border-t border-border align-top">
                       <td className="px-5 py-4">
-                        <div className="font-semibold text-foreground">{item.displayName}</div>
-                        <div className="text-xs text-muted-foreground">Base: {item.baseName}</div>
+                        <div className="font-semibold text-foreground">{item.baseName}</div>
                       </td>
                       <td className="px-5 py-4 text-foreground">{item.category}</td>
-                      <td className="px-5 py-4 text-foreground">{item.tierCode}</td>
+                      <td className="px-5 py-4 text-foreground">{getCommercialTierLabel(item.tierCode)}</td>
                       <td className="px-5 py-4 text-foreground">{formatCurrency(item.basePrice)}</td>
                       <td className="px-5 py-4 text-foreground">
                         {item.manualPrice === null ? "-" : formatCurrency(item.manualPrice)}
@@ -147,11 +157,11 @@ export default async function ServicesPage(props: ServicesPageProps) {
                 <article key={item.tierId} className="rounded-2xl border border-border bg-card p-4">
                   <div className="flex items-start justify-between gap-4">
                     <div>
-                      <h3 className="font-semibold text-foreground">{item.displayName}</h3>
+                      <h3 className="font-semibold text-foreground">{item.baseName}</h3>
                       <p className="text-sm text-muted-foreground">{item.category}</p>
                     </div>
                     <span className="rounded-full bg-muted px-3 py-1 text-xs font-semibold text-foreground">
-                      {item.tierCode}
+                      {getCommercialTierLabel(item.tierCode)}
                     </span>
                   </div>
                   <dl className="mt-4 grid grid-cols-2 gap-3 text-sm">

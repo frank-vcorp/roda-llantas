@@ -5,6 +5,7 @@
  *
  * @author SOFIA - Builder
  * @id IMPL-20260604-02
+ * @fix FIX-20260604-04
  * @ref context/SPECs/SPEC-ARCH-20260604-02-SLICE2-SERVICIOS-DASHBOARD.md
  * @backup context/clientes/DEAC-ARCH-20260604-01.md
  */
@@ -18,12 +19,22 @@ import { Input } from "@/components/ui/input";
 import { parseServiceExcel, type ParsedServiceImportRow } from "@/lib/logic/service-excel-parser";
 import { importServices, type ServiceMutationResult } from "@/app/dashboard/services/actions";
 
+const COMMERCIAL_TIER_LABELS = {
+  A: "Basica",
+  AA: "Media",
+  AAA: "Premium",
+} as const;
+
 function formatCurrency(value: number): string {
   return new Intl.NumberFormat("es-MX", {
     style: "currency",
     currency: "MXN",
     minimumFractionDigits: 2,
   }).format(value);
+}
+
+function getCommercialTierLabel(tierCode: ParsedServiceImportRow["tierCode"]): string {
+  return COMMERCIAL_TIER_LABELS[tierCode];
 }
 
 export function ServiceImportForm() {
@@ -92,7 +103,7 @@ export function ServiceImportForm() {
             <div>
               <h2 className="text-xl font-semibold text-foreground">1. Cargar archivo</h2>
               <p className="mt-2 text-sm text-muted-foreground">
-                El importador respeta el nombre original, categoria y precio del Excel. Solo separa el tier final A, AA o AAA.
+                El importador respeta el nombre original, categoria y precio del Excel. La vista previa muestra el nombre comercial limpio y la gama visible.
               </p>
             </div>
           </div>
@@ -173,7 +184,7 @@ export function ServiceImportForm() {
         <div className="border-b border-border px-5 py-4">
           <h2 className="text-lg font-semibold text-foreground">3. Vista previa</h2>
           <p className="text-sm text-muted-foreground">
-            Revisa nombre original, categoria, tier y precio base antes de guardar.
+            Revisa servicio, categoria, gama y precio base antes de guardar.
           </p>
         </div>
 
@@ -186,9 +197,9 @@ export function ServiceImportForm() {
             <table className="min-w-full text-left text-sm">
               <thead className="bg-muted/50 text-muted-foreground">
                 <tr>
-                  <th className="px-5 py-3 font-medium">Display name</th>
+                  <th className="px-5 py-3 font-medium">Servicio</th>
                   <th className="px-5 py-3 font-medium">Categoria</th>
-                  <th className="px-5 py-3 font-medium">Tier</th>
+                  <th className="px-5 py-3 font-medium">Gama</th>
                   <th className="px-5 py-3 font-medium">Precio base</th>
                   <th className="px-5 py-3 font-medium">Alias base</th>
                 </tr>
@@ -196,9 +207,9 @@ export function ServiceImportForm() {
               <tbody>
                 {rows.map((row, index) => (
                   <tr key={`${row.sku}-${index}`} className="border-t border-border">
-                    <td className="px-5 py-4 font-medium text-foreground">{row.displayName}</td>
+                    <td className="px-5 py-4 font-medium text-foreground">{row.baseName}</td>
                     <td className="px-5 py-4 text-foreground">{row.category}</td>
-                    <td className="px-5 py-4 text-foreground">{row.tierCode}</td>
+                    <td className="px-5 py-4 text-foreground">{getCommercialTierLabel(row.tierCode)}</td>
                     <td className="px-5 py-4 text-foreground">{formatCurrency(row.basePrice)}</td>
                     <td className="px-5 py-4 text-foreground">{row.alias}</td>
                   </tr>

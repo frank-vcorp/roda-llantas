@@ -5,6 +5,7 @@
  *
  * @id IMPL-20260604-01
  * @id IMPL-20260302-LANDING
+ * @fix FIX-20260604-04
  * @author SOFIA - Builder
  * @ref context/SPECs/SPEC-ARCH-20260604-01-CATALOGO-SERVICIOS.md
  */
@@ -57,6 +58,27 @@ function formatPrice(value: number): string {
   }).format(value);
 }
 
+const COMMERCIAL_TIER_LABELS = {
+  A: "Basica",
+  AA: "Media",
+  AAA: "Premium",
+} as const;
+
+function getCommercialTierLabel(tierCode: string): string {
+  return COMMERCIAL_TIER_LABELS[tierCode as keyof typeof COMMERCIAL_TIER_LABELS] || tierCode;
+}
+
+function getVisibleServiceName(displayName: string, tierCode: string): string {
+  const normalizedTier = tierCode.toUpperCase();
+  const match = displayName.match(/^(.*?)(?:\s+)(AAA|AA|A)\s*$/i);
+
+  if (!match) {
+    return displayName;
+  }
+
+  return match[2].toUpperCase() === normalizedTier ? match[1].trimEnd() : displayName;
+}
+
 function ServiceSearchResults({ services }: { services: CatalogServiceResult[] }) {
   if (!services.length) {
     return null;
@@ -82,11 +104,13 @@ function ServiceSearchResults({ services }: { services: CatalogServiceResult[] }
                 <p className="text-xs font-semibold uppercase tracking-[0.18em] text-amber-700">
                   Servicio
                 </p>
-                <h3 className="mt-1 text-lg font-black text-slate-900">{service.displayName}</h3>
+                <h3 className="mt-1 text-lg font-black text-slate-900">
+                  {getVisibleServiceName(service.displayName, service.tierCode)}
+                </h3>
                 <p className="mt-1 text-sm text-slate-600">{service.category}</p>
               </div>
               <span className="rounded-full bg-white px-3 py-1 text-xs font-bold text-slate-700 ring-1 ring-slate-200">
-                Tier {service.tierCode}
+                Gama {getCommercialTierLabel(service.tierCode)}
               </span>
             </div>
 
@@ -159,7 +183,7 @@ export default async function Home(props: HomeProps) {
             {hasQuery ? (
               <div className="min-h-screen bg-white px-4 pb-8 pt-20 space-y-4">
                 <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-                  <SearchBar placeholder="Busca llantas o servicios... ej. 205/55R16, alineación AA" />
+                  <SearchBar placeholder="Busca llantas o servicios... ej. 205/55R16, alineacion premium" />
                 </div>
 
                 <ServiceSearchResults services={services} />
@@ -304,7 +328,7 @@ export default async function Home(props: HomeProps) {
                 </div>
 
                 <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-200">
-                  <SearchBar placeholder="Buscar llantas o servicios (ej. 205/55R16, balatas AA)..." />
+                  <SearchBar placeholder="Buscar llantas o servicios (ej. 205/55R16, balatas premium)..." />
                 </div>
 
                 <ServiceSearchResults services={services} />

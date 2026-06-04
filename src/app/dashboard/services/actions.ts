@@ -5,6 +5,7 @@
  *
  * @author SOFIA - Builder
  * @id IMPL-20260604-02
+ * @fix FIX-20260604-04
  * @ref context/SPECs/SPEC-ARCH-20260604-02-SLICE2-SERVICIOS-DASHBOARD.md
  * @backup context/clientes/DEAC-ARCH-20260604-01.md
  */
@@ -69,6 +70,12 @@ export interface CreateServiceInput {
 
 const VALID_TIERS: ServiceTierCode[] = ["A", "AA", "AAA"];
 
+const COMMERCIAL_TIER_LABELS: Record<ServiceTierCode, string> = {
+  A: "Basica",
+  AA: "Media",
+  AAA: "Premium",
+};
+
 function toNumber(value: NumericValue): number {
   if (typeof value === "number") {
     return value;
@@ -108,6 +115,10 @@ function buildSearchText(parts: string[]): string {
     .trim();
 }
 
+function getCommercialTierLabel(tierCode: ServiceTierCode): string {
+  return COMMERCIAL_TIER_LABELS[tierCode];
+}
+
 function deriveBaseName(displayName: string, tierCode: ServiceTierCode): string {
   const trimmedName = displayName.trim();
   const match = trimmedName.match(/^(.*?)(?:\s+)(AAA|AA|A)\s*$/i);
@@ -119,7 +130,9 @@ function deriveBaseName(displayName: string, tierCode: ServiceTierCode): string 
   const derivedTier = match[2].toUpperCase() as ServiceTierCode;
 
   if (derivedTier !== tierCode) {
-    throw new Error(`El tier del nombre (${derivedTier}) no coincide con el tier indicado (${tierCode}).`);
+    throw new Error(
+      `La gama detectada en el nombre (${getCommercialTierLabel(derivedTier)}) no coincide con la gama seleccionada (${getCommercialTierLabel(tierCode)}).`
+    );
   }
 
   return match[1].trimEnd();
@@ -327,6 +340,7 @@ export async function getServicesAdminList(search = ""): Promise<ServiceAdminLis
         item.baseName,
         item.displayName,
         item.tierCode,
+        getCommercialTierLabel(item.tierCode),
       ]);
 
       return haystack.includes(normalizedQuery);
@@ -337,7 +351,7 @@ export async function getServicesAdminList(search = ""): Promise<ServiceAdminLis
         return categoryCompare;
       }
 
-      const nameCompare = left.displayName.localeCompare(right.displayName);
+      const nameCompare = left.baseName.localeCompare(right.baseName);
       if (nameCompare !== 0) {
         return nameCompare;
       }
@@ -364,7 +378,7 @@ export async function importServices(
   for (const [index, row] of rows.entries()) {
     try {
       if (!VALID_TIERS.includes(row.tierCode)) {
-        throw new Error(`Tier invalido: ${row.tierCode}`);
+        throw new Error(`Gama invalida detectada en origen: ${row.tierCode}`);
       }
 
       const category = row.category.trim();
@@ -453,7 +467,7 @@ export async function createService(
   if (!VALID_TIERS.includes(tierCode)) {
     return {
       success: false,
-      message: "Debes indicar un tier valido (A, AA o AAA).",
+      message: "Debes indicar una gama valida (Basica, Media o Premium).",
     };
   }
 
