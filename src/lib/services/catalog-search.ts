@@ -2,8 +2,9 @@
  * Servicio de busqueda catalogada para productos y servicios.
  *
  * @author SOFIA - Builder
- * @id IMPL-20260604-01
+ * @id FIX-20260604-02
  * @ref context/SPECs/SPEC-ARCH-20260604-01-CATALOGO-SERVICIOS.md
+ * @backup context/clientes/DEAC-ARCH-20260604-01.md
  */
 
 import { createClient } from "@/lib/supabase/server";
@@ -59,8 +60,13 @@ function toNumber(value: number | string | null): number {
   return 0;
 }
 
-function isInventoryItem(value: Record<string, unknown> | null): value is InventoryItem {
-  return Boolean(value && typeof value.id === "string");
+function isInventoryItem(value: unknown): value is InventoryItem {
+  return Boolean(
+    value &&
+      typeof value === "object" &&
+      "id" in value &&
+      typeof (value as { id?: unknown }).id === "string"
+  );
 }
 
 export async function searchCatalog(
