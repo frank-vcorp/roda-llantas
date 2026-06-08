@@ -129,6 +129,7 @@ export default async function ServicesPage(props: ServicesPageProps) {
                     <th className="px-5 py-3 font-medium">Precio base</th>
                     <th className="px-5 py-3 font-medium">Precio manual</th>
                     <th className="px-5 py-3 font-medium">Precio final</th>
+                    <th className="px-5 py-3 font-medium">Acciones</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -146,6 +147,11 @@ export default async function ServicesPage(props: ServicesPageProps) {
                       <td className="px-5 py-4 font-semibold text-foreground">
                         {formatCurrency(item.finalPrice)}
                       </td>
+                      <td className="px-5 py-4">
+                        <Link href={`/dashboard/services/${item.tierId}/edit`}>
+                          <Button variant="outline" size="sm">Editar</Button>
+                        </Link>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -154,33 +160,38 @@ export default async function ServicesPage(props: ServicesPageProps) {
 
             <div className="grid gap-4 p-4 md:hidden">
               {items.map((item) => (
-                <article key={item.tierId} className="rounded-2xl border border-border bg-card p-4">
-                  <div className="flex items-start justify-between gap-4">
-                    <div>
-                      <h3 className="font-semibold text-foreground">{item.baseName}</h3>
-                      <p className="text-sm text-muted-foreground">{item.category}</p>
-                    </div>
-                    <span className="rounded-full bg-muted px-3 py-1 text-xs font-semibold text-foreground">
-                      {getCommercialTierLabel(item.tierCode)}
-                    </span>
-                  </div>
-                  <dl className="mt-4 grid grid-cols-2 gap-3 text-sm">
-                    <div>
-                      <dt className="text-muted-foreground">Precio base</dt>
-                      <dd className="font-medium text-foreground">{formatCurrency(item.basePrice)}</dd>
-                    </div>
-                    <div>
-                      <dt className="text-muted-foreground">Precio manual</dt>
-                      <dd className="font-medium text-foreground">
-                        {item.manualPrice === null ? "-" : formatCurrency(item.manualPrice)}
-                      </dd>
-                    </div>
-                    <div className="col-span-2">
-                      <dt className="text-muted-foreground">Precio final</dt>
-                      <dd className="text-base font-semibold text-foreground">{formatCurrency(item.finalPrice)}</dd>
-                    </div>
-                  </dl>
-                </article>
+<article key={item.tierId} className="rounded-2xl border border-border bg-card p-4">
+                   <div className="flex items-start justify-between gap-4">
+                     <div>
+                       <h3 className="font-semibold text-foreground">{item.baseName}</h3>
+                       <p className="text-sm text-muted-foreground">{item.category}</p>
+                     </div>
+                     <span className="rounded-full bg-muted px-3 py-1 text-xs font-semibold text-foreground">
+                       {getCommercialTierLabel(item.tierCode)}
+                     </span>
+                   </div>
+                   <dl className="mt-4 grid grid-cols-2 gap-3 text-sm">
+                     <div>
+                       <dt className="text-muted-foreground">Precio base</dt>
+                       <dd className="font-medium text-foreground">{formatCurrency(item.basePrice)}</dd>
+                     </div>
+                     <div>
+                       <dt className="text-muted-foreground">Precio manual</dt>
+                       <dd className="font-medium text-foreground">
+                         {item.manualPrice === null ? "-" : formatCurrency(item.manualPrice)}
+                       </dd>
+                     </div>
+                     <div className="col-span-2">
+                       <dt className="text-muted-foreground">Precio final</dt>
+                       <dd className="text-base font-semibold text-foreground">{formatCurrency(item.finalPrice)}</dd>
+                     </div>
+                   </dl>
+                   <div className="mt-4">
+                     <Link href={`/dashboard/services/${item.tierId}/edit`}>
+                       <Button variant="outline" size="sm" className="w-full">Editar</Button>
+                     </Link>
+                   </div>
+                 </article>
               ))}
             </div>
           </>

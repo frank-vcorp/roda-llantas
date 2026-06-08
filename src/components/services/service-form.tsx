@@ -6,18 +6,19 @@
  * @author SOFIA - Builder
  * @id IMPL-20260604-02
  * @fix FIX-20260604-04
+ * @arch ARCH-20260608-01 (modo edicion)
  * @ref context/SPECs/SPEC-ARCH-20260604-02-SLICE2-SERVICIOS-DASHBOARD.md
  * @backup context/clientes/DEAC-ARCH-20260604-01.md
  */
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { AlertCircle, CheckCircle2, Loader2 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { createService, type CreateServiceInput, type ServiceMutationResult } from "@/app/dashboard/services/actions";
+import { createService, updateService, getServiceById, type CreateServiceInput, type ServiceMutationResult, type ServiceFormData } from "@/app/dashboard/services/actions";
 
 const DEFAULT_FORM: {
   category: string;
@@ -42,11 +43,35 @@ const COMMERCIAL_TIER_OPTIONS: Array<{
   { value: "AAA", label: "Premium" },
 ];
 
-export function ServiceForm() {
+type ServiceFormProps = {
+  tierId?: string;
+};
+
+export function ServiceForm({ tierId }: ServiceFormProps) {
   const router = useRouter();
   const [form, setForm] = useState(DEFAULT_FORM);
   const [result, setResult] = useState<ServiceMutationResult | null>(null);
   const [isPending, startTransition] = useTransition();
+  const [isLoading, setLoading] = useState(false);
+
+  // Cargar datos existentes en modo edición
+  useEffect(() => {
+    if (!tierId) return;
+    
+    setLoading(true);
+    getServiceById(tierId).then((data) => {
+      if (data) {
+        setForm({
+          category: data.category,
+          displayName: data.displayName,
+          tierCode: data.tierCode,
+          basePrice: String(data.basePrice),
+          manualPrice: data.manualPrice !== null ? String(data.manualPrice) : "",
+        });
+      }
+      setLoading(false);
+    }).catch(() => setLoading(false));
+  }, [tierId]);
 
   const handleChange = (
     event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -71,11 +96,15 @@ export function ServiceForm() {
         manualPrice: form.manualPrice ? Number(form.manualPrice) : null,
       };
 
-      const response = await createService(payload);
+      const response = tierId 
+        ? await updateService(tierId, payload)
+        : await createService(payload);
       setResult(response);
 
       if (response.success) {
-        setForm(DEFAULT_FORM);
+        if (!tierId) {
+          setForm(DEFAULT_FORM);
+        }
         router.refresh();
       }
     });
@@ -165,14 +194,14 @@ export function ServiceForm() {
         </div>
 
         <div className="mt-6 flex flex-col gap-3 sm:flex-row">
-          <Button type="submit" disabled={isPending}>
+          <Button type="submit" disabled={isPending || isLoading}>
             {isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-            Guardar servicio
+            {tierId ? "Actualizar servicio" : "Guardar servicio"}
           </Button>
           <Button
             type="button"
             variant="outline"
-            disabled={isPending}
+            disabled={isPending || isLoading}
             onClick={() => router.push("/dashboard/services")}
           >
             Volver al listado

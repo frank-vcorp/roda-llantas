@@ -522,3 +522,137 @@ export async function createService(
     };
   }
 }
+
+export interface ServiceFormData {
+  category: string;
+  displayName: string;
+  tierCode: ServiceTierCode;
+  basePrice: number;
+  manualPrice: number | null;
+}
+
+export async function getServiceById(tierId: string): Promise<ServiceFormData | null> {
+  const { adminSupabase } = await requireAuthenticatedUser();
+
+  const { data, error } = await adminSupabase
+    .from("service_tiers")
+    .select(`
+      id,
+      tier_code,
+      base_price,
+      manual_price,
+      service_catalog!inner(category, display_name)
+    `)
+    .eq("id", tierId)
+    .single();
+
+  if (error || !data) {
+    return null;
+  }
+
+  // El join de Supabase devuelve un array por el !inner
+  const catalogData = Array.isArray(data.service_catalog) 
+    ? data.service_catalog[0] 
+    : data.service_catalog;
+
+  return {
+    category: (catalogData as { category: string }).category,
+    displayName: (catalogData as { display_name: string }).display_name,
+    tierCode: data.tier_code as ServiceTierCode,
+    basePrice: toNumber(data.base_price),
+    manualPrice: toNullableNumber(data.manual_price),
+  };
+}
+
+export async function updateService(
+  tierId: string,
+  input: CreateServiceInput
+): Promise<ServiceMutationResult> {
+  const { user, adminSupabase } = await requireAuthenticatedUser();
+  const category = input.category.trim();
+  const displayName = input.displayName.trim();
+  const tierCode = input.tierCode;
+  const basePrice = Number(input.basePrice);
+  const manualPrice = input.manualPrice ?? null;
+
+  if (!category || !displayName) {
+    return {
+      success: false,
+      message: "Categoria y nombre del servicio son obligatorios.",
+    };
+  }
+
+  if (!VALID_TIERS.includes(tierCode)) {
+    return {
+      success: false,
+      message: "Debes indicar una gama valida (Basica, Media o Premium).",
+    };
+  }
+
+  if (!Number.isFinite(basePrice) || basePrice < 0) {
+    return {
+      success: false,
+      message: "El precio base debe ser un numero valido mayor o igual a 0.",
+    };
+  }
+
+  if (manualPrice !== null && (!Number.isFinite(manualPrice) || manualPrice < 0)) {
+    return {
+      success: false,
+      message: "El precio manual debe ser un numero valido mayor o igual a 0.",
+    };
+  }
+
+  try {
+    // Primero obtener el service_id del tier actual
+    const { data: tierData, error: tierLookupError } = await adminSupabase
+      .from("service_tiers")
+      .select("service_id")
+      .eq("id", tierId)
+      .single();
+
+    if (tierLookupError || !tierData) {
+      return {
+        success: false,
+        message: "No se encontro el servicio a editar.",
+      };
+    }
+
+    const serviceId = tierData.service_id;
+    const baseName = deriveBaseName(displayName, tierCode);
+
+    // Actualizar el catalogo del servicio
+    await adminSupabase
+      .from("service_catalog")
+      .update({
+        category,
+        base_name: baseName,
+        display_name: displayName,
+        search_text: buildSearchText([category, baseName, displayName]),
+      })
+      .eq("id", serviceId);
+
+    // Actualizar el tier
+    await adminSupabase
+      .from("service_tiers")
+      .update({
+        tier_code: tierCode,
+        base_price: basePrice,
+        manual_price: manualPrice,
+      })
+      .eq("id", tierId);
+
+    revalidatePath("/dashboard/services");
+    revalidatePath(`/dashboard/services/${tierId}/edit`);
+
+    return {
+      success: true,
+      message: "Servicio actualizado correctamente.",
+    };
+  } catch (error) {
+    return {
+      success: false,
+      message: error instanceof Error ? error.message : "No se pudo actualizar el servicio.",
+    };
+  }
+}
