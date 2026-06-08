@@ -15,7 +15,7 @@ import { logLostSale } from "@/lib/services/analytics";
 /**
  * Enriches inventory items with warehouse stock breakdown
  */
-async function enrichInventoryWithStock(items: InventoryItem[]) {
+export async function enrichInventoryWithStock(items: InventoryItem[]) {
   if (!items.length) return items;
 
   const supabase = await createClient();

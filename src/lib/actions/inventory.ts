@@ -97,8 +97,12 @@ export async function searchPublicMobileCatalogAction(
     const { enrichInventoryWithPrices } = await import("@/lib/logic/pricing-engine");
     const rules = await getPricingRules();
 
+    const { enrichInventoryWithStock } = await import("@/lib/services/inventory");
+    const productsWithPrices = enrichInventoryWithPrices(result.products || [], rules);
+    const productsWithStock = await enrichInventoryWithStock(productsWithPrices);
+
     return {
-      products: enrichInventoryWithPrices(result.products || [], rules),
+      products: productsWithStock,
       services: (result.services || []).map((service) => ({
         id: service.id,
         title: service.title,
